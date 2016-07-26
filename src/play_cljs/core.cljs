@@ -12,9 +12,16 @@
 (defprotocol Game
   (start [this])
   (stop [this])
-  (show [this screens])
-  (screens [this])
-  (state [this]))
+  (get-screens [this])
+  (set-screens [this screens])
+  (get-state [this])
+  (set-state [this state]))
+
+(defn process-commands! [game commands]
+  (doseq [cmd (flatten commands)]
+    (cond
+      (map? cmd) (set-state game cmd)
+      (fn? cmd) (cmd (get-state game)))))
 
 (defn create-game [initial-state]
   (let [state-atom (atom initial-state)
@@ -32,12 +39,14 @@
       (stop [this]
         (.cancelAnimationFrame js/window (:request-id @hidden-state-atom))
         (events/removeAll js/window))
-      (show [this screens]
+      (get-screens [this]
+        (:screens @hidden-state-atom))
+      (set-screens [this screens]
         (run-on-all-screens! this on-hide)
         (swap! hidden-state-atom assoc :screens screens)
         (run-on-all-screens! this on-show))
-      (screens [this]
-        (:screens @hidden-state-atom))
-      (state [this]
-        @state-atom))))
+      (get-state [this]
+        @state-atom)
+      (set-state [this state]
+        (reset! state-atom state)))))
 
