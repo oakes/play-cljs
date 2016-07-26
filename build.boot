@@ -9,9 +9,10 @@
 
 (task-options!
   pom {:project 'play-cljs
-       :version "1.0.0-SNAPSHOT"}
-  jar {:manifest {"Description" "A ClojureScript game library"
-                  "Url" "https://github.com/oakes/play-cljs"}}
+       :version "1.0.0-SNAPSHOT"
+       :description "A ClojureScript game library"
+       :url "https://github.com/oakes/play-cljs"
+       :license {"Public Domain" "http://unlicense.org/UNLICENSE"}}
   push {:repo "clojars"})
 
 (deftask try []
