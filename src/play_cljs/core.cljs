@@ -20,8 +20,7 @@
 (defn process-commands! [game commands]
   (doseq [cmd (flatten commands)]
     (cond
-      (map? cmd) (set-state game cmd)
-      (fn? cmd) (cmd (get-state game)))))
+      (fn? cmd) (some->> (cmd (get-state game)) (set-state game)))))
 
 (defn create-game [initial-state]
   (let [state-atom (atom initial-state)
