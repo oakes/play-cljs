@@ -20,7 +20,8 @@
 (defn process-commands! [game commands]
   (doseq [cmd (flatten commands)]
     (cond
-      (fn? cmd) (some->> (cmd (get-state game)) (set-state game)))))
+      (fn? cmd) (some->> (cmd (get-state game)) (set-state game))
+      :else (throw (js/Error. (str "Invalid command: " (pr-str cmd)))))))
 
 (defn create-game [initial-state]
   (let [state-atom (atom initial-state)
