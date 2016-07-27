@@ -20,6 +20,7 @@
 (defn process-commands! [game commands]
   (doseq [cmd (flatten commands)]
     (cond
+      (map? cmd) (set-state game cmd)
       (fn? cmd) (some->> (cmd (get-state game)) (set-state game))
       :else (throw (js/Error. (str "Invalid command: " (pr-str cmd)))))))
 
