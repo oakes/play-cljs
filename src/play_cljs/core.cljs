@@ -15,19 +15,25 @@
   (get-screens [this])
   (set-screens [this screens])
   (get-state [this])
-  (set-state [this state]))
+  (set-state [this state])
+  (get-gl [this]))
+
+(defprotocol Command
+  (run [this game]))
 
 (defn process-commands! [game commands]
   (doseq [cmd (flatten commands)]
     (cond
+      (satisfies? Command cmd) (run cmd game)
       (map? cmd) (set-state game cmd)
       (fn? cmd) (some->> (cmd (get-state game)) (set-state game))
       (nil? cmd) nil
       :else (throw (js/Error. (str "Invalid command: " (pr-str cmd)))))))
 
-(defn create-game [initial-state]
+(defn create-game [initial-state element]
   (let [state-atom (atom initial-state)
-        hidden-state-atom (atom {:screens []})]
+        hidden-state-atom (atom {:screens []})
+        gl (.getContext element "webgl")]
     (reify Game
       (start [this]
         (->> (fn callback [timestamp]
@@ -50,5 +56,20 @@
       (get-state [this]
         @state-atom)
       (set-state [this state]
-        (reset! state-atom state)))))
+        (reset! state-atom state))
+      (get-gl [this]
+        gl))))
+
+(defrecord Clear [r g b a] Command
+  (run [this game]
+    (let [gl (get-gl game)]
+      (doto gl
+        (.clearColor r g b a)
+        (.clear (.-COLOR_BUFFER_BIT gl) (.-DEPTH_BUFFER_BIT gl))))))
+
+(defn clear
+  ([]
+   (clear 0 0 0 1))
+  ([r g b a]
+   (Clear. r g b a)))
 
