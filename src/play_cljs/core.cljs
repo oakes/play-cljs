@@ -22,12 +22,13 @@
   (run [this game]))
 
 (defn process-commands! [game commands]
-  (doseq [cmd (flatten commands)]
+  (doseq [cmd commands]
     (cond
       (satisfies? Command cmd) (run cmd game)
       (map? cmd) (set-state game cmd)
       (fn? cmd) (some->> (cmd (get-state game)) (set-state game))
       (nil? cmd) nil
+      (sequential? cmd) (process-commands! game cmd)
       :else (throw (js/Error. (str "Invalid command: " (pr-str cmd)))))))
 
 (defn create-game [initial-state element]
