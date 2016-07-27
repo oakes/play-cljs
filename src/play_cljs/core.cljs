@@ -8,8 +8,7 @@
   (on-show [this state])
   (on-hide [this state])
   (on-render [this state timestamp])
-  (on-keydown [this state event])
-  (on-keyup [this state event]))
+  (on-event [this state event]))
 
 (defprotocol Game
   (start [this])
@@ -44,7 +43,7 @@
     (.appendChild element (.-view renderer))
     renderer))
 
-(defn create-game [initial-state renderer]
+(defn create-game [initial-state renderer events]
   (let [state-atom (atom initial-state)
         hidden-state-atom (atom {:screens []})]
     (reify Game
@@ -54,9 +53,8 @@
                (.requestAnimationFrame js/window callback))
              (.requestAnimationFrame js/window)
              (swap! hidden-state-atom assoc :request-id))
-        (doto js/window
-          (events/listen "keydown" #(run-on-all-screens! this on-keydown %))
-          (events/listen "keyup" #(run-on-all-screens! this on-keyup %))))
+        (doseq [event events]
+          (events/listen js/window (name event) #(run-on-all-screens! this on-event %))))
       (stop [this]
         (.cancelAnimationFrame js/window (:request-id @hidden-state-atom))
         (events/removeAll js/window))
