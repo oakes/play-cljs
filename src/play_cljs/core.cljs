@@ -26,7 +26,9 @@
     (cond
       (satisfies? Command cmd) (run cmd game)
       (map? cmd) (set-state game cmd)
-      (fn? cmd) (some->> (cmd (get-state game)) (set-state game))
+      (fn? cmd) (when-let [result (cmd (get-state game))]
+                  (assert (map? result) "Result of function should be nil or a state map.")
+                  (set-state game result))
       (nil? cmd) nil
       (sequential? cmd) (process-commands! game cmd)
       :else (throw (js/Error. (str "Invalid command: " (pr-str cmd)))))))
