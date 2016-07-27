@@ -11,7 +11,7 @@
   (on-event [this state event]))
 
 (defprotocol Game
-  (start [this])
+  (start [this events])
   (stop [this])
   (get-screens [this])
   (set-screens [this screens])
@@ -40,11 +40,11 @@
                   (into {}))]
     (.autoDetectRenderer js/PIXI width height (clj->js opts))))
 
-(defn create-game [renderer initial-state events]
+(defn create-game [renderer initial-state]
   (let [state-atom (atom initial-state)
         hidden-state-atom (atom {:screens []})]
     (reify Game
-      (start [this]
+      (start [this events]
         (->> (fn callback [timestamp]
                (run-on-all-screens! this on-render timestamp)
                (.requestAnimationFrame js/window callback))
