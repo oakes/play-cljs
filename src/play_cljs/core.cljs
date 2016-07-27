@@ -22,6 +22,7 @@
     (cond
       (map? cmd) (set-state game cmd)
       (fn? cmd) (some->> (cmd (get-state game)) (set-state game))
+      (nil? cmd) nil
       :else (throw (js/Error. (str "Invalid command: " (pr-str cmd)))))))
 
 (defn create-game [initial-state]
