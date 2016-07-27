@@ -1,6 +1,7 @@
 (ns play-cljs.core
   (:require [goog.events :as events]
-            [cljsjs.pixi])
+            [cljsjs.pixi]
+            [play-cljs.utils :as u])
   (:require-macros [play-cljs.core :refer [run-on-all-screens!]]))
 
 (defprotocol Screen
@@ -35,7 +36,11 @@
       :else (throw (js/Error. (str "Invalid command: " (pr-str cmd)))))))
 
 (defn create-renderer [element width height opts]
-  (let [renderer (.autoDetectRenderer js/PIXI width height)]
+  (let [opts (->> opts
+                  (map (fn [[k v]] [(u/key->camel k) v]))
+                  (into {})
+                  clj->js)
+        renderer (.autoDetectRenderer js/PIXI width height opts)]
     (.appendChild element (.-view renderer))
     renderer))
 
