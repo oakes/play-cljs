@@ -34,16 +34,13 @@
       (sequential? cmd) (process-commands! game cmd)
       :else (throw (js/Error. (str "Invalid command: " (pr-str cmd)))))))
 
-(defn create-renderer [element width height opts]
+(defn create-renderer [width height opts]
   (let [opts (->> opts
                   (map (fn [[k v]] [(u/key->camel k) v]))
-                  (into {})
-                  clj->js)
-        renderer (.autoDetectRenderer js/PIXI width height opts)]
-    (.appendChild element (.-view renderer))
-    renderer))
+                  (into {}))]
+    (.autoDetectRenderer js/PIXI width height (clj->js opts))))
 
-(defn create-game [initial-state renderer events]
+(defn create-game [renderer initial-state events]
   (let [state-atom (atom initial-state)
         hidden-state-atom (atom {:screens []})]
     (reify Game
