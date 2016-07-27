@@ -1,5 +1,6 @@
 (ns play-cljs.core
-  (:require [goog.events :as events])
+  (:require [goog.events :as events]
+            [cljsjs.pixi])
   (:require-macros [play-cljs.core :refer [run-on-all-screens!]]))
 
 (defprotocol Screen
@@ -16,7 +17,7 @@
   (set-screens [this screens])
   (get-state [this])
   (set-state [this state])
-  (get-gl [this]))
+  (get-renderer [this]))
 
 (defprotocol Command
   (run [this game]))
@@ -33,10 +34,14 @@
       (sequential? cmd) (process-commands! game cmd)
       :else (throw (js/Error. (str "Invalid command: " (pr-str cmd)))))))
 
-(defn create-game [initial-state element]
+(defn create-renderer [element width height opts]
+  (let [renderer (.autoDetectRenderer js/PIXI width height)]
+    (.appendChild element (.-view renderer))
+    renderer))
+
+(defn create-game [initial-state renderer]
   (let [state-atom (atom initial-state)
-        hidden-state-atom (atom {:screens []})
-        gl (.getContext element "webgl")]
+        hidden-state-atom (atom {:screens []})]
     (reify Game
       (start [this]
         (->> (fn callback [timestamp]
@@ -60,19 +65,6 @@
         @state-atom)
       (set-state [this state]
         (reset! state-atom state))
-      (get-gl [this]
-        gl))))
-
-(defrecord Clear [r g b a] Command
-  (run [this game]
-    (let [gl (get-gl game)]
-      (doto gl
-        (.clearColor r g b a)
-        (.clear (.-COLOR_BUFFER_BIT gl) (.-DEPTH_BUFFER_BIT gl))))))
-
-(defn clear
-  ([]
-   (clear 0 0 0 1))
-  ([r g b a]
-   (Clear. r g b a)))
+      (get-renderer [this]
+        renderer))))
 
