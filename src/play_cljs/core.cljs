@@ -51,10 +51,10 @@
              (.requestAnimationFrame js/window)
              (swap! hidden-state-atom assoc :request-id))
         (doseq [event events]
-          (events/listen js/window event #(run-on-all-screens! this on-event %))))
+          (events/listen (.-view renderer) event #(run-on-all-screens! this on-event %))))
       (stop [this]
-        (.cancelAnimationFrame js/window (:request-id @hidden-state-atom))
-        (events/removeAll js/window))
+        (.cancelAnimationFrame (.-view renderer) (:request-id @hidden-state-atom))
+        (events/removeAll (.-view renderer)))
       (get-screens [this]
         (:screens @hidden-state-atom))
       (set-screens [this screens]
