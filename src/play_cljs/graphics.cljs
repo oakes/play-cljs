@@ -1,5 +1,4 @@
-(ns play-cljs.graphics
-  (:require [cljsjs.pixi]))
+(ns play-cljs.graphics)
 
 (defmulti draw-graphics! (fn [command _ _ _] (first command)))
 
