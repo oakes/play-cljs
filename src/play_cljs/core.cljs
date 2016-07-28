@@ -8,7 +8,7 @@
 (defprotocol Screen
   (on-show [this state])
   (on-hide [this state])
-  (on-render [this state timestamp])
+  (on-render [this state total-time delta-time])
   (on-event [this state event]))
 
 (defprotocol Game
@@ -19,7 +19,9 @@
   (get-state [this])
   (set-state [this state])
   (get-renderer [this])
-  (set-renderer [this renderer]))
+  (set-renderer [this renderer])
+  (get-pressed-key [this])
+  (key-pressed? [this key-name]))
 
 (defprotocol Command
   (run [this game]))
@@ -40,19 +42,23 @@
 
 (defn create-game [renderer]
   (let [state-atom (atom {})
-        hidden-state-atom (atom {:screens [] :renderer renderer})]
+        hidden-state-atom (atom {:screens [] :renderer renderer :time 0 :last-key nil})]
     (reify Game
       (start [this events]
-        (->> (fn callback [timestamp]
-               (run-on-all-screens! this on-render timestamp)
+        (->> (fn callback [time]
+               (run-on-all-screens! this on-render time (- time (:time @hidden-state-atom)))
+               (swap! hidden-state-atom assoc :time time)
                (.requestAnimationFrame js/window callback))
              (.requestAnimationFrame js/window)
              (swap! hidden-state-atom assoc :request-id))
+        (doto js/window
+          (events/listen "keydown" #(swap! hidden-state-atom assoc :last-key %))
+          (events/listen "keyup" #(swap! hidden-state-atom dissoc :last-key %)))
         (doseq [event events]
-          (events/listen (.-view renderer) event #(run-on-all-screens! this on-event %))))
+          (events/listen js/window event #(run-on-all-screens! this on-event %))))
       (stop [this]
-        (.cancelAnimationFrame (.-view renderer) (:request-id @hidden-state-atom))
-        (events/removeAll (.-view renderer)))
+        (.cancelAnimationFrame js/window (:request-id @hidden-state-atom))
+        (events/removeAll js/window))
       (get-screens [this]
         (:screens @hidden-state-atom))
       (set-screens [this screens]
@@ -68,7 +74,11 @@
         (:renderer @hidden-state-atom))
       (set-renderer [this renderer]
         (swap! hidden-state-atom assoc :renderer renderer)
-        renderer))))
+        renderer)
+      (get-pressed-key [this]
+        (:last-key @hidden-state-atom))
+      (key-pressed? [this key-name]
+        (some-> (get-pressed-key this) .-event_ .-key (= (u/key->pascal key-name)))))))
 
 (defrecord ResetState [state] Command
   (run [{:keys [state]} game]

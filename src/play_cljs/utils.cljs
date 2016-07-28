@@ -11,3 +11,8 @@
          (cons (first parts))
          (str/join ""))))
 
+(defn key->pascal [k]
+  (->> (split-key k)
+       (map str/capitalize)
+       (str/join "")))
+
