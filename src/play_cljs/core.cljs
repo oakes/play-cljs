@@ -38,8 +38,8 @@
                   (into {}))]
     (.autoDetectRenderer js/PIXI width height (clj->js opts))))
 
-(defn create-game [renderer initial-state]
-  (let [state-atom (atom initial-state)
+(defn create-game [renderer]
+  (let [state-atom (atom {})
         hidden-state-atom (atom {:screens [] :renderer renderer})]
     (reify Game
       (start [this events]
