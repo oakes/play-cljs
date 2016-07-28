@@ -66,14 +66,14 @@
         renderer))))
 
 (defrecord ResetState [state] Command
-  (run [this game]
+  (run [{:keys [state]} game]
     (set-state game state)))
 
 (defn reset-state [state]
   (ResetState. state))
 
 (defrecord Graphics [command x y] Command
-  (run [this game]
+  (run [{:keys [command x y]} game]
     (let [renderer (get-renderer game)
           graphics (js/PIXI.Graphics.)]
       (g/draw-graphics! command x y graphics)
