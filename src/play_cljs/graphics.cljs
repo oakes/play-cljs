@@ -1,6 +1,5 @@
 (ns play-cljs.graphics
-  (:require [cljsjs.pixi]
-            [play-cljs.core :as c]))
+  (:require [cljsjs.pixi]))
 
 (defmulti draw-graphics! (fn [command _ _ _] (first command)))
 
@@ -61,17 +60,4 @@
     nil
     :else
     (throw (js/Error. (str "Invalid graphics command: " (pr-str command))))))
-
-(defrecord Graphics [command x y] c/Command
-  (run [this game]
-    (let [renderer (c/get-renderer game)
-          graphics (js/PIXI.Graphics.)]
-      (draw-graphics! command x y graphics)
-      (.render renderer graphics))))
-
-(defn graphics
-  ([command]
-   (graphics command 0 0))
-  ([command x y]
-   (Graphics. command x y)))
 

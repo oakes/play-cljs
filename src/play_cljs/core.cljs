@@ -1,6 +1,7 @@
 (ns play-cljs.core
   (:require [goog.events :as events]
             [cljsjs.pixi]
+            [play-cljs.graphics :as g]
             [play-cljs.utils :as u])
   (:require-macros [play-cljs.core :refer [run-on-all-screens!]]))
 
@@ -70,4 +71,17 @@
 
 (defn reset-state [state]
   (ResetState. state))
+
+(defrecord Graphics [command x y] Command
+  (run [this game]
+    (let [renderer (get-renderer game)
+          graphics (js/PIXI.Graphics.)]
+      (g/draw-graphics! command x y graphics)
+      (.render renderer graphics))))
+
+(defn graphics
+  ([command]
+   (graphics command 0 0))
+  ([command x y]
+   (Graphics. command x y)))
 
