@@ -5,5 +5,5 @@
 (defmacro run-on-all-screens! [game f & other-args]
   `(let [state# (get-state ~game)
          screens# (get-screens ~game)]
-     (run! #(process-commands! ~game (~f % state# ~@other-args)) screens#)))
+     (run! #(process-command! ~game (~f % state# ~@other-args)) screens#)))
 

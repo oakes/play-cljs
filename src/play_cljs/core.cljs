@@ -22,17 +22,13 @@
 (defprotocol Command
   (run [this game]))
 
-(defn process-commands! [game commands]
-  (doseq [cmd commands]
-    (cond
-      (satisfies? Command cmd) (run cmd game)
-      (map? cmd) (set-state game cmd)
-      (fn? cmd) (when-let [result (cmd (get-state game))]
-                  (assert (map? result) "Result of function should be nil or a state map.")
-                  (set-state game result))
-      (nil? cmd) nil
-      (sequential? cmd) (process-commands! game cmd)
-      :else (throw (js/Error. (str "Invalid command: " (pr-str cmd)))))))
+(defn process-command! [game cmd]
+  (cond
+    (sequential? cmd) (run! #(process-command! game %) cmd)
+    (satisfies? Command cmd) (run cmd game)
+    (fn? cmd) (process-command! (cmd (get-state game)))
+    (nil? cmd) nil
+    :else (throw (js/Error. (str "Invalid command: " (pr-str cmd))))))
 
 (defn create-renderer [width height opts]
   (let [opts (->> opts
@@ -67,4 +63,11 @@
         (reset! state-atom state))
       (get-renderer [this]
         renderer))))
+
+(defrecord ResetState [state] Command
+  (run [this game]
+    (set-state game state)))
+
+(defn reset-state [state]
+  (ResetState. state))
 
