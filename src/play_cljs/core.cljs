@@ -18,7 +18,10 @@
   (set-screens [this screens])
   (get-state [this])
   (set-state [this state])
-  (get-renderer [this]))
+  (get-renderer [this])
+  (set-renderer [this renderer])
+  (get-resource [this url])
+  (set-resource [this url res]))
 
 (defprotocol Command
   (run [this game]))
@@ -39,7 +42,7 @@
 
 (defn create-game [renderer initial-state]
   (let [state-atom (atom initial-state)
-        hidden-state-atom (atom {:screens []})]
+        hidden-state-atom (atom {:screens [] :resources {} :renderer renderer})]
     (reify Game
       (start [this events]
         (->> (fn callback [timestamp]
@@ -61,9 +64,18 @@
       (get-state [this]
         @state-atom)
       (set-state [this state]
-        (reset! state-atom state))
+        (reset! state-atom state)
+        state)
       (get-renderer [this]
-        renderer))))
+        (:renderer @hidden-state-atom))
+      (set-renderer [this renderer]
+        (swap! hidden-state-atom assoc :renderer renderer)
+        renderer)
+      (get-resource [this url]
+        (-> @hidden-state-atom :resources (get url)))
+      (set-resource [this url res]
+        (swap! hidden-state-atom assoc-in [:resources url] res)
+        res))))
 
 (defrecord ResetState [state] Command
   (run [{:keys [state]} game]
@@ -84,4 +96,14 @@
    (graphics command 0 0))
   ([command x y]
    (Graphics. command x y)))
+
+(defrecord Sprite [url] Command
+  (run [{:keys [url]} game]
+    (let [sprite (or (get-resource game url)
+                     (set-resource game url (.fromImage js/PIXI.Sprite url)))
+          renderer (get-renderer game)]
+      (.render renderer sprite))))
+
+(defn sprite [url]
+  (Sprite. url))
 
