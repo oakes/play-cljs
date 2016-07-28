@@ -55,7 +55,11 @@
              (swap! hidden-state-atom assoc :request-id))
         (doto js/window
           (events/listen "keydown" #(swap! hidden-state-atom update :pressed-keys conj (-> % .-event_ .-key)))
-          (events/listen "keyup" #(swap! hidden-state-atom update :pressed-keys disj (-> % .-event_ .-key))))
+          (events/listen "keyup" #(let [key-name (-> % .-event_ .-key)]
+                                    (if (= key-name "Meta")
+                                      (swap! hidden-state-atom assoc :pressed-keys #{})
+                                      (swap! hidden-state-atom update :pressed-keys disj key-name))))
+          (events/listen "blur" #(swap! hidden-state-atom assoc :pressed-keys #{})))
         (doseq [event events]
           (events/listen js/window event #(run-on-all-screens! this on-event %))))
       (stop [this]
