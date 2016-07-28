@@ -90,15 +90,22 @@
   ([command x y]
    (Graphics. command x y)))
 
-(defrecord Sprite [url x y frame] Command
-  (run [{:keys [url x y frame]} game]
+(defrecord Sprite [url x y frame scale anchor width height] Command
+  (run [{:keys [url x y frame scale anchor width height]} game]
     (let [texture (.fromImage js/PIXI.Texture url)
           texture (if frame
-                    (js/PIXI.Texture. texture frame nil nil false)
+                    (doto (.clone texture)
+                      (#(set! (.-frame %) frame)))
                     texture)
           sprite (js/PIXI.Sprite. texture)
           renderer (get-renderer game)]
       (.set (.-position sprite) x y)
+      (when-let [[x y] anchor]
+        (.set (.-anchor sprite) x y))
+      (when-let [[x y] scale]
+        (.set (.-scale sprite) x y))
+      (some->> width (set! (.-width sprite)))
+      (some->> height (set! (.-height sprite)))
       (.render renderer sprite))))
 
 (defn sprite
@@ -106,8 +113,9 @@
    (sprite url 0 0))
   ([url x y]
    (sprite url x y nil))
-  ([url x y frame]
-   (Sprite. url x y frame)))
+  ([url x y opts]
+   (let [{:keys [frame scale anchor width height]} opts]
+     (Sprite. url x y frame scale anchor width height))))
 
 (defn rectangle [x y width height]
   (js/PIXI.Rectangle. x y width height))
