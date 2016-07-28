@@ -90,9 +90,12 @@
   ([command x y]
    (Graphics. command x y)))
 
-(defrecord Sprite [url x y] Command
-  (run [{:keys [url]} game]
+(defrecord Sprite [url x y frame] Command
+  (run [{:keys [url x y frame]} game]
     (let [texture (.fromImage js/PIXI.Texture url)
+          texture (if frame
+                    (js/PIXI.Texture. texture frame nil nil false)
+                    texture)
           sprite (js/PIXI.Sprite. texture)
           renderer (get-renderer game)]
       (.set (.-position sprite) x y)
@@ -102,5 +105,10 @@
   ([url]
    (sprite url 0 0))
   ([url x y]
-   (Sprite. url x y)))
+   (sprite url x y nil))
+  ([url x y frame]
+   (Sprite. url x y frame)))
+
+(defn rectangle [x y width height]
+  (js/PIXI.Rectangle. x y width height))
 
