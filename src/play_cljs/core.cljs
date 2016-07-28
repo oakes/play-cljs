@@ -20,8 +20,10 @@
   (set-state [this state])
   (get-renderer [this])
   (set-renderer [this renderer])
-  (get-pressed-key [this])
-  (key-pressed? [this key-name]))
+  (get-pressed-keys [this])
+  (key-pressed? [this key-name])
+  (get-width [this])
+  (get-height [this]))
 
 (defprotocol Command
   (run [this game]))
@@ -42,7 +44,7 @@
 
 (defn create-game [renderer]
   (let [state-atom (atom {})
-        hidden-state-atom (atom {:screens [] :renderer renderer :time 0 :last-key nil})]
+        hidden-state-atom (atom {:screens [] :renderer renderer :time 0 :pressed-keys #{}})]
     (reify Game
       (start [this events]
         (->> (fn callback [time]
@@ -52,8 +54,8 @@
              (.requestAnimationFrame js/window)
              (swap! hidden-state-atom assoc :request-id))
         (doto js/window
-          (events/listen "keydown" #(swap! hidden-state-atom assoc :last-key %))
-          (events/listen "keyup" #(swap! hidden-state-atom dissoc :last-key %)))
+          (events/listen "keydown" #(swap! hidden-state-atom update :pressed-keys conj (-> % .-event_ .-key)))
+          (events/listen "keyup" #(swap! hidden-state-atom update :pressed-keys disj (-> % .-event_ .-key))))
         (doseq [event events]
           (events/listen js/window event #(run-on-all-screens! this on-event %))))
       (stop [this]
@@ -75,10 +77,14 @@
       (set-renderer [this renderer]
         (swap! hidden-state-atom assoc :renderer renderer)
         renderer)
-      (get-pressed-key [this]
-        (:last-key @hidden-state-atom))
+      (get-pressed-keys [this]
+        (:pressed-keys @hidden-state-atom))
       (key-pressed? [this key-name]
-        (some-> (get-pressed-key this) .-event_ .-key (= (u/key->pascal key-name)))))))
+        (contains? (get-pressed-keys this) (u/key->pascal key-name)))
+      (get-width [this]
+        (-> (get-renderer this) .-view .-width))
+      (get-height [this]
+        (-> (get-renderer this) .-view .-height)))))
 
 (defrecord ResetState [state] Command
   (run [{:keys [state]} game]
