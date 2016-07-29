@@ -97,46 +97,72 @@
 (defn reset-state [state]
   (ResetState. state))
 
-(defrecord Graphics [command x y] Command
-  (run [{:keys [command x y]} game]
+(defrecord Graphics [object x y] Command
+  (run [{:keys [object x y]} game]
     (let [renderer (get-renderer game)
           graphics (js/PIXI.Graphics.)]
-      (g/draw-graphics! command x y graphics)
+      (g/draw-graphics! object x y graphics)
       (.render renderer graphics))))
 
 (defn graphics
-  ([command]
-   (graphics command 0 0))
-  ([command x y]
-   (Graphics. command x y)))
+  ([object]
+   (graphics object nil))
+  ([object opts]
+   (let [{:keys [x y]
+          :or {x 0 y 0}} opts]
+     (Graphics. object x y))))
 
-(defrecord Sprite [url x y frame scale anchor width height] Command
-  (run [{:keys [url x y frame scale anchor width height]} game]
-    (let [texture (.fromImage js/PIXI.Texture url)
-          texture (if frame
-                    (doto (.clone texture)
-                      (#(set! (.-frame %) frame)))
-                    texture)
-          sprite (js/PIXI.Sprite. texture)
-          renderer (get-renderer game)]
-      (.set (.-position sprite) x y)
-      (when-let [[x y] anchor]
-        (.set (.-anchor sprite) x y))
-      (when-let [[x y] scale]
-        (.set (.-scale sprite) x y))
-      (some->> width (set! (.-width sprite)))
-      (some->> height (set! (.-height sprite)))
-      (.render renderer sprite))))
+(defrecord Sprite [object x y width height] Command
+  (run [{:keys [object x y width height]} game]
+    (.set (.-position object) x y)
+    (some->> width (set! (.-width object)))
+    (some->> height (set! (.-height object)))
+    (.render (get-renderer game) object)))
 
 (defn sprite
   ([url]
-   (sprite url 0 0))
-  ([url x y]
-   (sprite url x y nil))
-  ([url x y opts]
-   (let [{:keys [frame scale anchor width height]} opts]
-     (Sprite. url x y frame scale anchor width height))))
+   (sprite url nil))
+  ([url opts]
+   (let [{:keys [x y width height frame anchor scale]
+          :or {x 0 y 0}} opts
+         texture (.fromImage js/PIXI.Texture url)
+         texture (if frame
+                   (let [texture (.clone texture)
+                         {:keys [x y width height]} frame
+                         rect (js/PIXI.Rectangle. x y width height)]
+                     (set! (.-frame texture) rect)
+                     texture)
+                   texture)
+         object (js/PIXI.Sprite. texture)]
+     (when-let [[x y] anchor]
+       (.set (.-anchor object) x y))
+     (when-let [[x y] scale]
+       (.set (.-scale object) x y))
+     (Sprite. object x y width height))))
 
-(defn rectangle [x y width height]
-  (js/PIXI.Rectangle. x y width height))
+(defrecord MovieClip [object sprites x y width height animation-speed play? loop?] Command
+  (run [{:keys [object sprites x y width height animation-speed play? loop?]} game]
+    (.set (.-position object) x y)
+    (some->> width (set! (.-width object)))
+    (some->> height (set! (.-height object)))
+    (let [sprite (get sprites (.-currentFrame object))]
+      (set! (.-anchor object) (.-anchor sprite))
+      (set! (.-scale object) (.-scale sprite)))
+    (set! (.-animationSpeed object) animation-speed)
+    (if play?
+      (when-not (.-playing object) (.play object))
+      (when (.-playing object) (.stop object)))
+    (set! (.-loop object) loop?)
+    (.render (get-renderer game) object)))
+
+(defn movie-clip
+  ([sprites]
+   (movie-clip sprites nil))
+  ([sprites opts]
+   (let [{:keys [x y width height animation-speed play? loop?]
+          :or {x 0 y 0 play? true loop? true}} opts
+         sprites (mapv :object sprites)
+         textures (mapv #(.-texture %) sprites)
+         object (js/PIXI.extras.MovieClip. (into-array textures))]
+     (MovieClip. object sprites x y width height animation-speed play? loop?))))
 
