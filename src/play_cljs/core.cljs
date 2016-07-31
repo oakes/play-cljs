@@ -34,7 +34,7 @@
   (cond
     (sequential? cmd) (run! #(process-command! game %) cmd)
     (satisfies? Command cmd) (run cmd game)
-    (fn? cmd) (process-command! (cmd (get-state game)))
+    (fn? cmd) (process-command! game (cmd (get-state game)))
     (nil? cmd) nil
     :else (throw (js/Error. (str "Invalid command: " (pr-str cmd))))))
 
