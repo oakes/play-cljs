@@ -111,20 +111,21 @@
 (defn reset-state [state]
   (ResetState. state))
 
-(defrecord Graphics [object x y] Command
-  (run [{:keys [object x y]} game]
-    (let [renderer (get-renderer game)
-          graphics (js/PIXI.Graphics.)]
-      (g/draw-graphics! object x y graphics)
-      (.render renderer graphics))))
+(defrecord Graphics [object content x y] Command
+  (run [{:keys [object content x y]} game]
+    (let [renderer (get-renderer game)]
+      (.clear object)
+      (g/draw-graphics! object content x y)
+      (.render renderer object))))
 
 (defn graphics
-  ([object]
-   (graphics object nil))
-  ([object opts]
+  ([content]
+   (graphics content nil))
+  ([content opts]
    (let [{:keys [x y]
-          :or {x 0 y 0}} opts]
-     (Graphics. object x y))))
+          :or {x 0 y 0}} opts
+         object (js/PIXI.Graphics.)]
+     (Graphics. object content x y))))
 
 (defrecord Sprite [object x y width height] Command
   (run [{:keys [object x y width height]} game]

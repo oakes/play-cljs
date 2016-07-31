@@ -1,62 +1,62 @@
 (ns play-cljs.graphics)
 
-(defmulti draw-graphics! (fn [command _ _ _] (first command)))
+(defmulti draw-graphics! (fn [_ content _ _] (first content)))
 
-(defmethod draw-graphics! :fill [command origin-x origin-y graphics]
-  (let [[_ opts & children] command
+(defmethod draw-graphics! :fill [object content origin-x origin-y]
+  (let [[_ opts & children] content
         {:keys [color alpha]} opts]
-    (.beginFill graphics color alpha)
-    (draw-graphics! children origin-x origin-y graphics)
-    (.endFill graphics)))
+    (.beginFill object color alpha)
+    (draw-graphics! object children origin-x origin-y)
+    (.endFill object)))
 
-(defmethod draw-graphics! :circle [command origin-x origin-y graphics]
-  (let [[_ opts & children] command
+(defmethod draw-graphics! :circle [object content origin-x origin-y]
+  (let [[_ opts & children] content
         {:keys [x y radius]} opts
         x (+ origin-x x)
         y (+ origin-y y)]
-    (.drawCircle graphics x y radius)
-    (draw-graphics! children x y graphics)))
+    (.drawCircle object x y radius)
+    (draw-graphics! object children x y)))
 
-(defmethod draw-graphics! :ellipse [command origin-x origin-y graphics]
-  (let [[_ opts & children] command
+(defmethod draw-graphics! :ellipse [object content origin-x origin-y]
+  (let [[_ opts & children] content
         {:keys [x y width height]} opts
         x (+ origin-x x)
         y (+ origin-y y)]
-    (.drawEllipse graphics x y width height)
-    (draw-graphics! children x y graphics)))
+    (.drawEllipse object x y width height)
+    (draw-graphics! object children x y)))
 
-(defmethod draw-graphics! :polygon [command origin-x origin-y graphics]
-  (let [[_ opts & children] command
+(defmethod draw-graphics! :polygon [object content origin-x origin-y]
+  (let [[_ opts & children] content
         {:keys [path]} opts
         path (->> path
                   (partition 2)
                   (map (fn [[x y]] [(+ origin-x x) (+ origin-y y)]))
                   flatten)]
-    (.drawPolygon graphics (into-array path))
-    (draw-graphics! children origin-x origin-y graphics)))
+    (.drawPolygon object (into-array path))
+    (draw-graphics! object children origin-x origin-y)))
 
-(defmethod draw-graphics! :rect [command origin-x origin-y graphics]
-  (let [[_ opts & children] command
+(defmethod draw-graphics! :rect [object content origin-x origin-y]
+  (let [[_ opts & children] content
         {:keys [x y width height radius]} opts
         x (+ origin-x x)
         y (+ origin-y y)]
-    (.drawRect graphics x y width height)
-    (draw-graphics! children x y graphics)))
+    (.drawRect object x y width height)
+    (draw-graphics! object children x y)))
 
-(defmethod draw-graphics! :rounded-rect [command origin-x origin-y graphics]
-  (let [[_ opts & children] command
+(defmethod draw-graphics! :rounded-rect [object content origin-x origin-y]
+  (let [[_ opts & children] content
         {:keys [x y width height radius]} opts
         x (+ origin-x x)
         y (+ origin-y y)]
-    (.drawRoundedRect graphics x y width height radius)
-    (draw-graphics! children x y graphics)))
+    (.drawRoundedRect object x y width height radius)
+    (draw-graphics! object children x y)))
 
-(defmethod draw-graphics! :default [command origin-x origin-y graphics]
+(defmethod draw-graphics! :default [object content origin-x origin-y]
   (cond
-    (sequential? (first command))
-    (run! #(draw-graphics! % origin-x origin-y graphics) command)
-    (nil? (first command))
+    (sequential? (first content))
+    (run! #(draw-graphics! object % origin-x origin-y) content)
+    (nil? (first content))
     nil
     :else
-    (throw (js/Error. (str "Invalid graphics command: " (pr-str command))))))
+    (throw (js/Error. (str "Invalid graphics command: " (pr-str content))))))
 
