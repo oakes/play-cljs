@@ -11,7 +11,7 @@
           :label (p/text "Hello, world!" {:x 0 :y 0 :fill 0xFFFFFF})
           :background (p/graphics
                         [:fill {:color 0x8080FF :alpha 1}
-                         [:rect {:x 0 :y 0 :width view-size :height view-size}]])})))
+                         [:rect {:x 0 :y 0 :width view-size :height view-size}]]))))
     (on-hide [this state])
     (on-render [this state]
       [(:background state)
