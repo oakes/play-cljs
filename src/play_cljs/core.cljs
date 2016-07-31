@@ -22,7 +22,6 @@
   (get-total-time [this])
   (get-delta-time [this])
   (get-pressed-keys [this])
-  (key-pressed? [this key-name])
   (get-width [this])
   (get-height [this]))
 
@@ -68,11 +67,10 @@
              (.requestAnimationFrame js/window)
              (swap! hidden-state-atom assoc :request-id))
         (doto js/window
-          (events/listen "keydown" #(swap! hidden-state-atom update :pressed-keys conj (-> % .-event_ .-key)))
-          (events/listen "keyup" #(let [key-name (-> % .-event_ .-key)]
-                                    (if (= key-name "Meta")
-                                      (swap! hidden-state-atom assoc :pressed-keys #{})
-                                      (swap! hidden-state-atom update :pressed-keys disj key-name))))
+          (events/listen "keydown" #(swap! hidden-state-atom update :pressed-keys conj (.-keyCode %)))
+          (events/listen "keyup" #(if (contains? #{91 93} (.-keyCode %))
+                                    (swap! hidden-state-atom assoc :pressed-keys #{})
+                                    (swap! hidden-state-atom update :pressed-keys disj (.-keyCode %))))
           (events/listen "blur" #(swap! hidden-state-atom assoc :pressed-keys #{})))
         (doseq [event events]
           (events/listen js/window event (fn [e]
@@ -103,8 +101,6 @@
         (:delta-time @hidden-state-atom))
       (get-pressed-keys [this]
         (:pressed-keys @hidden-state-atom))
-      (key-pressed? [this key-name]
-        (contains? (get-pressed-keys this) (u/key->pascal key-name)))
       (get-width [this]
         (-> (get-renderer this) .-view .-width))
       (get-height [this]
