@@ -1,6 +1,10 @@
 ## Introduction
 
-A ClojureScript library for making games. It uses [Pixi.js](http://www.pixijs.com/) for rendering.
+A ClojureScript library for making games. It uses [Pixi.js](http://www.pixijs.com/) for rendering. You can create a new play-cljs project with the template:
+
+```
+boot -d seancorfield/boot-new new -t "play-cljs" -n "hello-world"
+```
 
 ## Documentation
 
