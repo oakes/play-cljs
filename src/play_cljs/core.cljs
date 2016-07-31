@@ -15,6 +15,8 @@
   (stop [this])
   (get-screens [this])
   (set-screens [this screens])
+  (get-screen [this])
+  (set-screen [this screen])
   (get-state [this])
   (set-state [this state])
   (get-renderer [this])
@@ -86,6 +88,10 @@
         (run-on-all-screens! this on-hide)
         (swap! hidden-state-atom assoc :screens screens)
         (run-on-all-screens! this on-show))
+      (get-screen [this]
+        (first (get-screens this)))
+      (set-screen [this screen]
+        (set-screens this [screen]))
       (get-state [this]
         @state-atom)
       (set-state [this state]
