@@ -2,8 +2,7 @@
   (:require [goog.events :as events]
             [cljsjs.pixi]
             [play-cljs.graphics :as g]
-            [play-cljs.utils :as u])
-  (:require-macros [play-cljs.core :refer [run-on-all-screens!]]))
+            [play-cljs.utils :as u]))
 
 (defprotocol Screen
   (on-show [this state])
@@ -38,6 +37,11 @@
     (nil? cmd) nil
     :else (throw (js/Error. (str "Invalid command: " (pr-str cmd))))))
 
+(defn ^:private run-on-all-screens! [game f]
+  (let [state (get-state game)
+        screens (get-screens game)]
+    (run! #(process-command! game (f % state)) screens)))
+
 (defn create-renderer [width height opts]
   (let [opts (->> opts
                   (map (fn [[k v]] [(u/key->camel k) v]))
@@ -71,7 +75,9 @@
                                       (swap! hidden-state-atom update :pressed-keys disj key-name))))
           (events/listen "blur" #(swap! hidden-state-atom assoc :pressed-keys #{})))
         (doseq [event events]
-          (events/listen js/window event #(run-on-all-screens! this on-event %))))
+          (events/listen js/window event (fn [e]
+                                           (run-on-all-screens! this (fn [screen state]
+                                                                       (on-event screen state e)))))))
       (stop [this]
         (.cancelAnimationFrame js/window (:request-id @hidden-state-atom))
         (events/removeAll js/window))
