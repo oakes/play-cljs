@@ -10,6 +10,7 @@ boot -d seancorfield/boot-new new -t "play-cljs" -n "hello-world"
 
 * Read the source (I know that sucks, but I am in very early stages of development!)
 * Check out [the example games](https://github.com/oakes/play-cljs-examples)
+* Join the discussion on [r/playcljs](https://www.reddit.com/r/playcljs/)
 * Look at this commented example:
 
 ```clojure
