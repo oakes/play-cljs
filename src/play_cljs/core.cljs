@@ -39,9 +39,8 @@
     :else (throw (js/Error. (str "Invalid command: " (pr-str cmd))))))
 
 (defn ^:private run-on-all-screens! [game f]
-  (let [state (get-state game)
-        screens (get-screens game)]
-    (run! #(process-command! game (f % state)) screens)))
+  (run! #(process-command! game (f % (get-state game)))
+    (get-screens game)))
 
 (defn create-renderer [width height opts]
   (let [opts (->> opts
