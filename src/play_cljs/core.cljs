@@ -8,7 +8,7 @@
 (defprotocol Screen
   (on-show [this state])
   (on-hide [this state])
-  (on-render [this state total-time delta-time])
+  (on-render [this state])
   (on-event [this state event]))
 
 (defprotocol Game
@@ -20,6 +20,8 @@
   (set-state [this state])
   (get-renderer [this])
   (set-renderer [this renderer])
+  (get-total-time [this])
+  (get-delta-time [this])
   (get-pressed-keys [this])
   (key-pressed? [this key-name])
   (get-width [this])
@@ -44,12 +46,20 @@
 
 (defn create-game [renderer]
   (let [state-atom (atom {})
-        hidden-state-atom (atom {:screens [] :renderer renderer :time 0 :pressed-keys #{}})]
+        hidden-state-atom (atom {:screens []
+                                 :renderer renderer
+                                 :total-time 0
+                                 :delta-time 0
+                                 :pressed-keys #{}})]
     (reify Game
       (start [this events]
         (->> (fn callback [time]
-               (run-on-all-screens! this on-render time (- time (:time @hidden-state-atom)))
-               (swap! hidden-state-atom assoc :time time)
+               (swap! hidden-state-atom
+                 (fn [hidden-state]
+                   (assoc hidden-state
+                     :total-time time
+                     :delta-time (- time (:total-time hidden-state)))))
+               (run-on-all-screens! this on-render)
                (.requestAnimationFrame js/window callback))
              (.requestAnimationFrame js/window)
              (swap! hidden-state-atom assoc :request-id))
@@ -81,6 +91,10 @@
       (set-renderer [this renderer]
         (swap! hidden-state-atom assoc :renderer renderer)
         renderer)
+      (get-total-time [this]
+        (:total-time @hidden-state-atom))
+      (get-delta-time [this]
+        (:delta-time @hidden-state-atom))
       (get-pressed-keys [this]
         (:pressed-keys @hidden-state-atom))
       (key-pressed? [this key-name]
