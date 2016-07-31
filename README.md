@@ -16,10 +16,12 @@ A ClojureScript library for making games.
 
     ; runs when the screen is first shown
     (on-show [this state]
-      (p/reset-state {:label (p/text "Hello, world!" {:x 0 :y 0 :fill 0xFFFFFF})
-                      :background (p/graphics
-                                    [:fill {:color 0x8080FF :alpha 1}
-                                     [:rect {:x 0 :y 0 :width 500 :height 500}]])}))
+      (p/reset-state
+        (assoc state
+          :label (p/text "Hello, world!" {:x 0 :y 0 :fill 0xFFFFFF})
+          :background (p/graphics
+                        [:fill {:color 0x8080FF :alpha 1}
+                         [:rect {:x 0 :y 0 :width view-size :height view-size}]])})))
 
     ; runs when the screen is hidden
     (on-hide [this state])
