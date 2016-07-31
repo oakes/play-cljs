@@ -43,6 +43,7 @@
 
 (defn create-renderer [width height opts]
   (let [opts (->> opts
+                  (merge {:clear-before-render false})
                   (map (fn [[k v]] [(u/key->camel k) v]))
                   (into {}))]
     (.autoDetectRenderer js/PIXI width height (clj->js opts))))
@@ -182,4 +183,24 @@
          textures (mapv #(.-texture %) sprites)
          object (js/PIXI.extras.MovieClip. (into-array textures))]
      (MovieClip. object sprites x y width height animation-speed play? loop?))))
+
+(defrecord Text [object x y width height] Command
+  (run [{:keys [object x y width height]} game]
+    (.set (.-position object) x y)
+    (some->> width (set! (.-width object)))
+    (some->> height (set! (.-height object)))
+    (.render (get-renderer game) object)))
+
+(defn text
+  ([text-str]
+   (text text-str nil nil))
+  ([text-str style]
+   (text text-str style nil))
+  ([text-str style opts]
+   (let [style (->> style
+                    (map (fn [[k v]] [(u/key->camel k) v]))
+                    (into {}))
+         {:keys [x y width height]
+          :or {x 0 y 0}} opts]
+     (Text. (js/PIXI.Text. text-str (clj->js style)) x y width height))))
 
