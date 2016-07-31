@@ -193,14 +193,12 @@
 
 (defn text
   ([text-str]
-   (text text-str nil nil))
-  ([text-str style]
-   (text text-str style nil))
-  ([text-str style opts]
-   (let [style (->> style
-                    (map (fn [[k v]] [(u/key->camel k) v]))
-                    (into {}))
-         {:keys [x y width height]
-          :or {x 0 y 0}} opts]
-     (Text. (js/PIXI.Text. text-str (clj->js style)) x y width height))))
+   (text text-str nil))
+  ([text-str opts]
+   (let [{:keys [x y width height]
+          :or {x 0 y 0}} opts
+         opts (->> opts
+                   (map (fn [[k v]] [(u/key->camel k) v]))
+                   (into {}))]
+     (Text. (js/PIXI.Text. text-str (clj->js opts)) x y width height))))
 
