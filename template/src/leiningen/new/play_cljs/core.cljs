@@ -6,10 +6,12 @@
 (def main-screen
   (reify p/Screen
     (on-show [_ state]
-      (p/reset-state {:label (p/text "Hello, world!" {:x 0 :y 0 :fill 0xFFFFFF})
-                      :background (p/graphics
-                                    [:fill {:color 0x8080FF :alpha 1}
-                                     [:rect {:x 0 :y 0 :width view-size :height view-size}]])}))
+      (p/reset-state
+        (assoc state
+          :label (p/text "Hello, world!" {:x 0 :y 0 :fill 0xFFFFFF})
+          :background (p/graphics
+                        [:fill {:color 0x8080FF :alpha 1}
+                         [:rect {:x 0 :y 0 :width view-size :height view-size}]])})))
     (on-hide [_ state])
     (on-render [_ state]
       [(:background state)
@@ -26,5 +28,5 @@
 (doto game
   (p/stop)
   (p/start ["keydown"])
-  (p/set-screens [main-screen]))
+  (p/set-screen main-screen))
 
