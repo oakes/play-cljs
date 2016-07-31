@@ -30,7 +30,7 @@
 (defprotocol Command
   (run [this game]))
 
-(defn process-command! [game cmd]
+(defn ^:private process-command! [game cmd]
   (cond
     (sequential? cmd) (run! #(process-command! game %) cmd)
     (satisfies? Command cmd) (run cmd game)
