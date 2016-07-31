@@ -1,9 +1,10 @@
 ## Introduction
 
-A ClojureScript library for making games.
+A ClojureScript library for making games. It uses [Pixi.js](http://www.pixijs.com/) for rendering.
 
 ## Documentation
 
+* Read the source (I know that sucks, but I am in very early stages of development!)
 * Check out [the example games](https://github.com/oakes/play-cljs-examples)
 * Look at this commented example:
 
@@ -13,6 +14,16 @@ A ClojureScript library for making games.
   (reify p/Screen
     ; all screen functions get a map called "state" that you can store anything inside of
     ; the return value must be one or more "commands", or nil if you don't want to run any commands
+    
+    ; "commands" are any record that implements the Command protocol
+    ; they represent an anction that play-cljs will execute on your behalf
+    ; you can build your own, but here are the built-in ones:
+    
+    ; `reset-state` changes the contents of the state map
+    ; `graphics` generates shapes with a hiccup-like syntax
+    ; `sprite` displays an image
+    ; `movie-clip` plays a sequence of sprites
+    ; `text` displays a string
 
     ; runs when the screen is first shown
     (on-show [this state]
