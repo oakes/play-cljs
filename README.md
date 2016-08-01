@@ -14,6 +14,9 @@ boot -d seancorfield/boot-new new -t "play-cljs" -n "hello-world"
 * Look at this commented example:
 
 ```clojure
+(ns hello-world.core
+  (:require [play-cljs.core :as p]))
+
 ; define a screen, where all the action takes place
 (def main-screen
   (reify p/Screen
