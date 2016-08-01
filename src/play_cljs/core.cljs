@@ -34,7 +34,6 @@
   (cond
     (sequential? cmd) (run! #(process-command! game %) cmd)
     (satisfies? Command cmd) (run cmd game)
-    (fn? cmd) (process-command! game (cmd (get-state game)))
     (nil? cmd) nil
     :else (throw (js/Error. (str "Invalid command: " (pr-str cmd))))))
 
@@ -111,6 +110,13 @@
         (-> (get-renderer this) .-view .-width))
       (get-height [this]
         (-> (get-renderer this) .-view .-height)))))
+
+(defrecord DelayCommand [function] Command
+  (run [{:keys [function]} game]
+    (process-command! game (function (get-state game)))))
+
+(defn delay-command [function]
+  (DelayCommand. function))
 
 (defrecord ResetState [state] Command
   (run [{:keys [state]} game]
