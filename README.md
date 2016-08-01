@@ -60,8 +60,7 @@ boot -d seancorfield/boot-new new -t "play-cljs" -n "hello-world"
 (def canvas (.querySelector js/document "#canvas"))
 
 ; get a renderer object
-(defonce renderer
-  (p/create-renderer 500 500 {:view canvas}))
+(defonce renderer (p/create-renderer 500 500 {:view canvas}))
 
 ; get a game object, stop it if necessary (for reloading), and then start it
 (defonce game (p/create-game renderer))
