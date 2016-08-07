@@ -7,7 +7,8 @@
         (update :x + (:x parent-opts))
         (update :y + (:y parent-opts)))))
 
-(def ^:const text-defaults {:x 0 :y 0 :size 32 :font "Helvetica" :halign :left :valign :baseline :leading 0 :style :normal})
+(def ^:const basic-defaults {:x 0 :y 0})
+(def ^:const text-defaults (merge basic-defaults {:size 32 :font "Helvetica" :halign :left :valign :baseline :leading 0 :style :normal}))
 
 (defn halign->constant [renderer halign]
   (get {:left (.-LEFT renderer) :center (.-CENTER renderer) :right (.-RIGHT renderer)} halign))
@@ -33,6 +34,12 @@
     (.textLeading renderer leading)
     (.textStyle renderer (style->constant renderer style))
     (.text renderer command x y)
+    (draw-sketch! renderer children opts)))
+
+(defmethod draw-sketch! :arc [renderer content parent-opts]
+  (let [[command opts & children] content
+        {:keys [x y width height start stop] :as opts} (update-opts opts parent-opts basic-defaults)]
+    (.arc renderer x y width height start stop)
     (draw-sketch! renderer children opts)))
 
 (defmethod draw-sketch! :default [renderer content parent-opts]
