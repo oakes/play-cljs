@@ -6,14 +6,17 @@
                              :text
                              command))))
 
+(def ^:const text-defaults {:x 0 :y 0 :size 32 :font "Helvetica"})
+
 (defmethod draw-sketch! :text [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [x y size]
-         :or {x 0 y 0 size 32}} opts
-        x (+ x (or (:x parent-opts) 0))
-        y (+ y (or (:y parent-opts) 0))
-        opts (assoc opts :x x :y y)]
+        parent-opts (merge text-defaults parent-opts)
+        opts (-> (merge text-defaults (select-keys parent-opts [:size :font]) opts)
+                 (update :x + (:x parent-opts))
+                 (update :y + (:y parent-opts)))
+        {:keys [x y size font]} opts]
     (.textSize renderer size)
+    (.textFont renderer font)
     (.text renderer command x y)
     (draw-sketch! renderer children opts)))
 

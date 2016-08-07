@@ -66,7 +66,7 @@
       (stop [this]
         (events/removeAll js/window))
       (render [this content]
-        (s/draw-sketch! (get-renderer this) content))
+        (s/draw-sketch! (get-renderer this) content {}))
       (get-screens [this]
         (:screens @hidden-state-atom))
       (set-screens [this screens]
