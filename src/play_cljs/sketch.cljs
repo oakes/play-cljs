@@ -42,6 +42,12 @@
     (.arc renderer x y width height start stop)
     (draw-sketch! renderer children opts)))
 
+(defmethod draw-sketch! :ellipse [renderer content parent-opts]
+  (let [[command opts & children] content
+        {:keys [x y width height] :as opts} (update-opts opts parent-opts basic-defaults)]
+    (.ellipse renderer x y width height)
+    (draw-sketch! renderer children opts)))
+
 (defmethod draw-sketch! :default [renderer content parent-opts]
   (cond
     (sequential? (first content))
