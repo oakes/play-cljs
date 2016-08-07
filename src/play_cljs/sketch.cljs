@@ -48,6 +48,17 @@
     (.ellipse renderer x y width height)
     (draw-sketch! renderer children opts)))
 
+(defmethod draw-sketch! :line [renderer content parent-opts]
+  (let [[command opts & children] content
+        opts (update-opts opts parent-opts basic-defaults)
+        {:keys [x1 y1 x2 y2] :as opts} (-> opts
+                                           (update :x1 + (:x opts))
+                                           (update :x2 + (:x opts))
+                                           (update :y1 + (:y opts))
+                                           (update :y2 + (:y opts)))]
+    (.line renderer x1 y1 x2 y2)
+    (draw-sketch! renderer children opts)))
+
 (defmethod draw-sketch! :default [renderer content parent-opts]
   (cond
     (sequential? (first content))
