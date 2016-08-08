@@ -4,10 +4,10 @@
             [play-cljs.sketch :as s]))
 
 (defprotocol Screen
-  (on-show [this state])
-  (on-hide [this state])
-  (on-render [this state])
-  (on-event [this state event]))
+  (on-show [this])
+  (on-hide [this])
+  (on-render [this])
+  (on-event [this event]))
 
 (defprotocol Game
   (start [this events])
@@ -18,8 +18,6 @@
   (set-screens [this screens])
   (get-screen [this])
   (set-screen [this screen])
-  (get-state [this])
-  (set-state [this state])
   (get-renderer [this])
   (set-renderer [this renderer])
   (get-canvas [this])
@@ -30,12 +28,8 @@
   (get-height [this])
   (set-size [this width height]))
 
-(defn ^:private run-on-all-screens! [game f]
-  (run! #(f % (get-state game)) (get-screens game)))
-
 (defn create-game [width height]
-  (let [state-atom (atom {})
-        renderer (js/p5. (fn [renderer]))
+  (let [renderer (js/p5. (fn [renderer]))
         hidden-state-atom (atom {:screens []
                                  :renderer renderer
                                  :canvas nil
@@ -58,7 +52,7 @@
                     :total-time time
                     :delta-time (- time (:total-time hidden-state))))))
             (.clear renderer)
-            (run-on-all-screens! this on-render)))
+            (run! on-render (get-screens this))))
         (doto js/window
           (events/listen "keydown" #(swap! hidden-state-atom update :pressed-keys conj (.-keyCode %)))
           (events/listen "keyup" #(if (contains? #{91 93} (.-keyCode %))
@@ -67,8 +61,7 @@
           (events/listen "blur" #(swap! hidden-state-atom assoc :pressed-keys #{})))
         (doseq [event events]
           (events/listen js/window event (fn [e]
-                                           (run-on-all-screens! this (fn [screen state]
-                                                                       (on-event screen state e)))))))
+                                           (run! #(on-event % e) (get-screens this))))))
       (stop [this]
         (events/removeAll js/window))
       (render [this content]
@@ -78,18 +71,13 @@
       (get-screens [this]
         (:screens @hidden-state-atom))
       (set-screens [this screens]
-        (run-on-all-screens! this on-hide)
+        (run! on-hide (get-screens this))
         (swap! hidden-state-atom assoc :screens screens)
-        (run-on-all-screens! this on-show))
+        (run! on-show (get-screens this)))
       (get-screen [this]
         (first (get-screens this)))
       (set-screen [this screen]
         (set-screens this [screen]))
-      (get-state [this]
-        @state-atom)
-      (set-state [this state]
-        (reset! state-atom state)
-        state)
       (get-renderer [this]
         (:renderer @hidden-state-atom))
       (set-renderer [this renderer]
