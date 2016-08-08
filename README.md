@@ -18,6 +18,7 @@ boot -d seancorfield/boot-new new -t "play-cljs" -n "hello-world"
   (:require [play-cljs.core :as p]))
 
 (declare game)
+(defonce state (atom {}))
 
 ; define a screen, where all the action takes place
 (def main-screen
@@ -25,30 +26,27 @@ boot -d seancorfield/boot-new new -t "play-cljs" -n "hello-world"
     ; all screen functions get a map called "state" that you can store anything inside of
     
     ; runs when the screen is first shown
-    (on-show [this state]
-      ; we use `set-state` to update the state map with the x and y position
-      ; of the text we want to display
-      (p/set-state game
-        (assoc state :text-x 20 :text-y 30)))
+    (on-show [this]
+      ; start the state map with the x and y position of the text we want to display
+      (reset! state {:text-x 20 :text-y 30}))
 
     ; runs when the screen is hidden
-    (on-hide [this state])
+    (on-hide [this])
 
     ; runs every time a frame must be drawn (about 60 times per sec)
-    (on-render [this state]
+    (on-render [this]
       ; we use `render` to display a light blue background and black text
       ; as you can see, everything is specified as a hiccup-style data structure
       (p/render game
         [[:fill {:color "lightblue"}
           [:rect {:x 0 :y 0 :width 500 :height 500}]]
          [:fill {:color "black"}
-          ["Hello, world!" {:x (:text-x state) :y (:text-y state) :size 16 :font "Georgia" :style :italic}]]])
-      ; we use `set-state` to increment the x position of the text so it scrolls to the right
-      (p/set-state game
-        (update state :text-x inc)))
+          ["Hello, world!" {:x (:text-x @state) :y (:text-y @state) :size 16 :font "Georgia" :style :italic}]]])
+      ; increment the x position of the text so it scrolls to the right
+      (swap! state update :text-x inc))
 
     ; runs whenever an event you subscribed to happens (see below)
-    (on-event [this state event]
+    (on-event [this event]
       (case (.-type event)
         "keydown" (.log js/console "You typed something!")
         "mousemove" (.log js/console "You moved your mouse!")))))

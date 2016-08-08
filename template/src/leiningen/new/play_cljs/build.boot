@@ -8,7 +8,7 @@
                   ; project deps
                   [org.clojure/clojure "1.8.0"]
                   [org.clojure/clojurescript "1.9.89"]
-                  [play-cljs "0.2.0"]])
+                  [play-cljs "0.3.0"]])
 
 (require
   '[adzerk.boot-cljs :refer [cljs]]
