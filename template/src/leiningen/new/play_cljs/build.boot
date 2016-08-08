@@ -24,5 +24,5 @@
     (target)))
 
 (deftask build []
-  (comp (cljs :optimizations :advanced) (target)))
+  (comp (cljs :optimizations :simple) (target)))
 
