@@ -13,6 +13,7 @@
   (start [this events])
   (stop [this])
   (render [this content])
+  (load-image [this path])
   (get-screens [this])
   (set-screens [this screens])
   (get-screen [this])
@@ -34,25 +35,30 @@
 
 (defn create-game [width height]
   (let [state-atom (atom {})
+        renderer (js/p5. (fn [renderer]))
         hidden-state-atom (atom {:screens []
-                                 :renderer nil
+                                 :renderer renderer
                                  :canvas nil
                                  :total-time 0
                                  :delta-time 0
-                                 :pressed-keys #{}})
-        renderer (js/p5. (fn [renderer]
-                           (set! (.-setup renderer)
-                             (fn []
-                               (let [canvas (.-canvas (.createCanvas renderer width height))]
-                                 (.removeAttribute canvas "style")
-                                 (swap! hidden-state-atom
-                                   (fn [hidden-state]
-                                     (assoc hidden-state :renderer renderer :canvas canvas))))))))]
+                                 :pressed-keys #{}})]
     (reify Game
       (start [this events]
-        (set! (.-draw renderer) (fn []
-                                  (.clear renderer)
-                                  (run-on-all-screens! this on-render)))
+        (set! (.-setup renderer)
+          (fn []
+            (let [canvas (.-canvas (.createCanvas renderer width height))]
+              (.removeAttribute canvas "style")
+              (swap! hidden-state-atom assoc :canvas canvas))))
+        (set! (.-draw renderer)
+          (fn []
+            (swap! hidden-state-atom
+              (fn [hidden-state]
+                (let [time (.millis renderer)]
+                  (assoc hidden-state
+                    :total-time time
+                    :delta-time (- time (:total-time hidden-state))))))
+            (.clear renderer)
+            (run-on-all-screens! this on-render)))
         (doto js/window
           (events/listen "keydown" #(swap! hidden-state-atom update :pressed-keys conj (.-keyCode %)))
           (events/listen "keyup" #(if (contains? #{91 93} (.-keyCode %))
@@ -67,6 +73,8 @@
         (events/removeAll js/window))
       (render [this content]
         (s/draw-sketch! (get-renderer this) content {}))
+      (load-image [this path]
+        (.loadImage (get-renderer this) path))
       (get-screens [this]
         (:screens @hidden-state-atom))
       (set-screens [this screens]
