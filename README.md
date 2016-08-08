@@ -23,8 +23,7 @@ boot -d seancorfield/boot-new new -t "play-cljs" -n "hello-world"
 ; define a screen, where all the action takes place
 (def main-screen
   (reify p/Screen
-    ; all screen functions get a map called "state" that you can store anything inside of
-    
+  
     ; runs when the screen is first shown
     (on-show [this]
       ; start the state map with the x and y position of the text we want to display
