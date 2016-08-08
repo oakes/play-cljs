@@ -120,6 +120,19 @@
       x y (or width swidth) (or height sheight))
     (draw-sketch! renderer children opts)))
 
+(defmethod draw-sketch! :fill [renderer content parent-opts]
+  (let [[command opts & children] content
+        {:keys [grayscale red green blue color]
+         :as opts} (update-opts opts parent-opts basic-defaults)]
+    (cond
+      grayscale
+      (.fill renderer grayscale)
+      (and red green blue)
+      (.fill renderer red green blue)
+      color
+      (.fill renderer color))
+    (draw-sketch! renderer children opts)))
+
 (defmethod draw-sketch! :default [renderer content parent-opts]
   (cond
     (sequential? (first content))
