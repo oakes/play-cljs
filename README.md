@@ -48,13 +48,16 @@ boot -d seancorfield/boot-new new -t "play-cljs" -n "hello-world"
         (update state :text-x inc)))
 
     ; runs whenever an event you subscribed to happens (see below)
-    (on-event [this state event])))
+    (on-event [this state event]
+      (case (.-type event)
+        "keydown" (.log js/console "You typed something!")
+        "mousemove" (.log js/console "You moved your mouse!")))))
 
+; get a game object, stop it if necessary (for reloading), and then start it
 (defonce game (p/create-game 500 500))
-
 (doto game
   (p/stop)
-  (p/start ["keydown"])
+  (p/start ["keydown" "mousemove"]) ; subscribe to keydown and mousemove events
   (p/set-screen main-screen))
 ```
 
