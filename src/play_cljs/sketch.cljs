@@ -148,6 +148,28 @@
     (when-let [fill-fn (:fill-fn parent-opts)]
       (fill-fn))))
 
+(defmethod draw-sketch! :stroke [renderer content parent-opts]
+  (let [[command opts & children] content
+        {:keys [grayscale rgb color] :as opts}
+        (update-opts opts parent-opts basic-defaults)
+        stroke-fn (cond
+                    grayscale
+                    #(.stroke renderer grayscale)
+                    rgb
+                    (let [[red green blue] rgb]
+                      #(.stroke renderer red green blue))
+                    color
+                    #(.stroke renderer color)
+                    :else
+                    #(.noStroke renderer))]
+    (stroke-fn)
+    (draw-sketch! renderer children (assoc opts :stroke-fn stroke-fn))
+    ; stop the stroke function after drawing the children
+    (set! (.-_strokeSet (.-_renderer renderer)) false)
+    ; if there is a stroke function in a parent, re-apply it
+    (when-let [stroke-fn (:stroke-fn parent-opts)]
+      (stroke-fn))))
+
 (defmethod draw-sketch! :default [renderer content parent-opts]
   (cond
     (sequential? (first content))
