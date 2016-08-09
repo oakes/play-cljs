@@ -129,19 +129,24 @@
 (defmethod draw-sketch! :fill [renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [grayscale rgb color] :as opts}
-        (update-opts opts parent-opts basic-defaults)]
-    (cond
-      grayscale
-      (.fill renderer grayscale)
-      rgb
-      (let [[red green blue] rgb]
-        (.fill renderer red green blue))
-      color
-      (.fill renderer color)
-      :else
-      (.noFill renderer))
-    (draw-sketch! renderer children opts)
-    (set! (.-_fillSet (.-_renderer renderer)) false)))
+        (update-opts opts parent-opts basic-defaults)
+        fill-fn (cond
+                  grayscale
+                  #(.fill renderer grayscale)
+                  rgb
+                  (let [[red green blue] rgb]
+                    #(.fill renderer red green blue))
+                  color
+                  #(.fill renderer color)
+                  :else
+                  #(.noFill renderer))]
+    (fill-fn)
+    (draw-sketch! renderer children (assoc opts :fill-fn fill-fn))
+    ; stop the fill function after drawing the children
+    (set! (.-_fillSet (.-_renderer renderer)) false)
+    ; if there is a fill function in a parent, re-apply it
+    (when-let [fill-fn (:fill-fn parent-opts)]
+      (fill-fn))))
 
 (defmethod draw-sketch! :default [renderer content parent-opts]
   (cond
