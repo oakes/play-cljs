@@ -33,24 +33,28 @@
 
 (defmethod draw-sketch! :text [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [x y size font halign valign leading style] :as opts} (update-opts opts parent-opts text-defaults)]
-    (.textSize renderer size)
-    (.textFont renderer font)
-    (.textAlign renderer (halign->constant renderer halign) (valign->constant renderer valign))
-    (.textLeading renderer leading)
-    (.textStyle renderer (style->constant renderer style))
-    (.text renderer command x y)
+        {:keys [x y size font halign valign leading style] :as opts}
+        (update-opts opts parent-opts text-defaults)]
+    (doto renderer
+      (.textSize size)
+      (.textFont font)
+      (.textAlign (halign->constant renderer halign) (valign->constant renderer valign))
+      (.textLeading leading)
+      (.textStyle (style->constant renderer style))
+      (.text command x y))
     (draw-sketch! renderer children opts)))
 
 (defmethod draw-sketch! :arc [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [x y width height start stop] :as opts} (update-opts opts parent-opts basic-defaults)]
+        {:keys [x y width height start stop] :as opts}
+        (update-opts opts parent-opts basic-defaults)]
     (.arc renderer x y width height start stop)
     (draw-sketch! renderer children opts)))
 
 (defmethod draw-sketch! :ellipse [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [x y width height] :as opts} (update-opts opts parent-opts basic-defaults)]
+        {:keys [x y width height] :as opts}
+        (update-opts opts parent-opts basic-defaults)]
     (.ellipse renderer x y width height)
     (draw-sketch! renderer children opts)))
 
@@ -68,7 +72,8 @@
 
 (defmethod draw-sketch! :point [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [x y] :as opts} (update-opts opts parent-opts basic-defaults)]
+        {:keys [x y] :as opts}
+        (update-opts opts parent-opts basic-defaults)]
     (.point renderer x y)
     (draw-sketch! renderer children opts)))
 
@@ -90,7 +95,8 @@
 
 (defmethod draw-sketch! :rect [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [x y width height] :as opts} (update-opts opts parent-opts basic-defaults)]
+        {:keys [x y width height] :as opts}
+        (update-opts opts parent-opts basic-defaults)]
     (.rect renderer x y width height)
     (draw-sketch! renderer children opts)))
 
@@ -110,8 +116,8 @@
 
 (defmethod draw-sketch! :img [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [object x y width height sx sy swidth sheight scale-x scale-y]
-         :as opts} (update-opts opts parent-opts img-defaults)
+        {:keys [object x y width height sx sy swidth sheight scale-x scale-y] :as opts}
+        (update-opts opts parent-opts img-defaults)
         swidth (or swidth (.-width object))
         sheight (or sheight (.-height object))]
     (.scale renderer scale-x scale-y)
@@ -122,8 +128,8 @@
 
 (defmethod draw-sketch! :fill [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [grayscale rgb color]
-         :as opts} (update-opts opts parent-opts basic-defaults)]
+        {:keys [grayscale rgb color] :as opts}
+        (update-opts opts parent-opts basic-defaults)]
     (cond
       grayscale
       (.fill renderer grayscale)
