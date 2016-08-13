@@ -172,6 +172,52 @@
     (when-let [stroke-fn (:stroke-fn parent-opts)]
       (stroke-fn))))
 
+(defmethod draw-sketch! :bezier [renderer content parent-opts]
+  (let [[command opts & children] content
+        opts (update-opts opts parent-opts basic-defaults)
+        {:keys [x1 y1 x2 y2 x3 y3 x4 y4
+                z1 z2 z3 z4] :as opts}
+        (-> opts
+            (update :x1 + (:x opts))
+            (update :y1 + (:y opts))
+            (update :x2 + (:x opts))
+            (update :y2 + (:y opts))
+            (update :x3 + (:x opts))
+            (update :y3 + (:y opts))
+            (update :x4 + (:x opts))
+            (update :y4 + (:y opts)))]
+    (cond
+      (and x1 y1 x2 y2 x3 y3 x4 y4)
+      (.bezier renderer x1 y1 x2 y2 x3 y3 x4 y4)
+      (and z1 z2 z3 z4)
+      (.bezier renderer z1 z2 z3 z4)
+      :else
+      (throw "Invalid args for bezier"))
+    (draw-sketch! renderer children opts)))
+
+(defmethod draw-sketch! :curve [renderer content parent-opts]
+  (let [[command opts & children] content
+        opts (update-opts opts parent-opts basic-defaults)
+        {:keys [x1 y1 x2 y2 x3 y3 x4 y4
+                z1 z2 z3 z4] :as opts}
+        (-> opts
+            (update :x1 + (:x opts))
+            (update :y1 + (:y opts))
+            (update :x2 + (:x opts))
+            (update :y2 + (:y opts))
+            (update :x3 + (:x opts))
+            (update :y3 + (:y opts))
+            (update :x4 + (:x opts))
+            (update :y4 + (:y opts)))]
+    (cond
+      (and x1 y1 x2 y2 x3 y3 x4 y4)
+      (.curve renderer x1 y1 x2 y2 x3 y3 x4 y4)
+      (and z1 z2 z3 z4)
+      (.curve renderer z1 z2 z3 z4)
+      :else
+      (throw "Invalid args for curve"))
+    (draw-sketch! renderer children opts)))
+
 (defmethod draw-sketch! :default [renderer content parent-opts]
   (cond
     (sequential? (first content))
