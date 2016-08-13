@@ -143,7 +143,7 @@
     (fill-fn)
     (draw-sketch! renderer children (assoc opts :fill-fn fill-fn))
     ; reset fill to its default
-    (.noFill renderer)
+    (.fill renderer "white")
     (set! (.-_fillSet (.-_renderer renderer)) false)
     ; if there is a fill function in a parent, re-apply it
     (when-let [fill-fn (:fill-fn parent-opts)]
