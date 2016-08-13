@@ -142,7 +142,8 @@
                   #(.noFill renderer))]
     (fill-fn)
     (draw-sketch! renderer children (assoc opts :fill-fn fill-fn))
-    ; stop the fill function after drawing the children
+    ; reset fill to its default
+    (.noFill renderer)
     (set! (.-_fillSet (.-_renderer renderer)) false)
     ; if there is a fill function in a parent, re-apply it
     (when-let [fill-fn (:fill-fn parent-opts)]
@@ -164,7 +165,8 @@
                     #(.noStroke renderer))]
     (stroke-fn)
     (draw-sketch! renderer children (assoc opts :stroke-fn stroke-fn))
-    ; stop the stroke function after drawing the children
+    ; reset stroke to its default
+    (.stroke renderer "black")
     (set! (.-_strokeSet (.-_renderer renderer)) false)
     ; if there is a stroke function in a parent, re-apply it
     (when-let [stroke-fn (:stroke-fn parent-opts)]
