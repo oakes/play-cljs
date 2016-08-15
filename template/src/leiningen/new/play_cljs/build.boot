@@ -6,8 +6,7 @@
                   [adzerk/boot-reload "0.4.12" :scope "test"]
                   [pandeiro/boot-http "0.7.3" :scope "test"]
                   ; project deps
-                  [org.clojure/clojure "1.8.0"]
-                  [org.clojure/clojurescript "1.9.89"]
+                  [org.clojure/clojurescript "1.9.216"]
                   [play-cljs "0.3.1"]])
 
 (require
