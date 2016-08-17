@@ -10,6 +10,8 @@
 (def ^:const basic-defaults {:x 0 :y 0 :scale-x 1 :scale-y 1})
 (def ^:const text-defaults (merge basic-defaults {:size 32 :font "Helvetica" :halign :left :valign :baseline :leading 0 :style :normal}))
 (def ^:const img-defaults (merge basic-defaults {:sx 0 :sy 0}))
+(def ^:const rgb-defaults (merge basic-defaults {:max-r 255 :max-g 255 :max-b 255 :max-a 1}))
+(def ^:const hsb-defaults (merge basic-defaults {:max-h 360 :max-s 100 :max-b 100 :max-a 1}))
 
 (defn halign->constant [renderer halign]
   (get {:left (.-LEFT renderer) :center (.-CENTER renderer) :right (.-RIGHT renderer)} halign))
@@ -128,16 +130,16 @@
 
 (defmethod draw-sketch! :fill [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [grayscale rgb color] :as opts}
+        {:keys [grayscale color colors] :as opts}
         (update-opts opts parent-opts basic-defaults)
         fill-fn (cond
                   grayscale
                   #(.fill renderer grayscale)
-                  rgb
-                  (let [[red green blue] rgb]
-                    #(.fill renderer red green blue))
                   color
                   #(.fill renderer color)
+                  colors
+                  (let [[n1 n2 n3] colors]
+                    #(.fill renderer n1 n2 n3))
                   :else
                   #(.noFill renderer))]
     (fill-fn)
@@ -151,16 +153,16 @@
 
 (defmethod draw-sketch! :stroke [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [grayscale rgb color] :as opts}
+        {:keys [grayscale color colors] :as opts}
         (update-opts opts parent-opts basic-defaults)
         stroke-fn (cond
                     grayscale
                     #(.stroke renderer grayscale)
-                    rgb
-                    (let [[red green blue] rgb]
-                      #(.stroke renderer red green blue))
                     color
                     #(.stroke renderer color)
+                    colors
+                    (let [[n1 n2 n3] colors]
+                      #(.stroke renderer n1 n2 n3))
                     :else
                     #(.noStroke renderer))]
     (stroke-fn)
@@ -217,6 +219,34 @@
       :else
       (throw "Invalid args for curve"))
     (draw-sketch! renderer children opts)))
+
+(defmethod draw-sketch! :rgb [renderer content parent-opts]
+  (let [[command opts & children] content
+        {:keys [max-r max-g max-b max-a] :as opts}
+        (update-opts opts parent-opts rgb-defaults)
+        color-fn #(.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a)]
+    (color-fn)
+    (draw-sketch! renderer children (assoc opts :color-fn color-fn))
+    ; reset colorMode to its default
+    (let [{:keys [max-r max-g max-b max-a]} rgb-defaults]
+      (.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a))
+    ; if there is a color function in a parent, re-apply it
+    (when-let [color-fn (:color-fn parent-opts)]
+      (color-fn))))
+
+(defmethod draw-sketch! :hsb [renderer content parent-opts]
+  (let [[command opts & children] content
+        {:keys [max-h max-s max-b max-a] :as opts}
+        (update-opts opts parent-opts hsb-defaults)
+        color-fn #(.colorMode renderer (.-HSB renderer) max-h max-s max-b max-a)]
+    (color-fn)
+    (draw-sketch! renderer children (assoc opts :color-fn color-fn))
+    ; reset colorMode to its default
+    (let [{:keys [max-r max-g max-b max-a]} rgb-defaults]
+      (.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a))
+    ; if there is a color function in a parent, re-apply it
+    (when-let [color-fn (:color-fn parent-opts)]
+      (color-fn))))
 
 (defmethod draw-sketch! :default [renderer content parent-opts]
   (cond
