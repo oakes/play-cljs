@@ -1,7 +1,7 @@
 (ns {{namespace}}
   (:require [play-cljs.core :as p]))
 
-(declare game)
+(defonce game (p/create-game 500 500))
 (defonce state (atom {}))
 
 (def main-screen
@@ -18,7 +18,6 @@
       (swap! state update :text-x inc))
     (on-event [this event])))
 
-(defonce game (p/create-game 500 500))
 (doto game
   (p/stop)
   (p/start ["keydown"])

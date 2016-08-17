@@ -17,7 +17,7 @@ boot -d seancorfield/boot-new new -t "play-cljs" -n "hello-world"
 (ns hello-world.core
   (:require [play-cljs.core :as p]))
 
-(declare game)
+(defonce game (p/create-game 500 500))
 (defonce state (atom {}))
 
 ; define a screen, where all the action takes place
@@ -50,11 +50,10 @@ boot -d seancorfield/boot-new new -t "play-cljs" -n "hello-world"
         "keydown" (.log js/console "You typed something!")
         "mousemove" (.log js/console "You moved your mouse!")))))
 
-; get a game object, stop it if necessary (for reloading), and then start it
-(defonce game (p/create-game 500 500))
+; start the game and listen to the keydown and mousemove events
 (doto game
   (p/stop)
-  (p/start ["keydown" "mousemove"]) ; subscribe to keydown and mousemove events
+  (p/start ["keydown" "mousemove"])
   (p/set-screen main-screen))
 ```
 
