@@ -42,16 +42,7 @@
           (fn []
             (let [canvas (.-canvas (.createCanvas renderer width height))]
               (.removeAttribute canvas "style")
-              (swap! hidden-state-atom assoc :canvas canvas))
-            (doto js/window
-              (events/listen "keydown" #(swap! hidden-state-atom update :pressed-keys conj (.-keyCode %)))
-              (events/listen "keyup" #(if (contains? #{91 93} (.-keyCode %))
-                                        (swap! hidden-state-atom assoc :pressed-keys #{})
-                                        (swap! hidden-state-atom update :pressed-keys disj (.-keyCode %))))
-              (events/listen "blur" #(swap! hidden-state-atom assoc :pressed-keys #{})))
-            (doseq [event events]
-              (events/listen js/window event (fn [e]
-                                               (run! #(on-event % e) (get-screens this)))))))
+              (swap! hidden-state-atom assoc :canvas canvas))))
         ; draw
         (set! (.-draw renderer)
           (fn []
@@ -62,7 +53,18 @@
                     :total-time time
                     :delta-time (- time (:total-time hidden-state))))))
             (.clear renderer)
-            (run! on-render (get-screens this)))))
+            (run! on-render (get-screens this))))
+        ; events
+        (doto js/window
+          (events/listen "keydown" #(swap! hidden-state-atom update :pressed-keys conj (.-keyCode %)))
+          (events/listen "keyup" #(if (contains? #{91 93} (.-keyCode %))
+                                    (swap! hidden-state-atom assoc :pressed-keys #{})
+                                    (swap! hidden-state-atom update :pressed-keys disj (.-keyCode %))))
+          (events/listen "blur" #(swap! hidden-state-atom assoc :pressed-keys #{})))
+        (doseq [event events]
+          (events/listen js/window event (fn [e]
+                                           (when (get-canvas this) ; only run after on-show
+                                             (run! #(on-event % e) (get-screens this)))))))
       (stop [this]
         (events/removeAll js/window))
       (render [this content]
