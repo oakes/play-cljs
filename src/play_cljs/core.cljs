@@ -14,7 +14,7 @@
   (stop [this])
   (render [this content])
   (load-image [this path])
-  (generate-image [this width height content])
+  (render-image [this width height content])
   (get-screens [this])
   (set-screens [this screens])
   (get-screen [this])
@@ -71,7 +71,7 @@
         (s/draw-sketch! (get-renderer this) content {}))
       (load-image [this path]
         (.loadImage (get-renderer this) path))
-      (generate-image [this width height content]
+      (render-image [this width height content]
         (doto (.createGraphics renderer width height)
           (s/draw-sketch! content {})))
       (get-screens [this]
