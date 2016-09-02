@@ -1,10 +1,9 @@
 ## Introduction
 
-A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) underneath. You can create a new play-cljs project with the template:
+A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) underneath. There are a few ways to create a project:
 
-```
-boot -d seancorfield/boot-new new -t "play-cljs" -n "hello-world"
-```
+* [Boot](http://boot-clj.com/): `boot -d seancorfield/boot-new new -t "play-cljs" -n "hello-world"`
+* [Nightcode](https://sekao.net/nightcode/): Choose "Game Project" from its start menu
 
 ## Documentation
 
