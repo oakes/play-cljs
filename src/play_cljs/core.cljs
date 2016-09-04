@@ -100,6 +100,7 @@
                     (assoc hidden-state
                       :total-time time
                       :delta-time (- time (:total-time hidden-state))))))
+              (.clear renderer)
               (run! on-render (get-screens this))))))
       (get-screen [this]
         (first (get-screens this)))
