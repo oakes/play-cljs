@@ -1,7 +1,10 @@
 (ns play-cljs.core
   (:require [goog.events :as events]
             [p5.core]
-            [play-cljs.sketch :as s]))
+            [p5.tiled-map]
+            [play-cljs.sketch :as s]
+            [cljs.core.async :refer [promise-chan put! <!]])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defprotocol Screen
   (on-show [this])
@@ -13,8 +16,9 @@
   (start [this events])
   (stop [this])
   (render [this content])
-  (load-image [this path])
   (render-image [this width height content])
+  (load-image [this path])
+  (load-tiled-map [this map-name])
   (get-screens [this])
   (set-screens [this screens])
   (get-screen [this])
@@ -34,26 +38,33 @@
                                  :canvas nil
                                  :total-time 0
                                  :delta-time 0
-                                 :pressed-keys #{}})]
+                                 :pressed-keys #{}})
+        setup-finished? (promise-chan)
+        preloads (atom [])]
     (reify Game
       (start [this events]
-        ; setup
         (set! (.-setup renderer)
           (fn []
+            ; create the canvas
             (let [canvas (.-canvas (.createCanvas renderer width height))]
               (.removeAttribute canvas "style")
-              (swap! hidden-state-atom assoc :canvas canvas))))
-        ; draw
-        (set! (.-draw renderer)
-          (fn []
-            (swap! hidden-state-atom
-              (fn [hidden-state]
-                (let [time (.millis renderer)]
-                  (assoc hidden-state
-                    :total-time time
-                    :delta-time (- time (:total-time hidden-state))))))
-            (.clear renderer)
-            (run! on-render (get-screens this))))
+              (swap! hidden-state-atom assoc :canvas canvas))
+            ; allow on-show to be run
+            (put! setup-finished? true)
+            (go
+              ; wait for any assets from on-show to finish loading
+              (doseq [finished-loading? @preloads]
+                (<! finished-loading?))
+              ; set the draw function
+              (set! (.-draw renderer)
+                (fn []
+                  (swap! hidden-state-atom
+                    (fn [hidden-state]
+                      (let [time (.millis renderer)]
+                        (assoc hidden-state
+                          :total-time time
+                          :delta-time (- time (:total-time hidden-state))))))
+                  (run! on-render (get-screens this)))))))
         ; events
         (doto js/window
           (events/listen "keydown" #(swap! hidden-state-atom update :pressed-keys conj (.-keyCode %)))
@@ -69,17 +80,25 @@
         (events/removeAll js/window))
       (render [this content]
         (s/draw-sketch! (get-renderer this) content {}))
-      (load-image [this path]
-        (.loadImage (get-renderer this) path))
       (render-image [this width height content]
         (doto (.createGraphics renderer width height)
           (s/draw-sketch! content {})))
+      (load-image [this path]
+        (let [finished-loading? (promise-chan)]
+          (swap! preloads conj finished-loading?)
+          (.loadImage (get-renderer this) path #(put! finished-loading? true))))
+      (load-tiled-map [this map-name]
+        (let [finished-loading? (promise-chan)]
+          (swap! preloads conj finished-loading?)
+          (.loadTiledMap (get-renderer this) map-name #(put! finished-loading? true))))
       (get-screens [this]
         (:screens @hidden-state-atom))
       (set-screens [this screens]
-        (run! on-hide (get-screens this))
-        (swap! hidden-state-atom assoc :screens screens)
-        (run! on-show (get-screens this)))
+        (go
+          (<! setup-finished?) ; wait for the setup function to finish
+          (run! on-hide (get-screens this))
+          (swap! hidden-state-atom assoc :screens screens)
+          (run! on-show (get-screens this))))
       (get-screen [this]
         (first (get-screens this)))
       (set-screen [this screen]

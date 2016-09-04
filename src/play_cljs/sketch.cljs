@@ -248,6 +248,13 @@
     (when-let [color-fn (:color-fn parent-opts)]
       (color-fn))))
 
+(defmethod draw-sketch! :tiled-map [renderer content parent-opts]
+  (let [[command opts & children] content
+        {:keys [object x y] :as opts}
+        (update-opts opts parent-opts basic-defaults)]
+    (.draw object x y)
+    (draw-sketch! renderer children opts)))
+
 (defmethod draw-sketch! :default [renderer content parent-opts]
   (cond
     (sequential? (first content))
