@@ -72,11 +72,11 @@
       (load-image [this path]
         (let [finished-loading? (promise-chan)]
           (swap! preloads conj finished-loading?)
-          (.loadImage (get-renderer this) path #(put! finished-loading? true))))
+          (.loadImage renderer path #(put! finished-loading? true))))
       (load-tiled-map [this map-name]
         (let [finished-loading? (promise-chan)]
           (swap! preloads conj finished-loading?)
-          (.loadTiledMap (get-renderer this) map-name #(put! finished-loading? true))))
+          (.loadTiledMap renderer map-name #(put! finished-loading? true))))
       (get-screens [this]
         (:screens @hidden-state-atom))
       (set-screens [this screens]
@@ -116,9 +116,9 @@
       (get-pressed-keys [this]
         (:pressed-keys @hidden-state-atom))
       (get-width [this]
-        (.-width (get-renderer this)))
+        (.-width renderer))
       (get-height [this]
-        (.-height (get-renderer this)))
+        (.-height renderer))
       (set-size [this width height]
-        (.resizeCanvas (get-renderer this) width height)))))
+        (.resizeCanvas renderer width height)))))
 
