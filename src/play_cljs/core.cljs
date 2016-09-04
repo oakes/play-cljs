@@ -50,21 +50,7 @@
               (.removeAttribute canvas "style")
               (swap! hidden-state-atom assoc :canvas canvas))
             ; allow on-show to be run
-            (put! setup-finished? true)
-            (go
-              ; wait for any assets from on-show to finish loading
-              (doseq [finished-loading? @preloads]
-                (<! finished-loading?))
-              ; set the draw function
-              (set! (.-draw renderer)
-                (fn []
-                  (swap! hidden-state-atom
-                    (fn [hidden-state]
-                      (let [time (.millis renderer)]
-                        (assoc hidden-state
-                          :total-time time
-                          :delta-time (- time (:total-time hidden-state))))))
-                  (run! on-render (get-screens this)))))))
+            (put! setup-finished? true)))
         ; events
         (doto js/window
           (events/listen "keydown" #(swap! hidden-state-atom update :pressed-keys conj (.-keyCode %)))
@@ -95,10 +81,26 @@
         (:screens @hidden-state-atom))
       (set-screens [this screens]
         (go
-          (<! setup-finished?) ; wait for the setup function to finish
+          ; wait for the setup function to finish
+          (<! setup-finished?)
+          ; change the screens
           (run! on-hide (get-screens this))
           (swap! hidden-state-atom assoc :screens screens)
-          (run! on-show (get-screens this))))
+          (run! on-show (get-screens this))
+          ; wait for any assets from on-show to finish loading
+          (doseq [finished-loading? @preloads]
+            (<! finished-loading?))
+          (reset! preloads [])
+          ; set the draw function
+          (set! (.-draw renderer)
+            (fn []
+              (swap! hidden-state-atom
+                (fn [hidden-state]
+                  (let [time (.millis renderer)]
+                    (assoc hidden-state
+                      :total-time time
+                      :delta-time (- time (:total-time hidden-state))))))
+              (run! on-render (get-screens this))))))
       (get-screen [this]
         (first (get-screens this)))
       (set-screen [this screen]
