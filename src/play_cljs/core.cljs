@@ -16,7 +16,7 @@
   (start [this events])
   (stop [this])
   (render [this content])
-  (render-image [this width height content])
+  (pre-render [this width height content])
   (load-image [this path])
   (load-tiled-map [this map-name])
   (get-screens [this])
@@ -66,7 +66,7 @@
         (events/removeAll js/window))
       (render [this content]
         (s/draw-sketch! (get-renderer this) content {}))
-      (render-image [this width height content]
+      (pre-render [this width height content]
         (doto (.createGraphics renderer width height)
           (s/draw-sketch! content {})))
       (load-image [this path]
