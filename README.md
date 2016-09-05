@@ -39,7 +39,7 @@ A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) unde
         [[:fill {:color "lightblue"}
           [:rect {:x 0 :y 0 :width 500 :height 500}]]
          [:fill {:color "black"}
-          ["Hello, world!" {:x (:text-x @state) :y (:text-y @state) :size 16 :font "Georgia" :style :italic}]]])
+          [:text {:value "Hello, world!" :x (:text-x @state) :y (:text-y @state) :size 16 :font "Georgia" :style :italic}]]])
       ; increment the x position of the text so it scrolls to the right
       (swap! state update :text-x inc))
 

@@ -23,10 +23,7 @@
   (get {:normal (.-NORMAL renderer) :italic (.-ITALIC renderer) :bold (.-BOLD renderer)} style))
 
 (defmulti draw-sketch! (fn [renderer content parent-opts]
-                         (let [command (first content)]
-                           (if (string? command)
-                             :text
-                             command))))
+                         (first content)))
 
 (defmethod draw-sketch! :div [renderer content parent-opts]
   (let [[command opts & children] content
@@ -35,7 +32,7 @@
 
 (defmethod draw-sketch! :text [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [x y size font halign valign leading style] :as opts}
+        {:keys [value x y size font halign valign leading style] :as opts}
         (update-opts opts parent-opts text-defaults)]
     (doto renderer
       (.textSize size)
@@ -43,7 +40,7 @@
       (.textAlign (halign->constant renderer halign) (valign->constant renderer valign))
       (.textLeading leading)
       (.textStyle (style->constant renderer style))
-      (.text command x y))
+      (.text value x y))
     (draw-sketch! renderer children opts)))
 
 (defmethod draw-sketch! :arc [renderer content parent-opts]
@@ -116,14 +113,14 @@
     (.triangle renderer x1 y1 x2 y2 x3 y3)
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :img [renderer content parent-opts]
+(defmethod draw-sketch! :image [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [object x y width height sx sy swidth sheight scale-x scale-y] :as opts}
+        {:keys [value x y width height sx sy swidth sheight scale-x scale-y] :as opts}
         (update-opts opts parent-opts img-defaults)
-        swidth (or swidth (.-width object))
-        sheight (or sheight (.-height object))]
+        swidth (or swidth (.-width value))
+        sheight (or sheight (.-height value))]
     (.scale renderer scale-x scale-y)
-    (.image renderer object
+    (.image renderer value
       sx sy swidth sheight
       x y (or width swidth) (or height sheight))
     (draw-sketch! renderer children opts)))
@@ -250,9 +247,9 @@
 
 (defmethod draw-sketch! :tiled-map [renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [object x y] :as opts}
+        {:keys [value x y] :as opts}
         (update-opts opts parent-opts basic-defaults)]
-    (.draw object x y)
+    (.draw value x y)
     (draw-sketch! renderer children opts)))
 
 (defmethod draw-sketch! :default [renderer content parent-opts]
