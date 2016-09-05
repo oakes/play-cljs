@@ -323,7 +323,7 @@ p5.prototype.loadTiledMap = function () {
     if (typeof(arguments[i]) === 'number') transparentoffset = arguments[i];
     if (typeof(arguments[i]) === 'function') callback = arguments[i];
   }
-  if (imagepath[-1] != "/") imagepath = imagepath + "/";
+  if (imagepath.length > 0 && imagepath[-1] != "/") imagepath = imagepath + "/";
   if (!TileMaps) throw "No Tiled Map found!";
   if (!TileMaps[mapname]) throw "No Tiled Map named "+mapname+" found!";
   var t =  new p5.TiledMap(this, mapname, imagepath, transparentoffset);
