@@ -8,7 +8,7 @@
 
 (task-options!
   pom {:project 'play-cljs/lein-template
-       :version "0.7.0-SNAPSHOT"
+       :version "0.6.2"
        :description "A template for making play-cljs projects"
        :url "https://github.com/oakes/play-cljs"
        :license {"Public Domain" "http://unlicense.org/UNLICENSE"}}
