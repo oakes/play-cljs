@@ -14,7 +14,7 @@
         [[:fill {:color "lightblue"}
           [:rect {:x 0 :y 0 :width 500 :height 500}]]
          [:fill {:color "black"}
-          ["Hello, world!" {:x (:text-x @state) :y (:text-y @state) :size 16 :font "Georgia" :style :italic}]]])
+          [:text {:value "Hello, world!" :x (:text-x @state) :y (:text-y @state) :size 16 :font "Georgia" :style :italic}]]])
       (swap! state update :text-x inc))
     (on-event [this event])))
 
