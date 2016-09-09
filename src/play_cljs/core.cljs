@@ -7,7 +7,7 @@
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defprotocol Screen
-  "A screen is an object that provides the basic lifecycle for a game.
+  "A screen object provides the basic lifecycle for a game.
 Simple games may only need to have one screen. They are a useful way to
 isolate different aspects of your game. For example, you could make one
 screen display the title and menu, and another screen contain the game
@@ -38,6 +38,9 @@ You can create a screen by using `reify` like this:
     "Runs each time an event you subscribed to fires."))
 
 (defprotocol Game
+  "A game object contains the internal renderer object and various bits of state
+that are important to the overall execution of the game. Every play-cljs game
+should create just one such object by calling [create-game](#create-game)."
   (start [game events]
     "Creates the canvas element and begins listening to the supplied events.")
   (stop [game]
@@ -45,12 +48,11 @@ You can create a screen by using `reify` like this:
   (render [game content]
     "Renders the provided data structure.")
   (pre-render [game width height content]
-    "Renders the provided data structure off-screen and returns an
-[Image](#image) object suitable for use in an `:image` element.")
+    "Renders the provided data structure off-screen and returns an [Image](#image) object.")
   (load-image [game path]
     "Returns an [Image](#image) object downloaded from the provided path.")
   (load-tiled-map [game map-name]
-    "Returns a [TiledMap](#tiledmap) object. A tiled map with the provided name
+    "Returns a [TiledMap](#tiled-map) object. A tiled map with the provided name
 must already be loaded (see the TiledMap docs for details).")
   (get-screens [game]
     "Returns a vector of the [Screen](#screen) objects currently being displayed.")
