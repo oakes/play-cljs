@@ -62,6 +62,8 @@ must already be loaded (see the TiledMap docs for details).")
     "Returns a single [Screen](#screen) object currently being displayed.")
   (set-screen [game screen]
     "Sets a new [Screen](#screen) object to be displayed.")
+  (get-renderer [game]
+    "Returns the internal renderer object.")
   (get-canvas [game]
     "Returns the internal canvas object.")
   (get-total-time [game]
@@ -153,6 +155,8 @@ must already be loaded (see the TiledMap docs for details).")
         (first (get-screens this)))
       (set-screen [this screen]
         (set-screens this [screen]))
+      (get-renderer [this]
+        renderer)
       (get-canvas [this]
         (:canvas @hidden-state-atom))
       (get-total-time [this]
