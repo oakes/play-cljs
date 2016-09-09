@@ -48,20 +48,20 @@ should create just one such object by calling [create-game](#create-game)."
   (render [game content]
     "Renders the provided data structure.")
   (pre-render [game width height content]
-    "Renders the provided data structure off-screen and returns an [Image](#image) object.")
+    "Renders the provided data structure off-screen and returns an [Image](#Image) object.")
   (load-image [game path]
-    "Returns an [Image](#image) object downloaded from the provided path.")
+    "Returns an [Image](#Image) object downloaded from the provided path.")
   (load-tiled-map [game map-name]
-    "Returns a [TiledMap](#tiled-map) object. A tiled map with the provided name
+    "Returns a [TiledMap](#TiledMap) object. A tiled map with the provided name
 must already be loaded (see the TiledMap docs for details).")
   (get-screens [game]
-    "Returns a vector of the [Screen](#screen) objects currently being displayed.")
+    "Returns a vector of the [Screen](#Screen) objects currently being displayed.")
   (set-screens [game screens]
-    "Sets new [Screen](#screen) objects to be displayed.")
+    "Sets new [Screen](#Screen) objects to be displayed.")
   (get-screen [game]
-    "Returns a single [Screen](#screen) object currently being displayed.")
+    "Returns a single [Screen](#Screen) object currently being displayed.")
   (set-screen [game screen]
-    "Sets a new [Screen](#screen) object to be displayed.")
+    "Sets a new [Screen](#Screen) object to be displayed.")
   (get-renderer [game]
     "Returns the internal renderer object.")
   (get-canvas [game]
