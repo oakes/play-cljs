@@ -7,8 +7,8 @@ A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) unde
 
 ## Documentation
 
-* Read the source (I know that sucks, but I am in very early stages of development!)
 * Check out [the example games](https://github.com/oakes/play-cljs-examples)
+* Read [the generated docs](https://oakes.github.io/play-cljs/)
 * Join the discussion on [r/playcljs](https://www.reddit.com/r/playcljs/)
 * Look at this commented example:
 
