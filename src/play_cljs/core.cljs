@@ -7,32 +7,77 @@
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defprotocol Screen
-  (on-show [this])
-  (on-hide [this])
-  (on-render [this])
-  (on-event [this event]))
+  "A screen is an object that provides the basic lifecycle for a game.
+Simple games may only need to have one screen. They are a useful way to
+isolate different aspects of your game. For example, you could make one
+screen display the title and menu, and another screen contain the game
+itself.
+
+You can also display multiple screens at once. For example, the main
+view of your game could be in one screen, and a second screen could
+contain things you want to overlay on top of it, like your health
+bar or a dialog.
+
+You can create a screen by using `reify` like this:
+
+```
+(def main-screen
+  (reify p/Screen
+    (on-show [this])
+    (on-hide [this])
+    (on-render [this])
+    (on-event [this event])))
+```"
+  (on-show [this]
+    "Runs once, when the screen first appears.")
+  (on-hide [this]
+    "Runs once, when the screen is no longer displayed.")
+  (on-render [this]
+    "Runs each time the game is ready to render another frame.")
+  (on-event [this event]
+    "Runs each time an event you subscribed to fires."))
 
 (defprotocol Game
-  (start [this events])
-  (stop [this])
-  (render [this content])
-  (pre-render [this width height content])
-  (load-image [this path])
-  (load-tiled-map [this map-name])
-  (get-screens [this])
-  (set-screens [this screens])
-  (get-screen [this])
-  (set-screen [this screen])
-  (get-renderer [this])
-  (get-canvas [this])
-  (get-total-time [this])
-  (get-delta-time [this])
-  (get-pressed-keys [this])
-  (get-width [this])
-  (get-height [this])
-  (set-size [this width height]))
+  (start [game events]
+    "Creates the canvas element and begins listening to the supplied events.")
+  (stop [game]
+    "Stops displaying any screen or listening to any events.")
+  (render [game content]
+    "Renders the provided data structure.")
+  (pre-render [game width height content]
+    "Renders the provided data structure off-screen and returns an
+[Image](#image) object suitable for use in an `:image` element.")
+  (load-image [game path]
+    "Returns an [Image](#image) object downloaded from the provided path.")
+  (load-tiled-map [game map-name]
+    "Returns a [TiledMap](#tiledmap) object. A tiled map with the provided name
+must already be loaded (see the TiledMap docs for details).")
+  (get-screens [game]
+    "Returns a vector of the [Screen](#screen) objects currently being displayed.")
+  (set-screens [game screens]
+    "Sets new [Screen](#screen) objects to be displayed.")
+  (get-screen [game]
+    "Returns a single [Screen](#screen) object currently being displayed.")
+  (set-screen [game screen]
+    "Sets a new [Screen](#screen) object to be displayed.")
+  (get-canvas [game]
+    "Returns the internal canvas object.")
+  (get-total-time [game]
+    "Returns the total time transpired since the game started, in milliseconds.")
+  (get-delta-time [game]
+    "Returns the time since the last frame was rendered, in milliseconds.")
+  (get-pressed-keys [game]
+    "Returns a set containing the key codes for the keys currently being pressed.")
+  (get-width [game]
+    "Returns the virtual width of the game.")
+  (get-height [game]
+    "Returns the virtual height of the game.")
+  (set-size [game width height]
+    "Sets the virtual width and height of the game."))
 
-(defn create-game [width height]
+(defn create-game
+  "Returns a game object."
+  [width height]
   (let [renderer (js/p5. (fn [renderer]))
         hidden-state-atom (atom {:screens []
                                  :canvas nil
@@ -65,7 +110,7 @@
       (stop [this]
         (events/removeAll js/window))
       (render [this content]
-        (s/draw-sketch! (get-renderer this) content {}))
+        (s/draw-sketch! renderer content {}))
       (pre-render [this width height content]
         (doto (.createGraphics renderer width height)
           (s/draw-sketch! content {})))
@@ -106,8 +151,6 @@
         (first (get-screens this)))
       (set-screen [this screen]
         (set-screens this [screen]))
-      (get-renderer [this]
-        renderer)
       (get-canvas [this]
         (:canvas @hidden-state-atom))
       (get-total-time [this]
