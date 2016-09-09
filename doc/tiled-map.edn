@@ -1,4 +1,5 @@
 {:name "TiledMap"
+ :top-level? true
  :doc "TiledMap objects are returned by [load-tiled-map](#load-tiled-map).
 They can be placed in a :tiled-map element.
 

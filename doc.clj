@@ -17,78 +17,57 @@
                    :publics)
               (throw (Exception. "Couldn't find the namespace"))))
 
-; Game
-
-(def game (or (->> core
-                   (filter #(= (:name %) 'Game))
-                   first)
+(def game (or (-> (filter #(= (:name %) 'Game) core)
+                  first
+                  (assoc :top-level? true))
               (throw (Exception. "Couldn't find Game"))))
 
-; Screen
-
-(def screen (or (->> core
-                     (filter #(= (:name %) 'Screen))
-                     first)
+(def screen (or (-> (filter #(= (:name %) 'Screen) core)
+                    first
+                    (assoc :top-level? true))
                 (throw (Exception. "Couldn't find Screen"))))
 
-; Functions
-
-(def create-game (or (->> core
-                          (filter #(= (:name %) 'create-game))
-                          first)
+(def create-game (or (first (filter #(= (:name %) 'create-game) core))
                      (throw (Exception. "Couldn't find create-game"))))
 
 (def game-fns (->> game :members (sort-by :name)))
 
-; Elements
-
-(def elements [{:name :div}
-               {:name :text}
-               {:name :arc}
-               {:name :ellipse}
-               {:name :line}
-               {:name :point}
-               {:name :quad}
-               {:name :rect}
-               {:name :triangle}
-               {:name :image}
-               {:name :fill}
-               {:name :stroke}
-               {:name :bezier}
-               {:name :curve}
-               {:name :rgb}
-               {:name :hsb}
-               {:name :tiled-map}])
-
 (defn parse-file [fname]
   (-> fname slurp edn/read-string))
 
-(defn description->str [{:keys [name arglists doc members]}]
+(defn item->str [{:keys [name arglists doc members top-level? example]}]
   (list
     [:a {:name (str/replace (str name) #"\." "")}]
-    (for [arglist arglists]
-      [:h2 (pr-str (conj (apply list arglist) (symbol name)))])
+    (cond
+      top-level?
+      [:h1 (str name)]
+      (empty? arglists)
+      [:h2 (str name)]
+      :else
+      (for [arglist arglists]
+        [:h2 (pr-str (cons (symbol name) (apply list arglist)))]))
     (md-to-html-string doc)
-    (map description->str members)))
+    (when example
+      [:div {:class "paren-soup"}
+       [:div {:class "content" :contenteditable "true"}
+        example]])
+    (map item->str members)))
 
 (spit "doc.html"
   (html [:html
+         [:head
+          [:link {:rel "stylesheet" :type "text/css" :href "paren-soup-light.css"}]]
          [:body
-          [:h1 "Screen"]
-          (description->str (dissoc screen :members))
-          [:h1 "Game"]
-          (description->str (dissoc game :members))
-          [:h1 "Functions"]
-          (description->str create-game)
-          (map description->str game-fns)
-          [:h1 "Elements"]
-          [:h2 "Coming soon..."]
-          [:h1 "Image"]
-          (description->str (parse-file "doc/image.edn"))
-          [:h1 "TiledMap"]
-          (description->str (parse-file "doc/tiled-map.edn"))
-          [:h1 "Vector"]
-          (description->str (parse-file "doc/vector.edn"))
-          [:h1 "Color"]
-          (description->str (parse-file "doc/color.edn"))]]))
+          (item->str (dissoc screen :members))
+          (item->str (dissoc game :members))
+          (item->str create-game)
+          (map item->str game-fns)
+          (item->str (parse-file "doc/elements.edn"))
+          (item->str (parse-file "doc/image.edn"))
+          (item->str (parse-file "doc/tiled-map.edn"))
+          (item->str (parse-file "doc/vector.edn"))
+          (item->str (parse-file "doc/color.edn"))
+          [:script {:src "paren-soup.js" :type "text/javascript"}]
+          [:script {:type "text/javascript"}
+           "paren_soup.core.init_all();"]]]))
 

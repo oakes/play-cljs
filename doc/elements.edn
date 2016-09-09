@@ -1,0 +1,47 @@
+{:name "Elements"
+ :top-level? true
+ :members [{:name :div
+            :example "[:div {:x 10 :y 10}
+ [:rect {:x 0 :y 0 :width 10 :height 10}]
+ [:ellipse {:x 0 :y 10 :width 10 :height 10}]]"}
+           {:name :text
+            :example "[:text {:value \"Hello, world!\" :x 0 :y 50 :size 16 :font \"Georgia\" :style :italic}]"}
+           {:name :arc
+            :example "[:arc {:x 0 :y 0 :width 50 :height 50 :start 0 :stop 3.14}]"}
+           {:name :ellipse
+            :example "[:ellipse {:x 0 :y 0 :width 50 :height 50}]"}
+           {:name :line
+            :example "[:line {:x1 0 :y1 0 :x2 10 :y2 10}]"}
+           {:name :point
+            :example "[[:point {:x 5 :y 5}]
+ [:point {:x 10 :y 5}]]"}
+           {:name :quad
+            :example "[:quad {:x1 -10 :y1 -15 :x2 10 :y2 -15 :x3 10 :y3 15 :x4 -10 :y4 15}]"}
+           {:name :rect
+            :example "[:rect {:x -10 :y -15 :width 20 :height 30}]"}
+           {:name :triangle
+            :example "[:triangle {:x1 -10 :y1 -15 :x2 10 :y2 -15 :x3 0 :y3 15}]"}
+           {:name :image
+            :example "[:image {:value (:logo @state) :x 0 :y 0 :width 30 :height 30}]"}
+           {:name :fill
+            :example "[:fill {:color \"lightblue\"}
+ [:rect {:x 0 :y 0 :width 10 :height 10}]]"}
+           {:name :stroke
+            :example "[:stroke {:color \"lightblue\"}
+ [:rect {:x 0 :y 0 :width 10 :height 10}]]"}
+           {:name :bezier
+            :example "[:stroke {:colors [0 0 0]}
+ [:bezier {:x1 85 :y1 20 :x2 10 :y2 10 :x3 90 :y3 90 :x4 15 :y4 80}]]"}
+           {:name :curve
+            :example "[:stroke {:colors [255 102 0]}
+ [:curve {:x1 5 :y1 26 :x2 5 :y2 26 :x3 73 :y3 24 :x4 73 :y4 61}]]"}
+           {:name :rgb
+            :example "[:rgb {:max-r 100 :max-g 100 :max-b 100}
+ [:fill {:colors [0 0 0]}
+  [:rect {:x 0 :y 0 :width 10 :height 10}]]]"}
+           {:name :hsb
+            :example "[:hsb {:max-h 100 :max-s 100 :max-b 100}
+ [:fill {:colors [0 0 0]}
+  [:rect {:x 0 :y 0 :width 10 :height 10}]]]"}
+           {:name :tiled-map
+            :example "[:tiled-map {:value (:map @state)}]"}]}

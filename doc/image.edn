@@ -1,4 +1,5 @@
 {:name "Image"
+ :top-level? true
  :doc "Image objects are returned by [load-image](#load-image)
 and [pre-render](#pre-render). They can be placed in an :image element.
 
