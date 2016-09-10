@@ -53,7 +53,7 @@ If the region is outside the bounds of the image, nil is returned."}
             :doc "Set the color of a single pixel or write an image into this Image object.
 
 Note that for a large number of pixels this will be slower than directly manipulating the pixels
-array and then calling [updatePixels](#update-pixels).
+array and then calling [updatePixels](#updatePixels).
 
 ### Parameters
 
