@@ -19,24 +19,7 @@ the name provided to `load-tiled-map` should coorespond to the name saved in tha
       (p/render game [:tiled-map {:value (:map @state)}]))
     (on-event [this event])))
 ```"
- :members [{:name ".drawLayer"
-            :arglists ([tiled-map layer cam-left cam-top])
-            :doc "Draws a TiledMap layer.
-
-### Parameters
-
-* `layer`  layer index
-* `cam-left`  left coordinate
-* `cam-top`  top coordinate"}
-           {:name ".draw"
-            :arglists ([tiled-map cam-left cam-top])
-            :doc "Draws a TiledMap.
-
-### Parameters
-
-* `cam-left`  left coordinate
-* `cam-top`  top coordinate"}
-           {:name ".getName"
+ :members [{:name ".getName"
             :arglists ([tiled-map])
             :doc "### Returns
 
