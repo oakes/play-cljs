@@ -17,29 +17,26 @@
                    :publics)
               (throw (Exception. "Couldn't find the namespace"))))
 
-(def game (or (-> (filter #(= (:name %) 'Game) core)
-                  first
-                  (assoc :top-level? true))
-              (throw (Exception. "Couldn't find Game"))))
-
-(def screen (or (-> (filter #(= (:name %) 'Screen) core)
-                    first
-                    (assoc :top-level? true))
-                (throw (Exception. "Couldn't find Screen"))))
-
 (def create-game (or (first (filter #(= (:name %) 'create-game) core))
                      (throw (Exception. "Couldn't find create-game"))))
 
-(def game-fns (assoc game :name "Functions"))
+(def game (or (-> (filter #(= (:name %) 'Game) core)
+                  first
+                  (update :members #(cons create-game %)))
+              (throw (Exception. "Couldn't find Game"))))
+
+(def screen (or (-> (filter #(= (:name %) 'Screen) core)
+                    first)
+                (throw (Exception. "Couldn't find Screen"))))
 
 (defn parse-file [fname]
   (-> fname slurp edn/read-string))
 
-(defn item->str [{:keys [name arglists doc members top-level? example]}]
+(defn item->str [{:keys [name arglists doc members sub-item? example]}]
   (list
     [:a {:name (str/replace (str name) #"\." "")}]
     (cond
-      top-level?
+      (not sub-item?)
       [:h1 (str name)]
       (empty? arglists)
       [:h2 (str name)]
@@ -51,7 +48,7 @@
       [:div {:class "paren-soup"}
        [:div {:class "content" :contenteditable "true"}
         example]])
-    (map item->str members)))
+    (map #(-> % (assoc :sub-item? true) item->str) members)))
 
 (spit "build/index.html"
   (html [:html
@@ -59,9 +56,7 @@
           [:link {:rel "stylesheet" :type "text/css" :href "paren-soup-light.css"}]]
          [:body
           (item->str (dissoc screen :members))
-          (item->str (dissoc game :members))
-          (item->str create-game)
-          (map item->str game-fns)
+          (item->str game)
           (item->str (parse-file "elements.edn"))
           (item->str (parse-file "image.edn"))
           (item->str (parse-file "tiled-map.edn"))

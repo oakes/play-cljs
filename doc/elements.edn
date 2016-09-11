@@ -1,5 +1,4 @@
 {:name "Elements"
- :top-level? true
  :members [{:name :div
             :example "[:div {:x 10 :y 10}
  [:rect {:x 0 :y 0 :width 10 :height 10}]
