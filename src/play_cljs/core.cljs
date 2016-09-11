@@ -13,11 +13,6 @@ isolate different aspects of your game. For example, you could make one
 screen display the title and menu, and another screen contain the game
 itself.
 
-You can also display multiple screens at once. For example, the main
-view of your game could be in one screen, and a second screen could
-contain things you want to overlay on top of it, like your health
-bar or a dialog.
-
 You can create a screen by using `reify` like this:
 
 ```
@@ -54,14 +49,10 @@ should create just one such object by calling [create-game](#create-game)."
   (load-tiled-map [game map-name]
     "Returns a [TiledMap](#TiledMap) object. A tiled map with the provided name
 must already be loaded (see the TiledMap docs for details).")
-  (get-screens [game]
-    "Returns a vector of the [Screen](#Screen) objects currently being displayed.")
-  (set-screens [game screens]
-    "Sets new [Screen](#Screen) objects to be displayed.")
   (get-screen [game]
-    "Returns a single [Screen](#Screen) object currently being displayed.")
+    "Returns the [Screen](#Screen) object currently being displayed.")
   (set-screen [game screen]
-    "Sets a new [Screen](#Screen) object to be displayed.")
+    "Sets the [Screen](#Screen) object to be displayed.")
   (get-renderer [game]
     "Returns the internal renderer object.")
   (get-canvas [game]
@@ -83,7 +74,7 @@ must already be loaded (see the TiledMap docs for details).")
   "Returns a game object."
   [width height]
   (let [renderer (js/p5. (fn [renderer]))
-        hidden-state-atom (atom {:screens []
+        hidden-state-atom (atom {:screen nil
                                  :canvas nil
                                  :total-time 0
                                  :delta-time 0
@@ -109,8 +100,7 @@ must already be loaded (see the TiledMap docs for details).")
           (events/listen "blur" #(swap! hidden-state-atom assoc :pressed-keys #{})))
         (doseq [event events]
           (events/listen js/window event (fn [e]
-                                           (when (get-canvas this) ; only run after on-show
-                                             (run! #(on-event % e) (get-screens this)))))))
+                                           (some-> (get-screen this) (on-event e))))))
       (stop [this]
         (events/removeAll js/window))
       (render [this content]
@@ -126,16 +116,16 @@ must already be loaded (see the TiledMap docs for details).")
         (let [finished-loading? (promise-chan)]
           (swap! preloads conj finished-loading?)
           (.loadTiledMap renderer map-name #(put! finished-loading? true))))
-      (get-screens [this]
-        (:screens @hidden-state-atom))
-      (set-screens [this screens]
+      (get-screen [this]
+        (:screen @hidden-state-atom))
+      (set-screen [this screen]
         (go
           ; wait for the setup function to finish
           (<! setup-finished?)
           ; change the screens
-          (run! on-hide (get-screens this))
-          (swap! hidden-state-atom assoc :screens screens)
-          (run! on-show (get-screens this))
+          (some-> (get-screen this) on-hide)
+          (swap! hidden-state-atom assoc :screen screen)
+          (on-show screen)
           ; wait for any assets from on-show to finish loading
           (doseq [finished-loading? @preloads]
             (<! finished-loading?))
@@ -150,11 +140,7 @@ must already be loaded (see the TiledMap docs for details).")
                       :total-time time
                       :delta-time (- time (:total-time hidden-state))))))
               (.clear renderer)
-              (run! on-render (get-screens this))))))
-      (get-screen [this]
-        (first (get-screens this)))
-      (set-screen [this screen]
-        (set-screens this [screen]))
+              (on-render screen)))))
       (get-renderer [this]
         renderer)
       (get-canvas [this]
