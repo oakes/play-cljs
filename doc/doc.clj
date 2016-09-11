@@ -11,7 +11,7 @@
   '[hiccup.core :refer [html]]
   '[markdown.core :refer [md-to-html-string]])
 
-(def core (or (->> (read-namespaces "src/play_cljs")
+(def core (or (->> (read-namespaces "../src/play_cljs")
                    (filter #(= (:name %) 'play-cljs.core))
                    first
                    :publics)
@@ -30,7 +30,7 @@
 (def create-game (or (first (filter #(= (:name %) 'create-game) core))
                      (throw (Exception. "Couldn't find create-game"))))
 
-(def game-fns (->> game :members (sort-by :name)))
+(def game-fns (assoc game :name "Functions"))
 
 (defn parse-file [fname]
   (-> fname slurp edn/read-string))
@@ -53,7 +53,7 @@
         example]])
     (map item->str members)))
 
-(spit "doc.html"
+(spit "build/index.html"
   (html [:html
          [:head
           [:link {:rel "stylesheet" :type "text/css" :href "paren-soup-light.css"}]]
@@ -62,11 +62,11 @@
           (item->str (dissoc game :members))
           (item->str create-game)
           (map item->str game-fns)
-          (item->str (parse-file "doc/elements.edn"))
-          (item->str (parse-file "doc/image.edn"))
-          (item->str (parse-file "doc/tiled-map.edn"))
-          (item->str (parse-file "doc/vector.edn"))
-          (item->str (parse-file "doc/color.edn"))
+          (item->str (parse-file "elements.edn"))
+          (item->str (parse-file "image.edn"))
+          (item->str (parse-file "tiled-map.edn"))
+          (item->str (parse-file "vector.edn"))
+          (item->str (parse-file "color.edn"))
           [:script {:src "paren-soup.js" :type "text/javascript"}]
           [:script {:type "text/javascript"}
            "paren_soup.core.init_all();"]]]))
