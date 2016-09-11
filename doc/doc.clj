@@ -22,7 +22,11 @@
 
 (def game (or (-> (filter #(= (:name %) 'Game) core)
                   first
-                  (update :members #(cons create-game %)))
+                  (update :members
+                    (fn [members]
+                      (->> members
+                           (sort-by :name)
+                           (cons create-game)))))
               (throw (Exception. "Couldn't find Game"))))
 
 (def screen (or (-> (filter #(= (:name %) 'Screen) core)
