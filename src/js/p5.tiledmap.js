@@ -442,6 +442,8 @@ p5.TiledMap.prototype.drawLayer = function(n, x, y, pg) {
     pg.updatePixels();
   }
   pg.pop();
+  pg.ellipseMode(this.renderer.CENTER);
+  pg.angleMode(this.renderer.RADIANS);
 }
 
 /**
