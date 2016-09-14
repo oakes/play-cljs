@@ -6,7 +6,7 @@
                   [pandeiro/boot-http "0.7.3" :scope "test"]
                   ; project deps
                   [org.clojure/clojurescript "1.9.225"]
-                  [play-cljs "0.6.3"]])
+                  [play-cljs "0.6.4"]])
 
 (require
   '[adzerk.boot-cljs :refer [cljs]]
