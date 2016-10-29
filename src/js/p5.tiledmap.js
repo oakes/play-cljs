@@ -44,8 +44,8 @@ p5.TiledMap = function(renderer, mapname, imagepath, transparentoffset) {
   this.mapheight = TileMaps[this.name].height;
   this.camleft = 0;
   this.camtop = 0;
-  this.camwidth = parent.width;
-  this.camheight = parent.height;
+  this.camwidth = window.innerWidth;
+  this.camheight = window.innerHeight;
   this.staggeraxis = TileMaps[this.name].staggeraxis || "x";
   this.staggerindex = Number(TileMaps[this.name].staggerindex == "even");
   this.hexsidelength = TileMaps[this.name].hexsidelength || 0;
