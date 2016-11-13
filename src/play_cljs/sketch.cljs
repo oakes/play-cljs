@@ -252,6 +252,21 @@
     (.draw value x y)
     (draw-sketch! renderer children opts)))
 
+(defmethod draw-sketch! :shape [renderer content parent-opts]
+           (let [[command opts & children] content
+                 opts (update-opts opts parent-opts basic-defaults)
+                 {:keys [points] :as opts} opts]
+                (cond (odd? (count points))
+                      (throw ":shape requires :points to contain a collection with an even number of values (x and y pairs)")
+                      :else
+                      (do (.beginShape renderer)
+                          (loop [[x y & rest] points]
+                                (.vertex renderer x y)
+                                (when rest
+                                      (recur rest)))
+                          (.endShape renderer (.-CLOSE renderer))))
+                (draw-sketch! renderer children opts)))
+
 (defmethod draw-sketch! :default [renderer content parent-opts]
   (cond
     (sequential? (first content))
