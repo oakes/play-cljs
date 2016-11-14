@@ -257,15 +257,32 @@
                  opts (update-opts opts parent-opts basic-defaults)
                  {:keys [points] :as opts} opts]
                 (cond (odd? (count points))
-                      (throw ":shape requires :points to contain a collection with an even number of values (x and y pairs)")
+                      (throw ":shape requires :points to contain a seq'able with an even number of values (x and y pairs)")
                       :else
                       (do (.beginShape renderer)
                           (loop [[x y & rest] points]
                                 (.vertex renderer x y)
                                 (when rest
                                       (recur rest)))
-                          (.endShape renderer (.-CLOSE renderer))))
-                (draw-sketch! renderer children opts)))
+                          (draw-sketch! renderer children opts)
+                          (.endShape renderer (.-CLOSE renderer))))))
+
+
+(defmethod draw-sketch! :contour [renderer content parent-opts]
+           (let [[command opts & children] content
+                 opts (update-opts opts parent-opts basic-defaults)
+                 {:keys [points] :as opts} opts]
+                (cond (odd? (count points))
+                      (throw ":contour requires :points to contain a seq'able with an even number of values (x and y pairs)")
+                      :else
+                      (do (.beginContour renderer)
+                          (loop [[x y & rest] points]
+                                (.vertex renderer x y)
+                                (when rest
+                                      (recur rest)))
+                          (draw-sketch! renderer children opts)
+                          (.endContour renderer (.-CLOSE renderer))))))
+
 
 (defmethod draw-sketch! :default [renderer content parent-opts]
   (cond
