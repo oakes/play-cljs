@@ -29,14 +29,14 @@
 	max-width: inherit;
 	word-wrap: break-word;
 	right: 0px;
-	/*opacity: 0.7;*/
+	opacity: 0.7;
 }
 
 .paren-soup .instarepl .result:hover {
 	cursor: pointer;
 	height: auto !important;
 	z-index: 1;
-	/*opacity: 1;*/
+	opacity: 1;
 }
 
 .paren-soup .instarepl .error {
@@ -47,7 +47,7 @@
 	float: left;
 	padding: 0px 5px;
 	text-align: right;
-	/*opacity: 0.7;*/
+	opacity: 0.7;
 }
 
 .paren-soup .content {
@@ -111,24 +111,4 @@
 
 .paren-soup .content .rainbow-4 {
 	color: lime;
-}
-
-.paren-soup .content .rainbow-5 {
-	color: steelblue;
-}
-
-.paren-soup .content .rainbow-6 {
-	color: olivedrab;
-}
-
-.paren-soup .content .rainbow-7 {
-	color: deeppink;
-}
-
-.paren-soup .content .rainbow-8 {
-	color: violet;
-}
-
-.paren-soup .content .rainbow-9 {
-	color: darkcyan;
 }
