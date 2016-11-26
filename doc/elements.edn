@@ -43,4 +43,9 @@
  [:fill {:colors [0 0 0]}
   [:rect {:x 0 :y 0 :width 10 :height 10}]]]"}
            {:name :tiled-map
-            :example "[:tiled-map {:value (:map @state)}]"}]}
+            :example "[:tiled-map {:value (:map @state)}]"}
+           {:name :shape
+            :example "[:shape {:points [30 20 85 20 85 75 30 75]}]"}
+           {:name :contour
+            :example "[:shape {:points [-40 -40 40 -40 40 40 -40 40]}
+ [:contour {:points [-20 -20 -20 20 20 20 20 -20]}]]"}]}

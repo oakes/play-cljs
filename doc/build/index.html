@@ -15,7 +15,8 @@
  [:fill {:colors [0 0 0]}
   [:rect {:x 0 :y 0 :width 10 :height 10}]]]</div></div><a name=":hsb"></a><h2>:hsb</h2><div class="paren-soup"><div class="content" contenteditable="true">[:hsb {:max-h 100 :max-s 100 :max-b 100}
  [:fill {:colors [0 0 0]}
-  [:rect {:x 0 :y 0 :width 10 :height 10}]]]</div></div><a name=":tiled-map"></a><h2>:tiled-map</h2><div class="paren-soup"><div class="content" contenteditable="true">[:tiled-map {:value (:map @state)}]</div></div><a name="Image"></a><h1>Image</h1><p>Image objects are returned by <a href='#load-image'>load-image</a> and <a href='#pre-render'>pre-render</a>. They can be placed in an :image element.</p><pre><code>&#40;def state &#40;atom {}&#41;&#41;
+  [:rect {:x 0 :y 0 :width 10 :height 10}]]]</div></div><a name=":tiled-map"></a><h2>:tiled-map</h2><div class="paren-soup"><div class="content" contenteditable="true">[:tiled-map {:value (:map @state)}]</div></div><a name=":shape"></a><h2>:shape</h2><div class="paren-soup"><div class="content" contenteditable="true">[:shape {:points [30 20 85 20 85 75 30 75]}]</div></div><a name=":contour"></a><h2>:contour</h2><div class="paren-soup"><div class="content" contenteditable="true">[:shape {:points [-40 -40 40 -40 40 40 -40 40]}
+ [:contour {:points [-20 -20 -20 20 20 20 20 -20]}]]</div></div><a name="Image"></a><h1>Image</h1><p>Image objects are returned by <a href='#load-image'>load-image</a> and <a href='#pre-render'>pre-render</a>. They can be placed in an :image element.</p><pre><code>&#40;def state &#40;atom {}&#41;&#41;
 
 &#40;def main-screen
   &#40;reify p/Screen
