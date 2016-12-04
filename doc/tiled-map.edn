@@ -15,8 +15,7 @@ the name provided to `load-tiled-map` should coorespond to the name saved in tha
       (swap! state assoc :map (p/load-tiled-map \"dungeon\")))
     (on-hide [this])
     (on-render [this]
-      (p/render game [:tiled-map {:value (:map @state)}]))
-    (on-event [this event])))
+      (p/render game [:tiled-map {:value (:map @state)}]))))
 ```"
  :members [{:name ".getName"
             :arglists ([tiled-map])

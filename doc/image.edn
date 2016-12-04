@@ -11,8 +11,7 @@ and [pre-render](#pre-render). They can be placed in an :image element.
       (swap! state assoc :player-image (p/load-image \"player.jpg\")))
     (on-hide [this])
     (on-render [this]
-      (p/render game [:image {:value (:player-image @state)}]))
-    (on-event [this event])))
+      (p/render game [:image {:value (:player-image @state)}]))))
 ```"
  :members [{:name ".loadPixels"
             :arglists ([image])
