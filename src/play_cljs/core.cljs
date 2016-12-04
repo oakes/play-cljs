@@ -20,26 +20,23 @@ You can create a screen by using `reify` like this:
   (reify p/Screen
     (on-show [this])
     (on-hide [this])
-    (on-render [this])
-    (on-event [this event])))
+    (on-render [this])))
 ```"
   (on-show [this]
     "Runs once, when the screen first appears.")
   (on-hide [this]
     "Runs once, when the screen is no longer displayed.")
   (on-render [this]
-    "Runs each time the game is ready to render another frame.")
-  (on-event [this event]
-    "Runs each time an event you subscribed to fires."))
+    "Runs each time the game is ready to render another frame."))
 
 (defprotocol Game
   "A game object contains the internal renderer object and various bits of state
 that are important to the overall execution of the game. Every play-cljs game
 should create just one such object by calling [create-game](#create-game)."
-  (start [game events]
-    "Creates the canvas element and begins listening to the supplied events.")
+  (start [game]
+    "Creates the canvas element.")
   (stop [game]
-    "Stops displaying any screen or listening to any events.")
+    "Stops internal event listeners.")
   (render [game content]
     "Renders the provided data structure.")
   (pre-render [game width height content]
@@ -76,13 +73,14 @@ must already be loaded (see the TiledMap docs for details).")
   (let [renderer (js/p5. (fn [renderer]))
         hidden-state-atom (atom {:screen nil
                                  :canvas nil
+                                 :listeners []
                                  :total-time 0
                                  :delta-time 0
                                  :pressed-keys #{}})
         setup-finished? (promise-chan)
         preloads (atom [])]
     (reify Game
-      (start [this events]
+      (start [this]
         (set! (.-setup renderer)
           (fn []
             ; create the canvas
@@ -91,18 +89,20 @@ must already be loaded (see the TiledMap docs for details).")
               (swap! hidden-state-atom assoc :canvas canvas))
             ; allow on-show to be run
             (put! setup-finished? true)))
-        ; events
-        (doto js/window
-          (events/listen "keydown" #(swap! hidden-state-atom update :pressed-keys conj (.-keyCode %)))
-          (events/listen "keyup" #(if (contains? #{91 93} (.-keyCode %))
-                                    (swap! hidden-state-atom assoc :pressed-keys #{})
-                                    (swap! hidden-state-atom update :pressed-keys disj (.-keyCode %))))
-          (events/listen "blur" #(swap! hidden-state-atom assoc :pressed-keys #{})))
-        (doseq [event events]
-          (events/listen js/window event (fn [e]
-                                           (some-> (get-screen this) (on-event e))))))
+        ; keep track of pressed keys
+        (swap! hidden-state-atom assoc :listeners
+          [(events/listen js/window "keydown"
+             #(swap! hidden-state-atom update :pressed-keys conj (.-keyCode %)))
+           (events/listen js/window "keyup"
+             #(if (contains? #{91 93} (.-keyCode %))
+                (swap! hidden-state-atom assoc :pressed-keys #{})
+                (swap! hidden-state-atom update :pressed-keys disj (.-keyCode %))))
+           (events/listen js/window "blur"
+             #(swap! hidden-state-atom assoc :pressed-keys #{}))]))
       (stop [this]
-        (events/removeAll js/window))
+        (doseq [listener (:listeners @hidden-state-atom)]
+          (events/unlistenByKey listener))
+        (swap! hidden-state-atom assoc :listeners []))
       (render [this content]
         (s/draw-sketch! renderer content {}))
       (pre-render [this width height content]

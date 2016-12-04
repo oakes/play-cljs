@@ -41,18 +41,12 @@ A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) unde
          [:fill {:color "black"}
           [:text {:value "Hello, world!" :x (:text-x @state) :y (:text-y @state) :size 16 :font "Georgia" :style :italic}]]])
       ; increment the x position of the text so it scrolls to the right
-      (swap! state update :text-x inc))
-
-    ; runs whenever an event you subscribed to happens (see below)
-    (on-event [this event]
-      (case (.-type event)
-        "keydown" (.log js/console "You typed something!")
-        "mousemove" (.log js/console "You moved your mouse!")))))
+      (swap! state update :text-x inc))))
 
 ; start the game and listen to the keydown and mousemove events
 (doto game
   (p/stop)
-  (p/start ["keydown" "mousemove"])
+  (p/start)
   (p/set-screen main-screen))
 ```
 
