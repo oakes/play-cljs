@@ -35,8 +35,6 @@ that are important to the overall execution of the game. Every play-cljs game
 should create just one such object by calling [create-game](#create-game)."
   (start [game]
     "Creates the canvas element.")
-  (stop [game]
-    "Stops internal event listeners.")
   (render [game content]
     "Renders the provided data structure.")
   (pre-render [game width height content]
@@ -90,6 +88,7 @@ must already be loaded (see the TiledMap docs for details).")
             ; allow on-show to be run
             (put! setup-finished? true)))
         ; keep track of pressed keys
+        (run! events/unlistenByKey (:listeners @hidden-state-atom))
         (swap! hidden-state-atom assoc :listeners
           [(events/listen js/window "keydown"
              #(swap! hidden-state-atom update :pressed-keys conj (.-keyCode %)))
@@ -99,10 +98,6 @@ must already be loaded (see the TiledMap docs for details).")
                 (swap! hidden-state-atom update :pressed-keys disj (.-keyCode %))))
            (events/listen js/window "blur"
              #(swap! hidden-state-atom assoc :pressed-keys #{}))]))
-      (stop [this]
-        (doseq [listener (:listeners @hidden-state-atom)]
-          (events/unlistenByKey listener))
-        (swap! hidden-state-atom assoc :listeners []))
       (render [this content]
         (s/draw-sketch! renderer content {}))
       (pre-render [this width height content]
