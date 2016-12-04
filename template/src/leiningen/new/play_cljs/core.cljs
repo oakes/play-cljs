@@ -15,11 +15,10 @@
           [:rect {:x 0 :y 0 :width 500 :height 500}]]
          [:fill {:color "black"}
           [:text {:value "Hello, world!" :x (:text-x @state) :y (:text-y @state) :size 16 :font "Georgia" :style :italic}]]])
-      (swap! state update :text-x inc))
-    (on-event [this event])))
+      (swap! state update :text-x inc))))
 
 (doto game
   (p/stop)
-  (p/start ["keydown"])
+  (p/start)
   (p/set-screen main-screen))
 
