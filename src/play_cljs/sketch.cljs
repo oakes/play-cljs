@@ -1,6 +1,8 @@
 (ns play-cljs.sketch
   (:require [p5.core]))
 
+(set! *warn-on-infer* true)
+
 (defn update-opts [opts parent-opts defaults]
   (let [parent-opts (merge defaults parent-opts)]
     (-> (merge defaults (dissoc parent-opts :x :y) opts)
@@ -13,24 +15,24 @@
 (def ^:const rgb-defaults (merge basic-defaults {:max-r 255 :max-g 255 :max-b 255 :max-a 1}))
 (def ^:const hsb-defaults (merge basic-defaults {:max-h 360 :max-s 100 :max-b 100 :max-a 1}))
 
-(defn halign->constant [renderer halign]
+(defn halign->constant [^js/p5 renderer halign]
   (get {:left (.-LEFT renderer) :center (.-CENTER renderer) :right (.-RIGHT renderer)} halign))
 
-(defn valign->constant [renderer valign]
+(defn valign->constant [^js/p5 renderer valign]
   (get {:top (.-TOP renderer) :center (.-CENTER renderer) :bottom (.-BOTTOM renderer) :baseline (.-BASELINE renderer)} valign))
 
-(defn style->constant [renderer style]
+(defn style->constant [^js/p5 renderer style]
   (get {:normal (.-NORMAL renderer) :italic (.-ITALIC renderer) :bold (.-BOLD renderer)} style))
 
-(defmulti draw-sketch! (fn [renderer content parent-opts]
+(defmulti draw-sketch! (fn [^js/p5 renderer content parent-opts]
                          (first content)))
 
-(defmethod draw-sketch! :div [renderer content parent-opts]
+(defmethod draw-sketch! :div [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         opts (update-opts opts parent-opts basic-defaults)]
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :text [renderer content parent-opts]
+(defmethod draw-sketch! :text [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [value x y size font halign valign leading style] :as opts}
         (update-opts opts parent-opts text-defaults)]
@@ -43,21 +45,21 @@
       (.text value x y))
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :arc [renderer content parent-opts]
+(defmethod draw-sketch! :arc [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [x y width height start stop] :as opts}
         (update-opts opts parent-opts basic-defaults)]
     (.arc renderer x y width height start stop)
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :ellipse [renderer content parent-opts]
+(defmethod draw-sketch! :ellipse [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [x y width height] :as opts}
         (update-opts opts parent-opts basic-defaults)]
     (.ellipse renderer x y width height)
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :line [renderer content parent-opts]
+(defmethod draw-sketch! :line [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         opts (update-opts opts parent-opts basic-defaults)
         {:keys [x1 y1 x2 y2] :as opts}
@@ -69,14 +71,14 @@
     (.line renderer x1 y1 x2 y2)
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :point [renderer content parent-opts]
+(defmethod draw-sketch! :point [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [x y] :as opts}
         (update-opts opts parent-opts basic-defaults)]
     (.point renderer x y)
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :quad [renderer content parent-opts]
+(defmethod draw-sketch! :quad [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         opts (update-opts opts parent-opts basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4] :as opts}
@@ -92,14 +94,14 @@
     (.quad renderer x1 y1 x2 y2 x3 y3 x4 y4)
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :rect [renderer content parent-opts]
+(defmethod draw-sketch! :rect [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [x y width height] :as opts}
         (update-opts opts parent-opts basic-defaults)]
     (.rect renderer x y width height)
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :triangle [renderer content parent-opts]
+(defmethod draw-sketch! :triangle [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         opts (update-opts opts parent-opts basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3] :as opts}
@@ -113,9 +115,9 @@
     (.triangle renderer x1 y1 x2 y2 x3 y3)
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :image [renderer content parent-opts]
+(defmethod draw-sketch! :image [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [value x y width height sx sy swidth sheight scale-x scale-y] :as opts}
+        {:keys [^js/p5.Image value x y width height sx sy swidth sheight scale-x scale-y] :as opts}
         (update-opts opts parent-opts img-defaults)
         swidth (or swidth (.-width value))
         sheight (or sheight (.-height value))]
@@ -125,7 +127,7 @@
       x y (or width swidth) (or height sheight))
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :fill [renderer content parent-opts]
+(defmethod draw-sketch! :fill [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [grayscale color colors] :as opts}
         (update-opts opts parent-opts basic-defaults)
@@ -148,7 +150,7 @@
     (when-let [fill-fn (:fill-fn parent-opts)]
       (fill-fn))))
 
-(defmethod draw-sketch! :stroke [renderer content parent-opts]
+(defmethod draw-sketch! :stroke [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [grayscale color colors] :as opts}
         (update-opts opts parent-opts basic-defaults)
@@ -171,7 +173,7 @@
     (when-let [stroke-fn (:stroke-fn parent-opts)]
       (stroke-fn))))
 
-(defmethod draw-sketch! :bezier [renderer content parent-opts]
+(defmethod draw-sketch! :bezier [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         opts (update-opts opts parent-opts basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4
@@ -194,7 +196,7 @@
       (throw "Invalid args for bezier"))
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :curve [renderer content parent-opts]
+(defmethod draw-sketch! :curve [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         opts (update-opts opts parent-opts basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4
@@ -217,7 +219,7 @@
       (throw "Invalid args for curve"))
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :rgb [renderer content parent-opts]
+(defmethod draw-sketch! :rgb [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [max-r max-g max-b max-a] :as opts}
         (update-opts opts parent-opts rgb-defaults)
@@ -231,7 +233,7 @@
     (when-let [color-fn (:color-fn parent-opts)]
       (color-fn))))
 
-(defmethod draw-sketch! :hsb [renderer content parent-opts]
+(defmethod draw-sketch! :hsb [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [max-h max-s max-b max-a] :as opts}
         (update-opts opts parent-opts hsb-defaults)
@@ -245,14 +247,14 @@
     (when-let [color-fn (:color-fn parent-opts)]
       (color-fn))))
 
-(defmethod draw-sketch! :tiled-map [renderer content parent-opts]
+(defmethod draw-sketch! :tiled-map [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [value x y] :as opts}
+        {:keys [^js/p5.TiledMap value x y] :as opts}
         (update-opts opts parent-opts basic-defaults)]
     (.draw value x y)
     (draw-sketch! renderer children opts)))
 
-(defmethod draw-sketch! :shape [renderer content parent-opts]
+(defmethod draw-sketch! :shape [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         opts (update-opts opts parent-opts basic-defaults)
         points (:points opts)]
@@ -267,7 +269,7 @@
               (draw-sketch! renderer children opts)
               (.endShape renderer (.-CLOSE renderer))))))
 
-(defmethod draw-sketch! :contour [renderer content parent-opts]
+(defmethod draw-sketch! :contour [^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         opts (update-opts opts parent-opts basic-defaults)
         points (:points opts)]
@@ -282,7 +284,7 @@
               (draw-sketch! renderer children opts)
               (.endContour renderer (.-CLOSE renderer))))))
 
-(defmethod draw-sketch! :default [renderer content parent-opts]
+(defmethod draw-sketch! :default [^js/p5 renderer content parent-opts]
   (cond
     (sequential? (first content))
     (run! #(draw-sketch! renderer % parent-opts) content)

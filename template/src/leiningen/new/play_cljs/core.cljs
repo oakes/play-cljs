@@ -18,7 +18,6 @@
       (swap! state update :text-x inc))))
 
 (doto game
-  (p/stop)
   (p/start)
   (p/set-screen main-screen))
 

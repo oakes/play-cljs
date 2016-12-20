@@ -1,3 +1,5 @@
 {:require  [{{namespace}}]
  :init-fns []
- :compiler-options {}}
+ :compiler-options {:infer-externs true
+                    :pseudo-names true
+                    :pretty-print true}}

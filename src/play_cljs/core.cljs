@@ -65,10 +65,12 @@ must already be loaded (see the TiledMap docs for details).")
   (set-size [game width height]
     "Sets the virtual width and height of the game."))
 
+(set! *warn-on-infer* true)
+
 (defn create-game
   "Returns a game object."
   [width height]
-  (let [renderer (js/p5. (fn [renderer]))
+  (let [^js/p5 renderer (js/p5. (fn [_]))
         hidden-state-atom (atom {:screen nil
                                  :canvas nil
                                  :listeners []
@@ -82,7 +84,8 @@ must already be loaded (see the TiledMap docs for details).")
         (set! (.-setup renderer)
           (fn []
             ; create the canvas
-            (let [canvas (.-canvas (.createCanvas renderer width height))]
+            (let [^js/p5 canvas-wrapper (.createCanvas renderer width height)
+                  canvas (.-canvas canvas-wrapper)]
               (.removeAttribute canvas "style")
               (swap! hidden-state-atom assoc :canvas canvas))
             ; allow on-show to be run
@@ -91,11 +94,13 @@ must already be loaded (see the TiledMap docs for details).")
         (run! events/unlistenByKey (:listeners @hidden-state-atom))
         (swap! hidden-state-atom assoc :listeners
           [(events/listen js/window "keydown"
-             #(swap! hidden-state-atom update :pressed-keys conj (.-keyCode %)))
+             (fn [^js/KeyboardEvent e]
+               (swap! hidden-state-atom update :pressed-keys conj (.-keyCode e))))
            (events/listen js/window "keyup"
-             #(if (contains? #{91 93} (.-keyCode %))
-                (swap! hidden-state-atom assoc :pressed-keys #{})
-                (swap! hidden-state-atom update :pressed-keys disj (.-keyCode %))))
+             (fn [^js/KeyboardEvent e]
+               (if (contains? #{91 93} (.-keyCode e))
+                 (swap! hidden-state-atom assoc :pressed-keys #{})
+                 (swap! hidden-state-atom update :pressed-keys disj (.-keyCode e)))))
            (events/listen js/window "blur"
              #(swap! hidden-state-atom assoc :pressed-keys #{}))]))
       (render [this content]
