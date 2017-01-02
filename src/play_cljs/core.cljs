@@ -65,7 +65,7 @@ must already be loaded (see the TiledMap docs for details).")
   (set-size [game width height]
     "Sets the virtual width and height of the game."))
 
-(set! *warn-on-infer* true)
+;(set! *warn-on-infer* true)
 
 (defn create-game
   "Returns a game object."

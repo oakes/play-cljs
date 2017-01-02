@@ -45,7 +45,6 @@ A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) unde
 
 ; start the game and listen to the keydown and mousemove events
 (doto game
-  (p/stop)
   (p/start)
   (p/set-screen main-screen))
 ```

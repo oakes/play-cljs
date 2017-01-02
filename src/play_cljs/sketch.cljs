@@ -1,7 +1,7 @@
 (ns play-cljs.sketch
   (:require [p5.core]))
 
-(set! *warn-on-infer* true)
+;(set! *warn-on-infer* true)
 
 (defn update-opts [opts parent-opts defaults]
   (let [parent-opts (merge defaults parent-opts)]
