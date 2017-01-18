@@ -6,6 +6,8 @@
             [cljs.core.async :refer [promise-chan put! <!]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
+(set! (.-disableFriendlyErrors js/p5) true)
+
 (defprotocol Screen
   "A screen object provides the basic lifecycle for a game.
 Simple games may only need to have one screen. They are a useful way to
