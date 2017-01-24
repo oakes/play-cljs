@@ -1,21 +1,20 @@
 {:name "TiledMap"
  :doc "TiledMap objects are returned by [load-tiled-map](#load-tiled-map).
-They can be placed in a :tiled-map element.
+To display, make a :tiled-map element whose :name option is the map name.
 
 The map must be exported from an editor like [Tiled](http://www.mapeditor.org/) in JavaScript
 format. The resulting `.js` file must be included in the game's HTML before `main.js`. Lastly,
 the name provided to `load-tiled-map` should coorespond to the name saved in that JS file.
 
 ```
-(def state (atom {}))
+(def dungeon-map (p/load-tiled-map game \"dungeon\"))
 
 (def main-screen
   (reify p/Screen
-    (on-show [this]
-      (swap! state assoc :map (p/load-tiled-map \"dungeon\")))
+    (on-show [this])
     (on-hide [this])
     (on-render [this]
-      (p/render game [:tiled-map {:value (:map @state)}]))))
+      (p/render game [:tiled-map {:name \"dungeon\"}]))))
 ```"
  :members [{:name ".getName"
             :arglists ([tiled-map])

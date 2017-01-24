@@ -1,17 +1,16 @@
 {:name "Image"
  :doc "Image objects are returned by [load-image](#load-image)
-and [pre-render](#pre-render). They can be placed in an :image element.
+and [pre-render](#pre-render). To display, make an :image element whose :name option is the image path.
 
 ```
-(def state (atom {}))
+(def player-image (p/load-image game \"player.jpg\"))
 
 (def main-screen
   (reify p/Screen
-    (on-show [this]
-      (swap! state assoc :player-image (p/load-image \"player.jpg\")))
+    (on-show [this])
     (on-hide [this])
     (on-render [this]
-      (p/render game [:image {:value (:player-image @state)}]))))
+      (p/render game [:image {:name \"player.jpg\"}]))))
 ```"
  :members [{:name ".loadPixels"
             :arglists ([image])
