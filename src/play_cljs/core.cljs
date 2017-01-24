@@ -106,7 +106,7 @@ must already be loaded (see the TiledMap docs for details).")
            (events/listen js/window "blur"
              #(swap! hidden-state-atom assoc :pressed-keys #{}))]))
       (render [this content]
-        (s/draw-sketch! renderer content {}))
+        (s/draw-sketch! renderer content {} hidden-state-atom))
       (pre-render [this width height content]
         (doto (.createGraphics renderer width height)
           (s/draw-sketch! content {})))
