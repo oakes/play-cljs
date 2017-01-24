@@ -39,13 +39,15 @@ should create just one such object by calling [create-game](#create-game)."
     "Creates the canvas element.")
   (render [game content]
     "Renders the provided data structure.")
-  (pre-render [game width height content]
-    "Renders the provided data structure off-screen and returns an [Image](#Image) object.")
+  (pre-render [game image-name width height content]
+    "Renders the provided data structure off-screen and associates it with the given name. 
+Must be called in `on-show`! Returns an [Image](#Image) object.")
   (load-image [game path]
-    "Returns an [Image](#Image) object downloaded from the provided path.")
+    "Loads an image. Must be called in `on-show`! Returns an [Image](#Image) object.")
   (load-tiled-map [game map-name]
-    "Returns a [TiledMap](#TiledMap) object. A tiled map with the provided name
-must already be loaded (see the TiledMap docs for details).")
+    "Loads a tiled map. Must be called in `on-show`! Returns a [TiledMap](#TiledMap) object. 
+A tiled map with the provided name must already be loaded via a JavaScript include 
+(see the TiledMap docs for details).")
   (get-screen [game]
     "Returns the [Screen](#Screen) object currently being displayed.")
   (set-screen [game screen]
@@ -78,7 +80,8 @@ must already be loaded (see the TiledMap docs for details).")
                                  :listeners []
                                  :total-time 0
                                  :delta-time 0
-                                 :pressed-keys #{}})
+                                 :pressed-keys #{}
+                                 :assets {}})
         setup-finished? (promise-chan)
         preloads (atom [])]
     (reify Game
@@ -107,17 +110,23 @@ must already be loaded (see the TiledMap docs for details).")
              #(swap! hidden-state-atom assoc :pressed-keys #{}))]))
       (render [this content]
         (s/draw-sketch! renderer content {} hidden-state-atom))
-      (pre-render [this width height content]
-        (doto (.createGraphics renderer width height)
-          (s/draw-sketch! content {})))
+      (pre-render [this image-name width height content]
+        (let [object (.createGraphics renderer width height)]
+          (s/draw-sketch! object content {})
+          (swap! hidden-state-atom update :assets assoc image-name object)
+          object))
       (load-image [this path]
-        (let [finished-loading? (promise-chan)]
-          (swap! preloads conj finished-loading?)
-          (.loadImage renderer path #(put! finished-loading? true))))
+        (let [finished-loading? (promise-chan)
+              _ (swap! preloads conj finished-loading?)
+              object (.loadImage renderer path #(put! finished-loading? true))]
+          (swap! hidden-state-atom update :assets assoc path object)
+          object))
       (load-tiled-map [this map-name]
-        (let [finished-loading? (promise-chan)]
-          (swap! preloads conj finished-loading?)
-          (.loadTiledMap renderer map-name #(put! finished-loading? true))))
+        (let [finished-loading? (promise-chan)
+              _ (swap! preloads conj finished-loading?)
+              object (.loadTiledMap renderer map-name #(put! finished-loading? true))]
+          (swap! hidden-state-atom update :assets assoc map-name object)
+          object))
       (get-screen [this]
         (:screen @hidden-state-atom))
       (set-screen [this screen]

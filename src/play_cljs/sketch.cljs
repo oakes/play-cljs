@@ -117,8 +117,9 @@
 
 (defmethod draw-sketch! :image [^js/p5 renderer content parent-opts state]
   (let [[command opts & children] content
-        {:keys [^js/p5.Image value x y width height sx sy swidth sheight scale-x scale-y] :as opts}
+        {:keys [value name x y width height sx sy swidth sheight scale-x scale-y] :as opts}
         (update-opts opts parent-opts img-defaults)
+        ^js/p5.Image value (or value (get-in @state [:assets name]))
         swidth (or swidth (.-width value))
         sheight (or sheight (.-height value))]
     (.scale renderer scale-x scale-y)
@@ -259,8 +260,9 @@
 
 (defmethod draw-sketch! :tiled-map [^js/p5 renderer content parent-opts state]
   (let [[command opts & children] content
-        {:keys [^js/p5.TiledMap value x y] :as opts}
-        (update-opts opts parent-opts basic-defaults)]
+        {:keys [value name x y] :as opts}
+        (update-opts opts parent-opts basic-defaults)
+        ^js/p5.TiledMap value (or value (get-in @state [:assets name]))]
     (.draw value x y)
     (draw-sketch! renderer children opts state)))
 
