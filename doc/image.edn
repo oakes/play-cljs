@@ -3,7 +3,7 @@
 and [pre-render](#pre-render). To display, make an :image element whose :name option is the image path.
 
 ```
-(def player-image (p/load-image game \"player.jpg\"))
+(def image (p/load-image game \"player.jpg\"))
 
 (def main-screen
   (reify p/Screen

@@ -7,7 +7,7 @@ format. The resulting `.js` file must be included in the game's HTML before `mai
 the name provided to `load-tiled-map` should coorespond to the name saved in that JS file.
 
 ```
-(def dungeon-map (p/load-tiled-map game \"dungeon\"))
+(def tiled-map (p/load-tiled-map game \"dungeon\"))
 
 (def main-screen
   (reify p/Screen

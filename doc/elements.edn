@@ -21,7 +21,12 @@
            {:name :triangle
             :example "[:triangle {:x1 -10 :y1 -15 :x2 10 :y2 -15 :x3 0 :y3 15}]"}
            {:name :image
-            :example "[:image {:value (:logo @state) :x 0 :y 0 :width 30 :height 30}]"}
+            :example "[:image {:name \"player.png\" :x 0 :y 0 :width 30 :height 30}]"}
+           {:name :animation
+            :example "[:animation {:duration 200}
+ [:image {:name \"walk1.png\" :width 30 :height 30}]
+ [:image {:name \"walk2.png\" :width 30 :height 30}]
+ [:image {:name \"walk3.png\" :width 30 :height 30}]]"}
            {:name :fill
             :example "[:fill {:color \"lightblue\"}
  [:rect {:x 0 :y 0 :width 10 :height 10}]]"}
@@ -43,7 +48,7 @@
  [:fill {:colors [0 0 0]}
   [:rect {:x 0 :y 0 :width 10 :height 10}]]]"}
            {:name :tiled-map
-            :example "[:tiled-map {:value (:map @state)}]"}
+            :example "[:tiled-map {:name \"dungeon\"}]"}
            {:name :shape
             :example "[:shape {:points [30 20 85 20 85 75 30 75]}]"}
            {:name :contour
