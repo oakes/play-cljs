@@ -40,13 +40,12 @@ should create just one such object by calling [create-game](#create-game)."
   (render [game content]
     "Renders the provided data structure.")
   (pre-render [game image-name width height content]
-    "Renders the provided data structure off-screen and associates it with the given name. 
-Must be called in `on-show`! Returns an [Image](#Image) object.")
+    "Renders the provided data structure off-screen and associates it with the given name. Returns an [Image](#Image) object.")
   (load-image [game path]
-    "Loads an image. Must be called in `on-show`! Returns an [Image](#Image) object.")
+    "Loads an image. Returns an [Image](#Image) object.")
   (load-tiled-map [game map-name]
-    "Loads a tiled map. Must be called in `on-show`! Returns a [TiledMap](#TiledMap) object. 
-A tiled map with the provided name must already be loaded via a JavaScript include 
+    "Loads a tiled map. Returns a [TiledMap](#TiledMap) object. 
+A tiled map with the provided name must already be loaded 
 (see the TiledMap docs for details).")
   (get-screen [game]
     "Returns the [Screen](#Screen) object currently being displayed.")
