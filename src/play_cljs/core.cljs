@@ -5,8 +5,6 @@
             [cljs.core.async :refer [promise-chan put! <!]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(set! (.-disableFriendlyErrors js/p5) true)
-
 (defprotocol Screen
   "A screen object provides the basic lifecycle for a game.
 Simple games may only need to have one screen. They are a useful way to
@@ -70,6 +68,8 @@ A tiled map with the provided name must already be loaded
     "Gets the asset with the given name."))
 
 ;(set! *warn-on-infer* true)
+
+(set! (.-disableFriendlyErrors ^js/p5 js/p5) true)
 
 (defn update-opts [opts parent-opts defaults]
   (let [parent-opts (merge defaults parent-opts)]
