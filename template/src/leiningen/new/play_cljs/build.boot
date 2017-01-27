@@ -5,7 +5,7 @@
                   [adzerk/boot-reload "0.4.12" :scope "test"]
                   [pandeiro/boot-http "0.7.3" :scope "test"]
                   ; project deps
-                  [org.clojure/clojurescript "1.9.293"]
+                  [org.clojure/clojurescript "1.9.456"]
                   [play-cljs "0.9.0"]])
 
 (require
@@ -22,5 +22,5 @@
     (target)))
 
 (deftask build []
-  (comp (cljs :optimizations :simple) (target)))
+  (comp (cljs :optimizations :advanced) (target)))
 
