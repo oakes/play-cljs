@@ -44,7 +44,7 @@ A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) unde
       ; increment the x position of the text so it scrolls to the right
       (swap! state update :text-x inc))))
 
-; start the game and listen to the keydown and mousemove events
+; start the game
 (doto game
   (p/start)
   (p/set-screen main-screen))
