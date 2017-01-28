@@ -194,8 +194,8 @@ A tiled map with the provided name must already be loaded
         sheight (or sheight (.-height value))]
     (.scale renderer scale-x scale-y)
     (.image renderer value
-      sx sy swidth sheight
-      x y (or width swidth) (or height sheight))
+      x y (or width swidth) (or height sheight)
+      sx sy swidth sheight)
     (draw-sketch! game renderer children opts)))
 
 (defmethod draw-sketch! :animation [game ^js/p5 renderer content parent-opts]
