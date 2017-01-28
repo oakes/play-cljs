@@ -883,6 +883,7 @@ p5.TiledMap.prototype.setTileIndex = function(n, a, b, c) {
  *  @return {p5.Vector}                      Map Coordinates
  */
 p5.TiledMap.prototype.canvasToMap = function(a, b) {
+  var p;
   if (typeof(a) === "number") p = this.renderer.createVector(a, b);
   else p = a;
   return canvasToMap.call(this, p);
