@@ -7,7 +7,7 @@
                    :exclusions [org.clojure/clojure]]
                   ; project deps
                   [org.clojure/clojurescript "1.9.456"]
-                  [play-cljs "0.9.0"]])
+                  [play-cljs "0.10.0"]])
 
 (require
   '[adzerk.boot-cljs :refer [cljs]]
