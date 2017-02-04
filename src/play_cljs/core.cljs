@@ -185,17 +185,24 @@ A tiled map with the provided name must already be loaded
 
 (defmethod draw-sketch! :image [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [value name x y width height sx sy swidth sheight scale-x scale-y] :as opts}
-        (update-opts opts parent-opts img-defaults)
+        {:keys [value name x y width height sx sy swidth sheight scale-x scale-y flip-x flip-y]
+         :as opts} (update-opts opts parent-opts img-defaults)
         ^js/p5.Image value (or value
                                (get-asset game name)
                                (load-image game name))
         swidth (or swidth (.-width value))
         sheight (or sheight (.-height value))]
     (.push renderer)
+    (.translate renderer x y)
     (.scale renderer scale-x scale-y)
+    (when flip-x
+      (.scale renderer -1 1)
+      (.translate renderer (- swidth) 0))
+    (when flip-y
+      (.scale renderer 1 -1)
+      (.translate renderer 0 (- sheight)))
     (.image renderer value
-      x y (or width swidth) (or height sheight)
+      0 0 (or width swidth) (or height sheight)
       sx sy swidth sheight)
     (draw-sketch! game renderer children opts)
     (.pop renderer)))
