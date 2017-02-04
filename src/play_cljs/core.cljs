@@ -41,8 +41,8 @@ should create just one such object by calling [create-game](#create-game)."
   (load-image [game path]
     "Loads an image. Returns an [Image](#Image) object.")
   (load-tiled-map [game map-name]
-    "Loads a tiled map. Returns a [TiledMap](#TiledMap) object. 
-A tiled map with the provided name must already be loaded 
+    "Loads a tiled map. Returns a [TiledMap](#TiledMap) object.
+A tiled map with the provided name must already be loaded
 (see the TiledMap docs for details).")
   (get-screen [game]
     "Returns the [Screen](#Screen) object currently being displayed.")
@@ -192,11 +192,13 @@ A tiled map with the provided name must already be loaded
                                (load-image game name))
         swidth (or swidth (.-width value))
         sheight (or sheight (.-height value))]
+    (.push renderer)
     (.scale renderer scale-x scale-y)
     (.image renderer value
       x y (or width swidth) (or height sheight)
       sx sy swidth sheight)
-    (draw-sketch! game renderer children opts)))
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
 
 (defmethod draw-sketch! :animation [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
@@ -475,4 +477,3 @@ A tiled map with the provided name must already be loaded
         (.resizeCanvas renderer width height))
       (get-asset [game name]
         (get-in @hidden-state-atom [:assets name])))))
-
