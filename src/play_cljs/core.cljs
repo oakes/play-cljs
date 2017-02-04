@@ -212,48 +212,38 @@ A tiled map with the provided name must already be loaded
 (defmethod draw-sketch! :fill [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [grayscale color colors] :as opts}
-        (update-opts opts parent-opts basic-defaults)
-        fill-fn (cond
-                  grayscale
-                  #(.fill renderer grayscale)
-                  color
-                  #(.fill renderer color)
-                  colors
-                  (let [[n1 n2 n3] colors]
-                    #(.fill renderer n1 n2 n3))
-                  :else
-                  #(.noFill renderer))]
-    (fill-fn)
-    (draw-sketch! game renderer children (assoc opts :fill-fn fill-fn))
-    ; reset fill to its default
-    (.fill renderer "white")
-    (set! (.-_fillSet (.-_renderer renderer)) false)
-    ; if there is a fill function in a parent, re-apply it
-    (when-let [fill-fn (:fill-fn parent-opts)]
-      (fill-fn))))
+        (update-opts opts parent-opts basic-defaults)]
+    (.push renderer)
+    (cond
+      grayscale
+      (.fill renderer grayscale)
+      color
+      (.fill renderer color)
+      colors
+      (let [[n1 n2 n3] colors]
+        (.fill renderer n1 n2 n3))
+      :else
+      (.noFill renderer))
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
 
 (defmethod draw-sketch! :stroke [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [grayscale color colors] :as opts}
-        (update-opts opts parent-opts basic-defaults)
-        stroke-fn (cond
-                    grayscale
-                    #(.stroke renderer grayscale)
-                    color
-                    #(.stroke renderer color)
-                    colors
-                    (let [[n1 n2 n3] colors]
-                      #(.stroke renderer n1 n2 n3))
-                    :else
-                    #(.noStroke renderer))]
-    (stroke-fn)
-    (draw-sketch! game renderer children (assoc opts :stroke-fn stroke-fn))
-    ; reset stroke to its default
-    (.stroke renderer "black")
-    (set! (.-_strokeSet (.-_renderer renderer)) false)
-    ; if there is a stroke function in a parent, re-apply it
-    (when-let [stroke-fn (:stroke-fn parent-opts)]
-      (stroke-fn))))
+        (update-opts opts parent-opts basic-defaults)]
+    (.push renderer)
+    (cond
+      grayscale
+      (.stroke renderer grayscale)
+      color
+      (.stroke renderer color)
+      colors
+      (let [[n1 n2 n3] colors]
+        (.stroke renderer n1 n2 n3))
+      :else
+      (.noStroke renderer))
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
 
 (defmethod draw-sketch! :bezier [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
@@ -304,30 +294,20 @@ A tiled map with the provided name must already be loaded
 (defmethod draw-sketch! :rgb [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [max-r max-g max-b max-a] :as opts}
-        (update-opts opts parent-opts rgb-defaults)
-        color-fn #(.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a)]
-    (color-fn)
-    (draw-sketch! game renderer children (assoc opts :color-fn color-fn))
-    ; reset colorMode to its default
-    (let [{:keys [max-r max-g max-b max-a]} rgb-defaults]
-      (.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a))
-    ; if there is a color function in a parent, re-apply it
-    (when-let [color-fn (:color-fn parent-opts)]
-      (color-fn))))
+        (update-opts opts parent-opts rgb-defaults)]
+    (.push renderer)
+    (.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a)
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
 
 (defmethod draw-sketch! :hsb [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [max-h max-s max-b max-a] :as opts}
-        (update-opts opts parent-opts hsb-defaults)
-        color-fn #(.colorMode renderer (.-HSB renderer) max-h max-s max-b max-a)]
-    (color-fn)
-    (draw-sketch! game renderer children (assoc opts :color-fn color-fn))
-    ; reset colorMode to its default
-    (let [{:keys [max-r max-g max-b max-a]} rgb-defaults]
-      (.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a))
-    ; if there is a color function in a parent, re-apply it
-    (when-let [color-fn (:color-fn parent-opts)]
-      (color-fn))))
+        (update-opts opts parent-opts hsb-defaults)]
+    (.push renderer)
+    (.colorMode renderer (.-HSB renderer) max-h max-s max-b max-a)
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
 
 (defmethod draw-sketch! :tiled-map [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
