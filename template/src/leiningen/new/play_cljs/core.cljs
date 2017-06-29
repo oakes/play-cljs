@@ -1,5 +1,6 @@
 (ns {{namespace}}
-  (:require [play-cljs.core :as p]))
+  (:require [play-cljs.core :as p]
+            [goog.events :as events]))
 
 (defonce game (p/create-game (.-innerWidth js/window) (.-innerHeight js/window)))
 (defonce state (atom {}))
