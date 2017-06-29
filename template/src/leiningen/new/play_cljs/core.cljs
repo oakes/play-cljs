@@ -1,7 +1,7 @@
 (ns {{namespace}}
   (:require [play-cljs.core :as p]))
 
-(defonce game (p/create-game 500 500))
+(defonce game (p/create-game (.-innerWidth js/window) (.-innerHeight js/window)))
 (defonce state (atom {}))
 
 (def main-screen
@@ -12,10 +12,17 @@
     (on-render [this]
       (p/render game
         [[:fill {:color "lightblue"}
-          [:rect {:x 0 :y 0 :width 500 :height 500}]]
+          [:rect {:x 0 :y 0 :width (.-innerWidth js/window) :height (.-innerHeight js/window)}]]
          [:fill {:color "black"}
-          [:text {:value "Hello, world!" :x (:text-x @state) :y (:text-y @state) :size 16 :font "Georgia" :style :italic}]]])
-      (swap! state update :text-x inc))))
+          [:text {:value "Hello, world!" :x (:text-x @state) :y (:text-y @state) :size 16 :font "Georgia" :style :italic}]]]))))
+
+(events/listen js/window "mousemove"
+  (fn [event]
+    (swap! state assoc :text-x (.-clientX event) :text-y (.-clientY event))))
+
+(events/listen js/window "resize"
+  (fn [event]
+    (p/set-size game (.-innerWidth js/window) (.-innerHeight js/window))))
 
 (doto game
   (p/start)
