@@ -6,7 +6,7 @@
                   [pandeiro/boot-http "0.7.3" :scope "test"
                    :exclusions [org.clojure/clojure]]
                   ; project deps
-                  [org.clojure/clojurescript "1.9.854"]
+                  [org.clojure/clojurescript "1.9.908"]
                   [play-cljs "0.10.1"]])
 
 (require
