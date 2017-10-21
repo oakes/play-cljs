@@ -367,100 +367,104 @@ A tiled map with the provided name must already be loaded
 
 (defn create-game
   "Returns a game object."
-  [width height]
-  (let [^js/p5 renderer (js/p5. (fn [_]))
-        hidden-state-atom (atom {:screen nil
-                                 :canvas nil
-                                 :listeners []
-                                 :total-time 0
-                                 :delta-time 0
-                                 :pressed-keys #{}
-                                 :assets {}})
-        setup-finished? (promise-chan)
-        preloads (atom [])]
-    (reify Game
-      (start [this]
-        (set! (.-setup renderer)
-          (fn []
-            ; create the canvas
-            (let [^js/p5 canvas-wrapper (.createCanvas renderer width height)
-                  canvas (.-canvas canvas-wrapper)]
-              (.removeAttribute canvas "style")
-              (swap! hidden-state-atom assoc :canvas canvas))
-            ; allow on-show to be run
-            (put! setup-finished? true)))
-        ; keep track of pressed keys
-        (run! events/unlistenByKey (:listeners @hidden-state-atom))
-        (swap! hidden-state-atom assoc :listeners
-          [(events/listen js/window "keydown"
-             (fn [^js/KeyboardEvent e]
-               (swap! hidden-state-atom update :pressed-keys conj (.-keyCode e))))
-           (events/listen js/window "keyup"
-             (fn [^js/KeyboardEvent e]
-               (if (contains? #{91 93} (.-keyCode e))
-                 (swap! hidden-state-atom assoc :pressed-keys #{})
-                 (swap! hidden-state-atom update :pressed-keys disj (.-keyCode e)))))
-           (events/listen js/window "blur"
-             #(swap! hidden-state-atom assoc :pressed-keys #{}))]))
-      (render [this content]
-        (draw-sketch! this renderer content {}))
-      (pre-render [this image-name width height content]
-        (let [object (.createGraphics renderer width height)]
-          (draw-sketch! this object content {})
-          (swap! hidden-state-atom update :assets assoc image-name object)
-          object))
-      (load-image [this path]
-        (let [finished-loading? (promise-chan)
-              _ (swap! preloads conj finished-loading?)
-              object (.loadImage renderer path #(put! finished-loading? true))]
-          (swap! hidden-state-atom update :assets assoc path object)
-          object))
-      (load-tiled-map [this map-name]
-        (let [finished-loading? (promise-chan)
-              _ (swap! preloads conj finished-loading?)
-              object (.loadTiledMap renderer map-name #(put! finished-loading? true))]
-          (swap! hidden-state-atom update :assets assoc map-name object)
-          object))
-      (get-screen [this]
-        (:screen @hidden-state-atom))
-      (set-screen [this screen]
-        (go
-          ; wait for the setup function to finish
-          (<! setup-finished?)
-          ; change the screens
-          (some-> (get-screen this) on-hide)
-          (swap! hidden-state-atom assoc :screen screen)
-          (on-show screen)
-          ; wait for any assets from on-show to finish loading
-          (doseq [finished-loading? @preloads]
-            (<! finished-loading?))
-          (reset! preloads [])
-          ; set the draw function
-          (set! (.-draw renderer)
-            (fn []
-              (swap! hidden-state-atom
-                (fn [hidden-state]
-                  (let [time (.millis renderer)]
-                    (assoc hidden-state
-                      :total-time time
-                      :delta-time (- time (:total-time hidden-state))))))
-              (.clear renderer)
-              (on-render screen)))))
-      (get-renderer [this]
-        renderer)
-      (get-canvas [this]
-        (:canvas @hidden-state-atom))
-      (get-total-time [this]
-        (:total-time @hidden-state-atom))
-      (get-delta-time [this]
-        (:delta-time @hidden-state-atom))
-      (get-pressed-keys [this]
-        (:pressed-keys @hidden-state-atom))
-      (get-width [this]
-        (.-width renderer))
-      (get-height [this]
-        (.-height renderer))
-      (set-size [this width height]
-        (.resizeCanvas renderer width height))
-      (get-asset [game name]
-        (get-in @hidden-state-atom [:assets name])))))
+  ([width height]
+   (create-game width height {}))
+  ([width height {:keys [parent]}]
+   (let [^js/p5 renderer (js/p5. (fn [_]))
+         hidden-state-atom (atom {:screen nil
+                                  :canvas nil
+                                  :listeners []
+                                  :total-time 0
+                                  :delta-time 0
+                                  :pressed-keys #{}
+                                  :assets {}})
+         setup-finished? (promise-chan)
+         preloads (atom [])]
+     (reify Game
+       (start [this]
+         (set! (.-setup renderer)
+           (fn []
+             ;; create the canvas
+             (let [^js/p5 canvas-wrapper (cond-> (.createCanvas renderer
+                                                                width height)
+                                           parent (.parent parent))
+                   canvas (.-canvas canvas-wrapper)]
+               (.removeAttribute canvas "style")
+               (swap! hidden-state-atom assoc :canvas canvas))
+             ;; allow on-show to be run
+             (put! setup-finished? true)))
+         ;; keep track of pressed keys
+         (run! events/unlistenByKey (:listeners @hidden-state-atom))
+         (swap! hidden-state-atom assoc :listeners
+           [(events/listen js/window "keydown"
+              (fn [^js/KeyboardEvent e]
+                (swap! hidden-state-atom update :pressed-keys conj (.-keyCode e))))
+            (events/listen js/window "keyup"
+              (fn [^js/KeyboardEvent e]
+                (if (contains? #{91 93} (.-keyCode e))
+                  (swap! hidden-state-atom assoc :pressed-keys #{})
+                  (swap! hidden-state-atom update :pressed-keys disj (.-keyCode e)))))
+            (events/listen js/window "blur"
+              #(swap! hidden-state-atom assoc :pressed-keys #{}))]))
+       (render [this content]
+         (draw-sketch! this renderer content {}))
+       (pre-render [this image-name width height content]
+         (let [object (.createGraphics renderer width height)]
+           (draw-sketch! this object content {})
+           (swap! hidden-state-atom update :assets assoc image-name object)
+           object))
+       (load-image [this path]
+         (let [finished-loading? (promise-chan)
+               _ (swap! preloads conj finished-loading?)
+               object (.loadImage renderer path #(put! finished-loading? true))]
+           (swap! hidden-state-atom update :assets assoc path object)
+           object))
+       (load-tiled-map [this map-name]
+         (let [finished-loading? (promise-chan)
+               _ (swap! preloads conj finished-loading?)
+               object (.loadTiledMap renderer map-name #(put! finished-loading? true))]
+           (swap! hidden-state-atom update :assets assoc map-name object)
+           object))
+       (get-screen [this]
+         (:screen @hidden-state-atom))
+       (set-screen [this screen]
+         (go
+           ;; wait for the setup function to finish
+           (<! setup-finished?)
+           ;; change the screens
+           (some-> (get-screen this) on-hide)
+           (swap! hidden-state-atom assoc :screen screen)
+           (on-show screen)
+           ;; wait for any assets from on-show to finish loading
+           (doseq [finished-loading? @preloads]
+             (<! finished-loading?))
+           (reset! preloads [])
+           ;; set the draw function
+           (set! (.-draw renderer)
+             (fn []
+               (swap! hidden-state-atom
+                 (fn [hidden-state]
+                   (let [time (.millis renderer)]
+                     (assoc hidden-state
+                       :total-time time
+                       :delta-time (- time (:total-time hidden-state))))))
+               (.clear renderer)
+               (on-render screen)))))
+       (get-renderer [this]
+         renderer)
+       (get-canvas [this]
+         (:canvas @hidden-state-atom))
+       (get-total-time [this]
+         (:total-time @hidden-state-atom))
+       (get-delta-time [this]
+         (:delta-time @hidden-state-atom))
+       (get-pressed-keys [this]
+         (:pressed-keys @hidden-state-atom))
+       (get-width [this]
+         (.-width renderer))
+       (get-height [this]
+         (.-height renderer))
+       (set-size [this width height]
+         (.resizeCanvas renderer width height))
+       (get-asset [game name]
+         (get-in @hidden-state-atom [:assets name]))))))
