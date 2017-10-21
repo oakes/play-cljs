@@ -158,6 +158,9 @@ p5.TiledMap = function(renderer, mapname, imagepath, transparentoffset) {
       drawTileLayer = function(layer, pg) {
         'use strict';
         var n, x, y, p, tileN;
+        var FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
+        var FLIPPED_VERTICALLY_FLAG   = 0x40000000;
+        var FLIPPED_DIAGONALLY_FLAG   = 0x20000000;
         var offsetx = layer.offsetx || 0;
         var offsety = layer.offsety || 0;
         var xstart = Math.max(0, Math.floor(this.canvasToMap(this.camleft, this.camtop).x - this.drawmargin));
@@ -165,12 +168,40 @@ p5.TiledMap = function(renderer, mapname, imagepath, transparentoffset) {
         var ystart = Math.max(0, Math.floor(this.canvasToMap(this.camleft, this.camtop).y - this.drawmargin));
         var ystop = Math.min(this.mapheight, Math.ceil(this.canvasToMap(this.camleft + pg.width, this.camtop + pg.height).y + this.drawmargin));
         for (var ny = ystart; ny < ystop; ny++) for (var nx = xstart; nx < xstop; nx++) {
+          var flip = {
+            h: false,
+            v: false,
+            d: false
+          };
           n = layer.data[nx + ny * this.mapwidth];
+          if ((Boolean((n & FLIPPED_HORIZONTALLY_FLAG)) ||
+               Boolean((n & FLIPPED_VERTICALLY_FLAG)) ||
+               Boolean((n & FLIPPED_DIAGONALLY_FLAG)))) {
+            if (Boolean((n & FLIPPED_HORIZONTALLY_FLAG))) flip.h = true;
+            if (Boolean((n & FLIPPED_DIAGONALLY_FLAG))) flip.d = true;
+            if (Boolean((n & FLIPPED_VERTICALLY_FLAG))) flip.v = true;
+            n = n & ~(FLIPPED_HORIZONTALLY_FLAG | FLIPPED_VERTICALLY_FLAG | FLIPPED_DIAGONALLY_FLAG);
+          }
           if (this.tile[n]) tileN = this.tile[n];
           else tileN = this.tile[0];
           p = this.mapToCam(nx, ny);
           x = p.x - this.tilewidth / 2 + tileN.offsetx + offsetx;
-          y = p.y - this.tileheight / 2 + tileN.offsety + offsety + (this.tileheight - tileN.image.height);;
+          y = p.y - this.tileheight / 2 + tileN.offsety + offsety + (this.tileheight - tileN.image.height);
+          pg.resetMatrix();
+          if (flip.h) {
+            pg.scale(-1, 1);
+            pg.translate(-x * 2 - this.tilewidth, 0);
+          }
+          if (flip.v) {
+            pg.scale(1, -1);
+            pg.translate(0, -y * 2 - this.tilewidth);
+          }
+          if (flip.d) {
+            pg.rotate(90);
+            pg.translate(y - x, -x - y - this.tilewidth);
+            pg.scale(1, -1);
+            pg.translate(0, -y * 2 - this.tilewidth);
+          }
           pg.image(tileN.image, x, y);
         }
       }
