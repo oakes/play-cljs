@@ -5,6 +5,7 @@ A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) unde
 * [Boot](http://boot-clj.com/): `boot -d boot/new new -t play-cljs -n hello-world`
 * [Nightcode](https://sekao.net/nightcode/): Choose "Game Project" from its start menu
 * [Nightcoders.net](http://nightcoders.net/): Choose "Game" when creating a new project
+* [Lightmod](https://sekao.net/lightmod/): Choose one of the game templates
 
 ## Documentation
 
