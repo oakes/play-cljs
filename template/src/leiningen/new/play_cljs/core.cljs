@@ -1,6 +1,5 @@
 (ns {{namespace}}
-  (:require [play-cljs.core :as p]
-            [goog.events :as events]))
+  (:require [play-cljs.core :as p]))
 
 (defonce game (p/create-game (.-innerWidth js/window) (.-innerHeight js/window)))
 (defonce state (atom {}))
@@ -17,11 +16,11 @@
          [:fill {:color "black"}
           [:text {:value "Hello, world!" :x (:text-x @state) :y (:text-y @state) :size 16 :font "Georgia" :style :italic}]]]))))
 
-(events/listen js/window "mousemove"
+(p/listen "mousemove"
   (fn [event]
     (swap! state assoc :text-x (.-clientX event) :text-y (.-clientY event))))
 
-(events/listen js/window "resize"
+(p/listen "resize"
   (fn [event]
     (p/set-size game (.-innerWidth js/window) (.-innerHeight js/window))))
 
