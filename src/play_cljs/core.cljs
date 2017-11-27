@@ -2,8 +2,10 @@
   (:require [goog.events :as events]
             [p5.core]
             [p5.tiled-map]
-            [cljs.core.async :refer [promise-chan put! <!]])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+            [cljs.core.async :refer [promise-chan put! <!]]
+            [play-cljs.utils :as utils])
+  (:require-macros [cljs.core.async.macros :refer [go]]
+                   [dynadoc.example :refer [defexample]]))
 
 (defprotocol Screen
   "A screen object provides the basic lifecycle for a game.
@@ -69,69 +71,136 @@ A tiled map with the provided name must already be loaded
   (get-asset [game name]
     "Gets the asset with the given name."))
 
-;(set! *warn-on-infer* true)
-
 (set! (.-disableFriendlyErrors ^js/p5 js/p5) true)
 
-(defn update-opts [opts parent-opts defaults]
-  (let [parent-opts (merge defaults parent-opts)]
-    (-> (merge defaults (dissoc parent-opts :x :y) opts)
-        (update :x + (:x parent-opts))
-        (update :y + (:y parent-opts)))))
-
-(def ^:const basic-defaults {:x 0 :y 0 :scale-x 1 :scale-y 1})
-(def ^:const text-defaults (merge basic-defaults {:size 32 :font "Helvetica" :halign :left :valign :baseline :leading 0 :style :normal}))
-(def ^:const img-defaults (merge basic-defaults {:sx 0 :sy 0}))
-(def ^:const rgb-defaults (merge basic-defaults {:max-r 255 :max-g 255 :max-b 255 :max-a 1}))
-(def ^:const hsb-defaults (merge basic-defaults {:max-h 360 :max-s 100 :max-b 100 :max-a 1}))
-
-(defn halign->constant [^js/p5 renderer halign]
-  (get {:left (.-LEFT renderer) :center (.-CENTER renderer) :right (.-RIGHT renderer)} halign))
-
-(defn valign->constant [^js/p5 renderer valign]
-  (get {:top (.-TOP renderer) :center (.-CENTER renderer) :bottom (.-BOTTOM renderer) :baseline (.-BASELINE renderer)} valign))
-
-(defn style->constant [^js/p5 renderer style]
-  (get {:normal (.-NORMAL renderer) :italic (.-ITALIC renderer) :bold (.-BOLD renderer)} style))
+(defn ^:private start-example-game [game card state]
+  (doto game
+    (start)
+    (set-size (.-clientWidth card) (.-clientHeight card))
+    (listen "mousemove"
+      (fn [event]
+        (let [bounds (.getBoundingClientRect card)
+              x (- (.-clientX event) (.-left bounds))
+              y (- (.-clientY event) (.-top bounds))]
+          (swap! state assoc :x x :y y))))
+    (listen "resize"
+      (fn [event]
+        (set-size game (.-clientWidth card) (.-clientHeight card))))))
 
 (defmulti draw-sketch! (fn [game ^js/p5 renderer content parent-opts]
                          (first content)))
 
 (defmethod draw-sketch! :div [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
-        opts (update-opts opts parent-opts basic-defaults)]
+        opts (utils/update-opts opts parent-opts utils/basic-defaults)]
     (draw-sketch! game renderer children opts)))
+
+(defexample :div
+  {:doc "Acts as a generic container of options that it passes
+down to its children. The `x` and `y` are special in this example,
+serving as the pointer's position. Notice that the :rect is
+hard-coded at (0,0) but the :div is passing its own position down."
+   :with-card card
+   :with-focus [focus [:div {:x x :y y}
+                       [:fill {:color "lightblue"}
+                        [:rect {:x 0 :y 0 :width 100 :height 100}]]]]}
+  (defonce div-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto div-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 50 y 50}} @state]
+                        (try
+                          (render div-game focus)
+                          (catch js/Error _))))))))
+  nil)
 
 (defmethod draw-sketch! :text [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [value x y size font halign valign leading style] :as opts}
-        (update-opts opts parent-opts text-defaults)]
+        (utils/update-opts opts parent-opts utils/text-defaults)]
     (doto renderer
       (.textSize size)
       (.textFont font)
-      (.textAlign (halign->constant renderer halign) (valign->constant renderer valign))
+      (.textAlign (utils/halign->constant renderer halign) (utils/valign->constant renderer valign))
       (.textLeading leading)
-      (.textStyle (style->constant renderer style))
+      (.textStyle (utils/style->constant renderer style))
       (.text value x y))
     (draw-sketch! game renderer children opts)))
+
+(defexample :text
+  {:with-card card
+   :with-focus [focus [:text {:value "Hello, world!"
+                              :x 0 :y 50 :size 16
+                              :font "Georgia" :style :italic}]]}
+  (defonce text-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto text-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render text-game focus)
+                          (catch js/Error _))))))))
+  nil)
 
 (defmethod draw-sketch! :arc [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [x y width height start stop] :as opts}
-        (update-opts opts parent-opts basic-defaults)]
+        (utils/update-opts opts parent-opts utils/basic-defaults)]
     (.arc renderer x y width height start stop)
     (draw-sketch! game renderer children opts)))
+
+(defexample :arc
+  {:with-card card
+   :with-focus [focus [:arc {:x 200 :y 0 :width 200 :height 200 :start 0 :stop 3.14}]]}
+  (defonce arc-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto arc-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render arc-game focus)
+                          (catch js/Error _))))))))
+  nil)
 
 (defmethod draw-sketch! :ellipse [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [x y width height] :as opts}
-        (update-opts opts parent-opts basic-defaults)]
+        (utils/update-opts opts parent-opts utils/basic-defaults)]
     (.ellipse renderer x y width height)
     (draw-sketch! game renderer children opts)))
 
+(defexample :ellipse
+  {:with-card card
+   :with-focus [focus [:ellipse {:x 100 :y 100 :width 50 :height 70}]]}
+  (defonce ellipse-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto ellipse-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render ellipse-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :line [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
-        opts (update-opts opts parent-opts basic-defaults)
+        opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2] :as opts}
         (-> opts
             (update :x1 + (:x opts))
@@ -141,16 +210,56 @@ A tiled map with the provided name must already be loaded
     (.line renderer x1 y1 x2 y2)
     (draw-sketch! game renderer children opts)))
 
+(defexample :line
+  {:with-card card
+   :with-focus [focus [:line {:x1 0 :y1 0 :x2 50 :y2 50}]]}
+  (defonce line-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto line-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render line-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :point [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [x y] :as opts}
-        (update-opts opts parent-opts basic-defaults)]
+        (utils/update-opts opts parent-opts utils/basic-defaults)]
     (.point renderer x y)
     (draw-sketch! game renderer children opts)))
 
+(defexample :point
+  {:with-card card
+   :with-focus [focus [[:point {:x 5 :y 5}]
+                       [:point {:x 10 :y 5}]
+                       [:point {:x 15 :y 5}]
+                       [:point {:x 20 :y 5}]
+                       [:point {:x 25 :y 5}]
+                       [:point {:x 30 :y 5}]
+                       [:point {:x 35 :y 5}]]]}
+  (defonce point-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto point-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render point-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :quad [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
-        opts (update-opts opts parent-opts basic-defaults)
+        opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4] :as opts}
         (-> opts
             (update :x1 + (:x opts))
@@ -164,16 +273,50 @@ A tiled map with the provided name must already be loaded
     (.quad renderer x1 y1 x2 y2 x3 y3 x4 y4)
     (draw-sketch! game renderer children opts)))
 
+(defexample :quad
+  {:with-card card
+   :with-focus [focus [:quad {:x1 50 :y1 55 :x2 70 :y2 15 :x3 10 :y3 15 :x4 20 :y4 55}]]}
+  (defonce quad-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto quad-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render quad-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :rect [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [x y width height] :as opts}
-        (update-opts opts parent-opts basic-defaults)]
+        (utils/update-opts opts parent-opts utils/basic-defaults)]
     (.rect renderer x y width height)
     (draw-sketch! game renderer children opts)))
 
+(defexample :rect
+  {:with-card card
+   :with-focus [focus [:rect {:x 10 :y 15 :width 20 :height 30}]]}
+  (defonce rect-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto rect-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render rect-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :triangle [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
-        opts (update-opts opts parent-opts basic-defaults)
+        opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3] :as opts}
         (-> opts
             (update :x1 + (:x opts))
@@ -185,10 +328,27 @@ A tiled map with the provided name must already be loaded
     (.triangle renderer x1 y1 x2 y2 x3 y3)
     (draw-sketch! game renderer children opts)))
 
+(defexample :triangle
+  {:with-card card
+   :with-focus [focus [:triangle {:x1 10, :y1 10, :x2 50, :y2 25, :x3 10, :y3 35}]]}
+  (defonce triangle-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto triangle-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render triangle-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :image [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [value name x y width height sx sy swidth sheight scale-x scale-y flip-x flip-y]
-         :as opts} (update-opts opts parent-opts img-defaults)
+         :as opts} (utils/update-opts opts parent-opts utils/img-defaults)
         ^js/p5.Image value (or value
                                (get-asset game name)
                                (load-image game name))
@@ -209,19 +369,57 @@ A tiled map with the provided name must already be loaded
     (draw-sketch! game renderer children opts)
     (.pop renderer)))
 
+(defexample :image
+  {:with-card card
+   :with-focus [focus [:image {:name "/player_stand.png" :x 0 :y 0 :width 80 :height 80}]]}
+  (defonce image-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto image-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render image-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :animation [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
-        {:keys [duration] :as opts} (update-opts opts parent-opts basic-defaults)
+        {:keys [duration] :as opts} (utils/update-opts opts parent-opts utils/basic-defaults)
         images (vec children)
         cycle-time (mod (get-total-time game) (* duration (count images)))
         index (int (/ cycle-time duration))
         image (get images index)]
     (draw-sketch! game renderer image opts)))
 
+(defexample :animation
+  {:with-card card
+   :with-focus [focus [:div {:x 10 :y 10}
+                       [:animation {:duration 200}
+                        [:image {:name "/player_walk1.png" :width 80 :height 80}]
+                        [:image {:name "/player_walk2.png" :width 80 :height 80}]
+                        [:image {:name "/player_walk3.png" :width 80 :height 80}]]]]}
+  (defonce animation-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto animation-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render animation-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :fill [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [grayscale color colors] :as opts}
-        (update-opts opts parent-opts basic-defaults)]
+        (utils/update-opts opts parent-opts utils/basic-defaults)]
     (.push renderer)
     (cond
       grayscale
@@ -236,10 +434,28 @@ A tiled map with the provided name must already be loaded
     (draw-sketch! game renderer children opts)
     (.pop renderer)))
 
+(defexample :fill
+  {:with-card card
+   :with-focus [focus [:fill {:color "purple"}
+                       [:rect {:x 40 :y 40 :width 150 :height 150}]]]}
+  (defonce fill-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto fill-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render fill-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :stroke [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [grayscale color colors] :as opts}
-        (update-opts opts parent-opts basic-defaults)]
+        (utils/update-opts opts parent-opts utils/basic-defaults)]
     (.push renderer)
     (cond
       grayscale
@@ -254,9 +470,27 @@ A tiled map with the provided name must already be loaded
     (draw-sketch! game renderer children opts)
     (.pop renderer)))
 
+(defexample :stroke
+  {:with-card card
+   :with-focus [focus [:stroke {:color "green"}
+                       [:rect {:x 50 :y 50 :width 70 :height 70}]]]}
+  (defonce stroke-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto stroke-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render stroke-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :bezier [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
-        opts (update-opts opts parent-opts basic-defaults)
+        opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4
                 z1 z2 z3 z4] :as opts}
         (-> opts
@@ -277,9 +511,27 @@ A tiled map with the provided name must already be loaded
       (throw "Invalid args for bezier"))
     (draw-sketch! game renderer children opts)))
 
+(defexample :bezier
+  {:with-card card
+   :with-focus [focus [:stroke {:colors [0 0 0]}
+                       [:bezier {:x1 85 :y1 20 :x2 10 :y2 10 :x3 90 :y3 90 :x4 15 :y4 80}]]]}
+  (defonce bezier-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto bezier-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render bezier-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :curve [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
-        opts (update-opts opts parent-opts basic-defaults)
+        opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4
                 z1 z2 z3 z4] :as opts}
         (-> opts
@@ -300,37 +552,95 @@ A tiled map with the provided name must already be loaded
       (throw "Invalid args for curve"))
     (draw-sketch! game renderer children opts)))
 
+(defexample :curve
+  {:with-card card
+   :with-focus [focus [:stroke {:colors [255 102 0]}
+                       [:curve {:x1 5 :y1 26 :x2 5 :y2 26 :x3 73 :y3 24 :x4 73 :y4 61}]]]}
+  (defonce curve-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto curve-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render curve-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :rgb [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [max-r max-g max-b max-a] :as opts}
-        (update-opts opts parent-opts rgb-defaults)]
+        (utils/update-opts opts parent-opts utils/rgb-defaults)]
     (.push renderer)
     (.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a)
     (draw-sketch! game renderer children opts)
     (.pop renderer)))
 
+(defexample :rgb
+  {:with-card card
+   :with-focus [focus [:rgb {:max-r 100 :max-g 100 :max-b 100}
+                       [:fill {:colors [20 50 70]}
+                        [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
+  (defonce rgb-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto rgb-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render rgb-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :hsb [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [max-h max-s max-b max-a] :as opts}
-        (update-opts opts parent-opts hsb-defaults)]
+        (utils/update-opts opts parent-opts utils/hsb-defaults)]
     (.push renderer)
     (.colorMode renderer (.-HSB renderer) max-h max-s max-b max-a)
     (draw-sketch! game renderer children opts)
     (.pop renderer)))
 
+(defexample :hsb
+  {:with-card card
+   :with-focus [focus [:hsb {:max-h 100 :max-s 100 :max-b 100}
+                       [:fill {:colors [20 50 70]}
+                        [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
+  (defonce hsb-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto hsb-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render hsb-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :tiled-map [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
         {:keys [value name x y] :as opts}
-        (update-opts opts parent-opts basic-defaults)
+        (utils/update-opts opts parent-opts utils/basic-defaults)
         ^js/p5.TiledMap value (or value
                                   (get-asset game name)
                                   (load-tiled-map game name))]
     (.draw value x y)
     (draw-sketch! game renderer children opts)))
 
+; TODO: tiled-map examaple
+
 (defmethod draw-sketch! :shape [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
-        opts (update-opts opts parent-opts basic-defaults)
+        opts (utils/update-opts opts parent-opts utils/basic-defaults)
         points (:points opts)]
     (cond (odd? (count points))
           (throw ":shape requires :points to contain a seq'able with an even number of values (x and y pairs)")
@@ -343,9 +653,26 @@ A tiled map with the provided name must already be loaded
               (draw-sketch! game renderer children opts)
               (.endShape renderer (.-CLOSE renderer))))))
 
+(defexample :shape
+  {:with-card card
+   :with-focus [focus [:shape {:points [30 20 85 20 85 75 30 75]}]]}
+  (defonce shape-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto shape-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render shape-game focus)
+                          (catch js/Error _))))))))
+  nil)
+
 (defmethod draw-sketch! :contour [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
-        opts (update-opts opts parent-opts basic-defaults)
+        opts (utils/update-opts opts parent-opts utils/basic-defaults)
         points (:points opts)]
     (cond (odd? (count points))
           (throw ":contour requires :points to contain a seq'able with an even number of values (x and y pairs)")
@@ -357,6 +684,24 @@ A tiled map with the provided name must already be loaded
                       (recur rest)))
               (draw-sketch! game renderer children opts)
               (.endContour renderer (.-CLOSE renderer))))))
+
+(defexample :contour
+  {:with-card card
+   :with-focus [focus [:shape {:points [40 40 80 40 80 80 40 80]}
+                       [:contour {:points [20 20 20 40 40 40 40 20]}]]]}
+  (defonce contour-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto contour-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                        (try
+                          (render contour-game focus)
+                          (catch js/Error _))))))))
+  nil)
 
 (defmethod draw-sketch! :default [game ^js/p5 renderer content parent-opts]
   (cond
