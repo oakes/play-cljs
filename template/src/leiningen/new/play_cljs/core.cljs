@@ -16,15 +16,13 @@
          [:fill {:color "black"}
           [:text {:value "Hello, world!" :x (:text-x @state) :y (:text-y @state) :size 16 :font "Georgia" :style :italic}]]]))))
 
-(p/listen "mousemove"
-  (fn [event]
-    (swap! state assoc :text-x (.-clientX event) :text-y (.-clientY event))))
-
-(p/listen "resize"
-  (fn [event]
-    (p/set-size game (.-innerWidth js/window) (.-innerHeight js/window))))
-
 (doto game
   (p/start)
+  (p/listen "mousemove"
+    (fn [event]
+      (swap! state assoc :text-x (.-clientX event) :text-y (.-clientY event))))
+  (p/listen "resize"
+    (fn [event]
+      (p/set-size game (.-innerWidth js/window) (.-innerHeight js/window))))
   (p/set-screen main-screen))
 
