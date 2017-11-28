@@ -397,11 +397,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 (defexample :animation
   {:with-card card
-   :with-focus [focus [:div {:x 10 :y 10}
-                       [:animation {:duration 200}
-                        [:image {:name "player_walk1.png" :width 80 :height 80}]
-                        [:image {:name "player_walk2.png" :width 80 :height 80}]
-                        [:image {:name "player_walk3.png" :width 80 :height 80}]]]]}
+   :with-focus [focus [:animation {:x 10 :y 10 :duration 200}
+                       [:image {:name "player_walk1.png" :width 80 :height 80}]
+                       [:image {:name "player_walk2.png" :width 80 :height 80}]
+                       [:image {:name "player_walk3.png" :width 80 :height 80}]]]}
   (defonce animation-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [state (atom {})]
     (doto animation-game
