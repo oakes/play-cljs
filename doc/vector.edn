@@ -1,4 +1,0 @@
-{:name "Vector"
- :doc "Vector objects are used to hold (`x`, `y`) positions. They are
-returned by some of the JavaScript functions. For your own code, use ClojureScript's
-built-in vectors instead. See [the p5.js docs](http://p5js.org/reference/#/p5.Vector) for more."}

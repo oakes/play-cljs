@@ -1,3 +1,0 @@
-{:name "Color"
- :doc "Color objects represent a single given color. See
-[the p5.js docs](http://p5js.org/reference/#/p5/color) for more."}
