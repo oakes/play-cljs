@@ -87,8 +87,9 @@ A tiled map with the provided name must already be loaded
       (fn [event]
         (set-size game (.-clientWidth card) (.-clientHeight card))))))
 
-(defmulti draw-sketch! (fn [game ^js/p5 renderer content parent-opts]
-                         (first content)))
+(defmulti ^:private draw-sketch!
+  (fn [game ^js/p5 renderer content parent-opts]
+    (first content)))
 
 (defmethod draw-sketch! :div [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
@@ -132,7 +133,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (draw-sketch! game renderer children opts)))
 
 (defexample :text
-  {:with-card card
+  {:doc "Draws text to the screen.
+   
+   :value  -  The text to display (string)
+   :size   -  The font size (number)
+   :font   -  The name of the font (string)
+   :style  -  The font style (:normal, :italic, :bold)"
+   :with-card card
    :with-focus [focus [:text {:value "Hello, world!"
                               :x 0 :y 50 :size 16
                               :font "Georgia" :style :italic}]]}
@@ -158,7 +165,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (draw-sketch! game renderer children opts)))
 
 (defexample :arc
-  {:with-card card
+  {:doc "Draws an arc to the screen.
+   
+   :width  -  The width of the arc (number)
+   :height -  The height of the arc (number)
+   :start  -  Angle to start the arc, in radians (number)
+   :stop   -  Angle to stop the arc, in radians (number)"
+   :with-card card
    :with-focus [focus [:arc {:x 200 :y 0 :width 200 :height 200 :start 0 :stop 3.14}]]}
   (defonce arc-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [state (atom {})]
@@ -182,7 +195,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (draw-sketch! game renderer children opts)))
 
 (defexample :ellipse
-  {:with-card card
+  {:doc "Draws an ellipse (oval) to the screen.
+   
+   :width  -  The width of the ellipse (number)
+   :height -  The height of the ellipse (number)"
+   :with-card card
    :with-focus [focus [:ellipse {:x 100 :y 100 :width 50 :height 70}]]}
   (defonce ellipse-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [state (atom {})]
@@ -211,7 +228,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (draw-sketch! game renderer children opts)))
 
 (defexample :line
-  {:with-card card
+  {:doc "Draws a line (a direct path between two points) to the screen.
+   
+   :x1  -  The x-coordinate of the first point (number)
+   :y1  -  The y-coordinate of the first point (number)
+   :x2  -  The x-coordinate of the second point (number)
+   :y2  -  The y-coordinate of the second point (number)"
+   :with-card card
    :with-focus [focus [:line {:x1 0 :y1 0 :x2 50 :y2 50}]]}
   (defonce line-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [state (atom {})]
@@ -235,7 +258,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (draw-sketch! game renderer children opts)))
 
 (defexample :point
-  {:with-card card
+  {:doc "Draws a point, a coordinate in space at the dimension of one pixel."
+   :with-card card
    :with-focus [focus [[:point {:x 5 :y 5}]
                        [:point {:x 10 :y 5}]
                        [:point {:x 15 :y 5}]
@@ -274,7 +298,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (draw-sketch! game renderer children opts)))
 
 (defexample :quad
-  {:with-card card
+  {:doc "Draw a quad. A quad is a quadrilateral, a four sided polygon.
+   
+   :x1  -  The x-coordinate of the first point (number)
+   :y1  -  The y-coordinate of the first point (number)
+   :x2  -  The x-coordinate of the second point (number)
+   :y2  -  The y-coordinate of the second point (number)
+   :x3  -  The x-coordinate of the third point (number)
+   :y3  -  The y-coordinate of the third point (number)
+   :x4  -  The x-coordinate of the fourth point (number)
+   :y4  -  The y-coordinate of the fourth point (number)"
+   :with-card card
    :with-focus [focus [:quad {:x1 50 :y1 55 :x2 70 :y2 15 :x3 10 :y3 15 :x4 20 :y4 55}]]}
   (defonce quad-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [state (atom {})]
@@ -298,7 +332,12 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (draw-sketch! game renderer children opts)))
 
 (defexample :rect
-  {:with-card card
+  {:doc "Draws a rectangle to the screen.
+   A rectangle is a four-sided shape with every angle at ninety degrees.
+   
+   :width  -  The width of the rectangle (number)
+   :height -  The height of the rectangle (number)"
+   :with-card card
    :with-focus [focus [:rect {:x 10 :y 15 :width 20 :height 30}]]}
   (defonce rect-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [state (atom {})]
@@ -329,7 +368,15 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (draw-sketch! game renderer children opts)))
 
 (defexample :triangle
-  {:with-card card
+  {:doc "A triangle is a plane created by connecting three points.
+   
+   :x1  -  The x-coordinate of the first point (number)
+   :y1  -  The y-coordinate of the first point (number)
+   :x2  -  The x-coordinate of the second point (number)
+   :y2  -  The y-coordinate of the second point (number)
+   :x3  -  The x-coordinate of the third point (number)
+   :y3  -  The y-coordinate of the third point (number)"
+   :with-card card
    :with-focus [focus [:triangle {:x1 10, :y1 10, :x2 50, :y2 25, :x3 10, :y3 35}]]}
   (defonce triangle-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [state (atom {})]
@@ -370,7 +417,12 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (.pop renderer)))
 
 (defexample :image
-  {:with-card card
+  {:doc "Displays an image.
+   
+   :name   -  The file name of the image (string)
+   :width  -  The width of the image (number)
+   :height -  The height of the image (number)"
+   :with-card card
    :with-focus [focus [:image {:name "player_stand.png" :x 0 :y 0 :width 80 :height 80}]]}
   (defonce image-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [state (atom {})]
@@ -396,7 +448,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (draw-sketch! game renderer image opts)))
 
 (defexample :animation
-  {:with-card card
+  {:doc "Draws its children in a continuous loop.
+   
+   :duration  -  The number of milliseconds each child should be displayed (number)"
+   :with-card card
    :with-focus [focus [:animation {:x 10 :y 10 :duration 200}
                        [:image {:name "player_walk1.png" :width 80 :height 80}]
                        [:image {:name "player_walk2.png" :width 80 :height 80}]
@@ -434,7 +489,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (.pop renderer)))
 
 (defexample :fill
-  {:with-card card
+  {:doc "Sets the color of the children.
+   
+   :color  -  The name of the color (string)
+   :colors -  The RGB or HSB color values (vector of numbers)"
+   :with-card card
    :with-focus [focus [:fill {:color "purple"}
                        [:rect {:x 40 :y 40 :width 150 :height 150}]]]}
   (defonce fill-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
@@ -470,7 +529,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (.pop renderer)))
 
 (defexample :stroke
-  {:with-card card
+  {:doc "Sets the color used to draw lines and borders around the children.
+   
+   :color  -  The name of the color (string)
+   :colors -  The RGB or HSB color values (vector of numbers)"
+   :with-card card
    :with-focus [focus [:stroke {:color "green"}
                        [:rect {:x 50 :y 50 :width 70 :height 70}]]]}
   (defonce stroke-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
@@ -511,7 +574,22 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (draw-sketch! game renderer children opts)))
 
 (defexample :bezier
-  {:with-card card
+  {:doc "Draws a cubic Bezier curve on the screen.
+   
+   :x1  -  The x-coordinate of the first anchor point (number)
+   :y1  -  The y-coordinate of the first anchor point (number)
+   :x2  -  The x-coordinate of the first control point (number)
+   :y2  -  The y-coordinate of the first control point (number)
+   :x3  -  The x-coordinate of the second control point (number)
+   :y3  -  The y-coordinate of the second control point (number)
+   :x4  -  The x-coordinate of the second anchor point (number)
+   :y4  -  The y-coordinate of the second anchor point (number)
+   
+   :z1  -  The z-coordinate of the first anchor point (number)
+   :z2  -  The z-coordinate of the first control point (number)
+   :z3  -  The z-coordinate of the second anchor point (number)
+   :z4  -  The z-coordinate of the second control point (number)"
+   :with-card card
    :with-focus [focus [:stroke {:colors [0 0 0]}
                        [:bezier {:x1 85 :y1 20 :x2 10 :y2 10 :x3 90 :y3 90 :x4 15 :y4 80}]]]}
   (defonce bezier-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
@@ -552,9 +630,25 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (draw-sketch! game renderer children opts)))
 
 (defexample :curve
-  {:with-card card
+  {:doc "Draws a curved line on the screen between two points,
+   given as the middle four parameters.
+   
+   :x1  -  The x-coordinate of the beginning control point (number)
+   :y1  -  The y-coordinate of the beginning control point (number)
+   :x2  -  The x-coordinate of the first point (number)
+   :y2  -  The y-coordinate of the first point (number)
+   :x3  -  The x-coordinate of the second point (number)
+   :y3  -  The y-coordinate of the second point (number)
+   :x4  -  The x-coordinate of the ending control point (number)
+   :y4  -  The y-coordinate of the ending control point (number)
+   
+   :z1  -  The z-coordinate of the beginning control point (number)
+   :z2  -  The z-coordinate of the first point (number)
+   :z3  -  The z-coordinate of the second point (number)
+   :z4  -  The z-coordinate of the ending control point (number)"
+   :with-card card
    :with-focus [focus [:stroke {:colors [255 102 0]}
-                       [:curve {:x1 5 :y1 26 :x2 5 :y2 26 :x3 73 :y3 24 :x4 73 :y4 61}]]]}
+                       [:curve {:x1 5 :y1 26 :x2 5 :y2 26 :x3 73 :y3 24 :x4 73 :y4 180}]]]}
   (defonce curve-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [state (atom {})]
     (doto curve-game
@@ -579,7 +673,12 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (.pop renderer)))
 
 (defexample :rgb
-  {:with-card card
+  {:doc "Causes the color values in all children to be interpreted as RGB colors.
+   
+   :max-r  -  Range for red (number)
+   :max-g  -  Range for green (number)
+   :max-b  -  Range for blue (number)"
+   :with-card card
    :with-focus [focus [:rgb {:max-r 100 :max-g 100 :max-b 100}
                        [:fill {:colors [20 50 70]}
                         [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
@@ -607,7 +706,12 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (.pop renderer)))
 
 (defexample :hsb
-  {:with-card card
+  {:doc "Causes the color values in all children to be interpreted as HSB colors.
+   
+   :max-h  -  Range for hue (number)
+   :max-s  -  Range for saturation (number)
+   :max-b  -  Range for brightness (number)"
+   :with-card card
    :with-focus [focus [:hsb {:max-h 100 :max-s 100 :max-b 100}
                        [:fill {:colors [20 50 70]}
                         [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
@@ -646,14 +750,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
           :else
           (do (.beginShape renderer)
               (loop [[x y & rest] points]
-                    (.vertex renderer x y)
-                    (when rest
-                      (recur rest)))
+                (.vertex renderer x y)
+                (when rest
+                  (recur rest)))
               (draw-sketch! game renderer children opts)
               (.endShape renderer (.-CLOSE renderer))))))
 
 (defexample :shape
-  {:with-card card
+  {:doc "Draws a complex shape.
+   
+   :points  -  The x and y vertexes to draw (vector of numbers)"
+   :with-card card
    :with-focus [focus [:shape {:points [30 20 85 20 85 75 30 75]}]]}
   (defonce shape-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [state (atom {})]
@@ -678,14 +785,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
           :else
           (do (.beginContour renderer)
               (loop [[x y & rest] points]
-                    (.vertex renderer x y)
-                    (when rest
-                      (recur rest)))
+                (.vertex renderer x y)
+                (when rest
+                  (recur rest)))
               (draw-sketch! game renderer children opts)
               (.endContour renderer (.-CLOSE renderer))))))
 
 (defexample :contour
-  {:with-card card
+  {:doc "Draws a negative shape.
+   
+   :points  -  The x and y vertexes to draw (vector of numbers)"
+   :with-card card
    :with-focus [focus [:shape {:points [40 40 80 40 80 80 40 80]}
                        [:contour {:points [20 20 20 40 40 40 40 20]}]]]}
   (defonce contour-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
