@@ -1,5 +1,5 @@
 (set-env!
-  :resource-paths #{"src"}
+  :resource-paths #{"src" "resources"}
   :dependencies '[[adzerk/boot-cljs "2.1.4" :scope "test"]
                   [adzerk/boot-reload "0.5.2" :scope "test"]
                   [org.clojure/clojurescript "1.9.946" :scope "provided"]
@@ -25,7 +25,7 @@
   push {:repo "clojars"})
 
 (deftask run-docs []
-  (set-env! :source-paths #{"src"} :resource-paths #{"dev-resources"})
+  (set-env! :source-paths #{"src"} :resource-paths #{"dev-resources" "resources"})
   (comp
     (watch)
     (reload :asset-path "dynadoc-extend")
