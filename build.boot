@@ -4,7 +4,7 @@
                   [adzerk/boot-reload "0.5.2" :scope "test"]
                   [org.clojure/clojurescript "1.9.946" :scope "provided"]
                   [org.clojure/core.async "0.3.443"]
-                  [dynadoc "1.1.4" :scope "test"]
+                  [dynadoc "1.1.5" :scope "test"]
                   [defexample "1.6.1"]]
   :repositories (conj (get-env :repositories)
                   ["clojars" {:url "https://clojars.org/repo/"
