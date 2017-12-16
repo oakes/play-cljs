@@ -87,9 +87,46 @@ A tiled map with the provided name must already be loaded
       (fn [event]
         (set-size game (.-clientWidth card) (.-clientHeight card))))))
 
-(defmulti ^:private draw-sketch!
+(defmulti draw-sketch!
+  "Internal multimethod for drawing entities. Extending this will allow you
+to define new entity types."
   (fn [game ^js/p5 renderer content parent-opts]
     (first content)))
+
+(defexample draw-sketch!
+  {:doc "Creates a new entity type called :smiley that draws a smiley face.
+After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
+   :with-card card
+   :with-focus [focus (defmethod play-cljs.core/draw-sketch! :smiley [game ^js/p5 renderer content parent-opts]
+                        (let [[command opts & children] content
+                              opts (play-cljs.utils/update-opts opts parent-opts play-cljs.utils/basic-defaults)]
+                          (play-cljs.core/draw-sketch!
+                            game
+                            renderer
+                            [:div {:x 100 :y 100}
+                             [:fill {:color "yellow"}
+                              [:ellipse {:width 100 :height 100}
+                               [:fill {:color "black"}
+                                [:ellipse {:x -20 :y -10 :width 10 :height 10}]
+                                [:ellipse {:x 20 :y -10 :width 10 :height 10}]]
+                               [:fill {}
+                                [:arc {:width 60 :height 60 :start 0 :stop 3.14}]]]]]
+                            opts)
+                          (play-cljs.core/draw-sketch! game renderer children opts)))]}
+  focus
+  (defonce smiley-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (let [state (atom {})]
+    (doto smiley-game
+      (start-example-game card state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 150 y 150}} @state]
+                        (try
+                          (render smiley-game [:smiley {:x 0 :y 0}])
+                          (catch js/Error _))))))))
+  nil)
 
 (defmethod draw-sketch! :div [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
