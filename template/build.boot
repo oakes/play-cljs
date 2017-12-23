@@ -1,6 +1,6 @@
 (set-env!
   :resource-paths #{"src"}
-  :dependencies '[[org.clojure/clojure "1.9.0"]]
+  :dependencies '[[org.clojure/clojure "1.9.0" :scope "provided"]]
   :repositories (conj (get-env :repositories)
                   ["clojars" {:url "https://clojars.org/repo/"
                               :username (System/getenv "CLOJARS_USER")
@@ -14,7 +14,7 @@
        :license {"Public Domain" "http://unlicense.org/UNLICENSE"}}
   push {:repo "clojars"})
 
-(deftask try []
+(deftask local []
   (comp (pom) (jar) (install)))
 
 (deftask deploy []
