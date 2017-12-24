@@ -456,9 +456,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defexample :image
   {:doc "Displays an image.
    
-   :name   -  The file name of the image (string)
-   :width  -  The width of the image (number)
-   :height -  The height of the image (number)"
+   :name    -  The file name of the image (string)
+   :width   -  The width of the image (number)
+   :height  -  The height of the image (number)
+   :sx      -  The x-coordinate of the subsection of the source image to draw into the destination rectangle (number)
+   :sy      -  The y-coordinate of the subsection of the source image to draw into the destination rectangle (number)
+   :swidth  -  The width of the subsection of the source image to draw into the destination rectangle (number)
+   :sheight -  The height of the subsection of the source image to draw into the destination rectangle (number)
+   :scale-x -  Percent to scale the image in the x-axis (number)
+   :scale-y -  Percent to scale the image in the y-axis (number)
+   :flip-x  -  Whether to flip the image on its x-axis (boolean)
+   :flip-y  -  Whether to flip the image on its y-axis (boolean)"
    :with-card card
    :with-focus [focus [:image {:name "player_stand.png" :x 0 :y 0 :width 80 :height 80}]]}
   (defonce image-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
