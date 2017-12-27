@@ -2,7 +2,7 @@
   :dependencies '[[adzerk/boot-cljs "2.1.4" :scope "test"]
                   [adzerk/boot-reload "0.5.2" :scope "test"]
                   [dynadoc "1.1.6" :scope "test"]
-                  [org.clojars.oakes/boot-tools-deps "0.1.4" :scope "test"]]
+                  [org.clojars.oakes/boot-tools-deps "0.1.4.1" :scope "test"]]
   :repositories (conj (get-env :repositories)
                   ["clojars" {:url "https://clojars.org/repo/"
                               :username (System/getenv "CLOJARS_USER")
@@ -25,7 +25,7 @@
 (deftask run-docs []
   (set-env! :resource-paths #{"dev-resources" "resources"})
   (comp
-    (deps)
+    (deps :aliases [:cljs])
     (watch)
     (reload :asset-path "dynadoc-extend")
     (cljs)
