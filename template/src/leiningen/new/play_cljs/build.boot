@@ -8,7 +8,7 @@
                   [javax.xml.bind/jaxb-api "2.3.0" :scope "test"] ; necessary for Java 9 compatibility
                   ; project deps
                   [org.clojure/clojurescript "1.9.946"]
-                  [play-cljs "0.11.2"]])
+                  [play-cljs "0.12.0"]])
 
 (require
   '[adzerk.boot-cljs :refer [cljs]]
