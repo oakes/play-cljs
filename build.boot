@@ -27,8 +27,12 @@
   (comp
     (deps :aliases [:cljs])
     (watch)
-    (reload :asset-path "dynadoc-extend")
-    (cljs)
+    (reload
+      :on-jsload 'dynadoc.core/reload
+      :asset-path "dynadoc-extend")
+    (cljs
+      :optimizations :none
+      :compiler-options {:asset-path "/main.out"})
     (dynadoc :port 5000)))
 
 (deftask local []

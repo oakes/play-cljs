@@ -1,3 +1,1 @@
-{:require  [play-cljs.core dynadoc.core]
- :init-fns []
- :compiler-options {:optimizations :simple}}
+{:require  [play-cljs.core dynadoc.core]}
