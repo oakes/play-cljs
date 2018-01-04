@@ -73,7 +73,7 @@ A tiled map with the provided name must already be loaded
 
 (set! (.-disableFriendlyErrors ^js/p5 js/p5) true)
 
-(defn ^:private start-example-game [game card state]
+(defn ^:private start-example-game [game card *state]
   (doto game
     (start)
     (set-size (.-clientWidth card) (.-clientHeight card))
@@ -82,7 +82,7 @@ A tiled map with the provided name must already be loaded
         (let [bounds (.getBoundingClientRect card)
               x (- (.-clientX event) (.-left bounds))
               y (- (.-clientY event) (.-top bounds))]
-          (swap! state assoc :x x :y y))))
+          (swap! *state assoc :x x :y y))))
     (listen "resize"
       (fn [event]
         (set-size game (.-clientWidth card) (.-clientHeight card))))))
@@ -115,14 +115,14 @@ After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
                           (play-cljs.core/draw-sketch! game renderer children opts)))]}
   focus
   (defonce smiley-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto smiley-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 150 y 150}} @state]
+                      (let [{:keys [x y] :or {x 150 y 150}} @*state]
                         (try
                           (render smiley-game [:smiley {:x 0 :y 0}])
                           (catch js/Error _))))))))
@@ -143,14 +143,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
                        [:fill {:color "lightblue"}
                         [:rect {:x 0 :y 0 :width 100 :height 100}]]]]}
   (defonce div-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto div-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 50 y 50}} @state]
+                      (let [{:keys [x y] :or {x 50 y 50}} @*state]
                         (try
                           (render div-game focus)
                           (catch js/Error _))))))))
@@ -181,14 +181,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
                               :x 0 :y 50 :size 16
                               :font "Georgia" :style :italic}]]}
   (defonce text-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto text-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render text-game focus)
                           (catch js/Error _))))))))
@@ -211,14 +211,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-focus [focus [:arc {:x 200 :y 0 :width 200 :height 200 :start 0 :stop 3.14}]]}
   (defonce arc-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto arc-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render arc-game focus)
                           (catch js/Error _))))))))
@@ -239,14 +239,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-focus [focus [:ellipse {:x 100 :y 100 :width 50 :height 70}]]}
   (defonce ellipse-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto ellipse-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render ellipse-game focus)
                           (catch js/Error _))))))))
@@ -274,14 +274,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-focus [focus [:line {:x1 0 :y1 0 :x2 50 :y2 50}]]}
   (defonce line-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto line-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render line-game focus)
                           (catch js/Error _))))))))
@@ -305,14 +305,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
                        [:point {:x 30 :y 5}]
                        [:point {:x 35 :y 5}]]]}
   (defonce point-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto point-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render point-game focus)
                           (catch js/Error _))))))))
@@ -348,14 +348,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-focus [focus [:quad {:x1 50 :y1 55 :x2 70 :y2 15 :x3 10 :y3 15 :x4 20 :y4 55}]]}
   (defonce quad-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto quad-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render quad-game focus)
                           (catch js/Error _))))))))
@@ -377,14 +377,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-focus [focus [:rect {:x 10 :y 15 :width 20 :height 30}]]}
   (defonce rect-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto rect-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render rect-game focus)
                           (catch js/Error _))))))))
@@ -416,14 +416,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-focus [focus [:triangle {:x1 10, :y1 10, :x2 50, :y2 25, :x3 10, :y3 35}]]}
   (defonce triangle-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto triangle-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render triangle-game focus)
                           (catch js/Error _))))))))
@@ -470,14 +470,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-focus [focus [:image {:name "player_stand.png" :x 0 :y 0 :width 80 :height 80}]]}
   (defonce image-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto image-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render image-game focus)
                           (catch js/Error _))))))))
@@ -502,14 +502,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
                        [:image {:name "player_walk2.png" :width 80 :height 80}]
                        [:image {:name "player_walk3.png" :width 80 :height 80}]]]}
   (defonce animation-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto animation-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render animation-game focus)
                           (catch js/Error _))))))))
@@ -542,14 +542,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-focus [focus [:fill {:color "purple"}
                        [:rect {:x 40 :y 40 :width 150 :height 150}]]]}
   (defonce fill-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto fill-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render fill-game focus)
                           (catch js/Error _))))))))
@@ -582,14 +582,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-focus [focus [:stroke {:color "green"}
                        [:rect {:x 50 :y 50 :width 70 :height 70}]]]}
   (defonce stroke-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto stroke-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render stroke-game focus)
                           (catch js/Error _))))))))
@@ -638,14 +638,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-focus [focus [:stroke {:colors [0 0 0]}
                        [:bezier {:x1 85 :y1 20 :x2 10 :y2 10 :x3 90 :y3 90 :x4 15 :y4 80}]]]}
   (defonce bezier-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto bezier-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render bezier-game focus)
                           (catch js/Error _))))))))
@@ -695,14 +695,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-focus [focus [:stroke {:colors [255 102 0]}
                        [:curve {:x1 5 :y1 26 :x2 5 :y2 26 :x3 73 :y3 24 :x4 73 :y4 180}]]]}
   (defonce curve-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto curve-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render curve-game focus)
                           (catch js/Error _))))))))
@@ -728,14 +728,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
                        [:fill {:colors [20 50 70]}
                         [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
   (defonce rgb-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto rgb-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render rgb-game focus)
                           (catch js/Error _))))))))
@@ -761,14 +761,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
                        [:fill {:colors [20 50 70]}
                         [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
   (defonce hsb-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto hsb-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render hsb-game focus)
                           (catch js/Error _))))))))
@@ -808,14 +808,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-focus [focus [:shape {:points [30 20 85 20 85 75 30 75]}]]}
   (defonce shape-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto shape-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render shape-game focus)
                           (catch js/Error _))))))))
@@ -844,14 +844,14 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-focus [focus [:shape {:points [40 40 80 40 80 80 40 80]}
                        [:contour {:points [20 20 20 40 40 40 40 20]}]]]}
   (defonce contour-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [state (atom {})]
+  (let [*state (atom {})]
     (doto contour-game
-      (start-example-game card state)
+      (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
                     (on-hide [this])
                     (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @state]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (render contour-game focus)
                           (catch js/Error _))))))))
@@ -871,21 +871,21 @@ hard-coded at (0,0) but the :div is passing its own position down."
   ([width height]
    (create-game width height {}))
   ([width height {:keys [parent]}]
-   (let [hidden-state-atom (atom {:screen nil
-                                  :renderer nil
-                                  :canvas nil
-                                  :listeners []
-                                  :total-time 0
-                                  :delta-time 0
-                                  :pressed-keys #{}
-                                  :assets {}})
+   (let [*hidden-state (atom {:screen nil
+                              :renderer nil
+                              :canvas nil
+                              :listeners []
+                              :total-time 0
+                              :delta-time 0
+                              :pressed-keys #{}
+                              :assets {}})
          setup-finished? (promise-chan)]
      (reify Game
        (start [this]
          (when-let [^js/p5 renderer (get-renderer this)]
            (.remove renderer))
-         (run! events/unlistenByKey (:listeners @hidden-state-atom))
-         (swap! hidden-state-atom assoc :listeners [])
+         (run! events/unlistenByKey (:listeners @*hidden-state))
+         (swap! *hidden-state assoc :listeners [])
          (js/p5.
            (fn [^js/p5 renderer]
              (set! (.-setup renderer)
@@ -895,13 +895,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                                                parent (.parent parent))
                        canvas (.-canvas canvas-wrapper)]
                    (.removeAttribute canvas "style")
-                   (swap! hidden-state-atom assoc :renderer renderer :canvas canvas))
+                   (swap! *hidden-state assoc :renderer renderer :canvas canvas))
                  ;; allow on-show to be run
                  (put! setup-finished? true)))
              ;; set the draw function
              (set! (.-draw renderer)
                (fn []
-                 (swap! hidden-state-atom
+                 (swap! *hidden-state
                    (fn [hidden-state]
                      (let [time (.millis renderer)]
                        (assoc hidden-state
@@ -911,16 +911,16 @@ hard-coded at (0,0) but the :div is passing its own position down."
                  (some-> this get-screen on-render)))))
          (listen this "keydown"
             (fn [^js/KeyboardEvent e]
-              (swap! hidden-state-atom update :pressed-keys conj (.-keyCode e))))
+              (swap! *hidden-state update :pressed-keys conj (.-keyCode e))))
          (listen this "keyup"
            (fn [^js/KeyboardEvent e]
              (if (contains? #{91 93} (.-keyCode e))
-               (swap! hidden-state-atom assoc :pressed-keys #{})
-               (swap! hidden-state-atom update :pressed-keys disj (.-keyCode e)))))
+               (swap! *hidden-state assoc :pressed-keys #{})
+               (swap! *hidden-state update :pressed-keys disj (.-keyCode e)))))
          (listen this "blur"
-           #(swap! hidden-state-atom assoc :pressed-keys #{})))
+           #(swap! *hidden-state assoc :pressed-keys #{})))
        (listen [this listen-type listener]
-         (swap! hidden-state-atom update :listeners conj
+         (swap! *hidden-state update :listeners conj
                 (events/listen js/window listen-type listener)))
        (render [this content]
          (when-let [^js/p5 renderer (get-renderer this)]
@@ -929,38 +929,38 @@ hard-coded at (0,0) but the :div is passing its own position down."
          (when-let [^js/p5 renderer (get-renderer this)]
            (let [object (.createGraphics renderer width height)]
              (draw-sketch! this object content {})
-             (swap! hidden-state-atom update :assets assoc image-name object)
+             (swap! *hidden-state update :assets assoc image-name object)
              object)))
        (load-image [this path]
          (when-let [^js/p5 renderer (get-renderer this)]
            (let [object (.loadImage renderer path (fn []))]
-             (swap! hidden-state-atom update :assets assoc path object)
+             (swap! *hidden-state update :assets assoc path object)
              object)))
        (load-tiled-map [this map-name]
          (when-let [^js/p5 renderer (get-renderer this)]
            (let [object (.loadTiledMap renderer map-name (fn []))]
-             (swap! hidden-state-atom update :assets assoc map-name object)
+             (swap! *hidden-state update :assets assoc map-name object)
              object)))
        (get-screen [this]
-         (:screen @hidden-state-atom))
+         (:screen @*hidden-state))
        (set-screen [this screen]
          (go
            ;; wait for the setup function to finish
            (<! setup-finished?)
            ;; change the screens
            (some-> this get-screen on-hide)
-           (swap! hidden-state-atom assoc :screen screen)
+           (swap! *hidden-state assoc :screen screen)
            (on-show screen)))
        (get-renderer [this]
-         (:renderer @hidden-state-atom))
+         (:renderer @*hidden-state))
        (get-canvas [this]
-         (:canvas @hidden-state-atom))
+         (:canvas @*hidden-state))
        (get-total-time [this]
-         (:total-time @hidden-state-atom))
+         (:total-time @*hidden-state))
        (get-delta-time [this]
-         (:delta-time @hidden-state-atom))
+         (:delta-time @*hidden-state))
        (get-pressed-keys [this]
-         (:pressed-keys @hidden-state-atom))
+         (:pressed-keys @*hidden-state))
        (get-width [this]
          (when-let [^js/p5 renderer (get-renderer this)]
            (.-width renderer)))
@@ -971,4 +971,4 @@ hard-coded at (0,0) but the :div is passing its own position down."
          (when-let [^js/p5 renderer (get-renderer this)]
            (.resizeCanvas renderer width height)))
        (get-asset [game name]
-         (get-in @hidden-state-atom [:assets name]))))))
+         (get-in @*hidden-state [:assets name]))))))
