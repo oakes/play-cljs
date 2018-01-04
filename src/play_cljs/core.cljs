@@ -23,11 +23,11 @@ You can create a screen by using `reify` like this:
     (on-hide [this])
     (on-render [this])))
 ```"
-  (on-show [this]
+  (on-show [screen]
     "Runs once, when the screen first appears.")
-  (on-hide [this]
+  (on-hide [screen]
     "Runs once, when the screen is no longer displayed.")
-  (on-render [this]
+  (on-render [screen]
     "Runs each time the game is ready to render another frame."))
 
 (defprotocol Game
