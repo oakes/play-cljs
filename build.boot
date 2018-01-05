@@ -2,13 +2,14 @@
   :dependencies '[[adzerk/boot-cljs "2.1.4" :scope "test"]
                   [adzerk/boot-reload "0.5.2" :scope "test"]
                   [dynadoc "1.3.0" :scope "test"]
-                  [org.clojars.oakes/boot-tools-deps "0.1.4.1" :scope "test"]]
+                  [seancorfield/boot-tools-deps "0.1.4" :scope "test"]]
   :repositories (conj (get-env :repositories)
                   ["clojars" {:url "https://clojars.org/repo/"
                               :username (System/getenv "CLOJARS_USER")
                               :password (System/getenv "CLOJARS_PASS")}]))
 
 (require
+  '[clojure.edn :as edn]
   '[adzerk.boot-cljs :refer [cljs]]
   '[adzerk.boot-reload :refer [reload]]
   '[dynadoc.boot :refer [dynadoc]]
@@ -19,7 +20,19 @@
        :version "0.12.1-SNAPSHOT"
        :description "A ClojureScript game library"
        :url "https://github.com/oakes/play-cljs"
-       :license {"Public Domain" "http://unlicense.org/UNLICENSE"}}
+       :license {"Public Domain" "http://unlicense.org/UNLICENSE"}
+       :dependencies (->> "deps.edn"
+                          slurp
+                          edn/read-string
+                          :deps
+                          (reduce
+                            (fn [deps [artifact info]]
+                              (if-let [version (:mvn/version info)]
+                                (conj deps
+                                  (transduce cat conj [artifact version]
+                                    (select-keys info [:scope :exclusions])))
+                                deps))
+                            []))}
   push {:repo "clojars"})
 
 (deftask run-docs []
@@ -34,8 +47,8 @@
     (dynadoc :port 5000)))
 
 (deftask local []
-  (comp (deps) (pom) (jar) (install)))
+  (comp (pom) (jar) (install)))
 
 (deftask deploy []
-  (comp (deps) (pom) (jar) (push)))
+  (comp (pom) (jar) (push)))
 
