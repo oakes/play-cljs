@@ -1,4 +1,5 @@
 (set-env!
+  :resource-paths #{"src" "resources"}
   :dependencies '[[adzerk/boot-cljs "2.1.4" :scope "test"]
                   [adzerk/boot-reload "0.5.2" :scope "test"]
                   [dynadoc "1.3.0" :scope "test"]
