@@ -37,7 +37,7 @@
   push {:repo "clojars"})
 
 (deftask run-docs []
-  (set-env! :resource-paths #{"dev-resources" "resources"})
+  (set-env! :resource-paths #{"src" "resources" "dev-resources"})
   (comp
     (deps :aliases [:cljs])
     (watch)
