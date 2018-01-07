@@ -97,6 +97,7 @@ to define new entity types."
   {:doc "Creates a new entity type called :smiley that draws a smiley face.
 After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
    :with-card card
+   :with-callback callback
    :with-focus [focus (defmethod play-cljs.core/draw-sketch! :smiley [game ^js/p5 renderer content parent-opts]
                         (let [[command opts & children] content
                               opts (play-cljs.utils/update-opts opts parent-opts play-cljs.utils/basic-defaults)]
@@ -113,9 +114,9 @@ After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
                                 [:arc {:width 60 :height 60 :start 0 :stop 3.14}]]]]]
                             opts)
                           (play-cljs.core/draw-sketch! game renderer children opts)))]}
-  focus
   (defonce smiley-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
-  (let [*state (atom {})]
+  (let [*state (atom {})
+        var-obj focus]
     (doto smiley-game
       (start-example-game card *state)
       (set-screen (reify Screen
@@ -125,7 +126,8 @@ After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
                       (let [{:keys [x y] :or {x 150 y 150}} @*state]
                         (try
                           (render smiley-game [:smiley {:x 0 :y 0}])
-                          (catch js/Error _))))))))
+                          (callback var-obj)
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :div [game ^js/p5 renderer content parent-opts]
@@ -139,6 +141,7 @@ down to its children. The `x` and `y` are special in this example,
 serving as the pointer's position. Notice that the :rect is
 hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
+   :with-callback callback
    :with-focus [focus [:div {:x x :y y}
                        [:fill {:color "lightblue"}
                         [:rect {:x 0 :y 0 :width 100 :height 100}]]]]}
@@ -152,8 +155,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 50 y 50}} @*state]
                         (try
-                          (render div-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render div-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :text [game ^js/p5 renderer content parent-opts]
@@ -177,6 +182,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :font   -  The name of the font (string)
    :style  -  The font style (:normal, :italic, :bold)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:text {:value "Hello, world!"
                               :x 0 :y 50 :size 16
                               :font "Georgia" :style :italic}]]}
@@ -190,8 +196,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render text-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render text-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :arc [game ^js/p5 renderer content parent-opts]
@@ -209,6 +217,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :start  -  Angle to start the arc, in radians (number)
    :stop   -  Angle to stop the arc, in radians (number)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:arc {:x 200 :y 0 :width 200 :height 200 :start 0 :stop 3.14}]]}
   (defonce arc-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [*state (atom {})]
@@ -220,8 +229,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render arc-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render arc-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :ellipse [game ^js/p5 renderer content parent-opts]
@@ -237,6 +248,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :width  -  The width of the ellipse (number)
    :height -  The height of the ellipse (number)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:ellipse {:x 100 :y 100 :width 50 :height 70}]]}
   (defonce ellipse-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [*state (atom {})]
@@ -248,8 +260,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render ellipse-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render ellipse-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :line [game ^js/p5 renderer content parent-opts]
@@ -272,6 +286,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :x2  -  The x-coordinate of the second point (number)
    :y2  -  The y-coordinate of the second point (number)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:line {:x1 0 :y1 0 :x2 50 :y2 50}]]}
   (defonce line-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [*state (atom {})]
@@ -283,8 +298,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render line-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render line-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :point [game ^js/p5 renderer content parent-opts]
@@ -297,6 +314,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defexample :point
   {:doc "Draws a point, a coordinate in space at the dimension of one pixel."
    :with-card card
+   :with-callback callback
    :with-focus [focus [[:point {:x 5 :y 5}]
                        [:point {:x 10 :y 5}]
                        [:point {:x 15 :y 5}]
@@ -314,8 +332,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render point-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render point-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :quad [game ^js/p5 renderer content parent-opts]
@@ -346,6 +366,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :x4  -  The x-coordinate of the fourth point (number)
    :y4  -  The y-coordinate of the fourth point (number)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:quad {:x1 50 :y1 55 :x2 70 :y2 15 :x3 10 :y3 15 :x4 20 :y4 55}]]}
   (defonce quad-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [*state (atom {})]
@@ -357,8 +378,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render quad-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render quad-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :rect [game ^js/p5 renderer content parent-opts]
@@ -375,6 +398,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :width  -  The width of the rectangle (number)
    :height -  The height of the rectangle (number)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:rect {:x 10 :y 15 :width 20 :height 30}]]}
   (defonce rect-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [*state (atom {})]
@@ -386,8 +410,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render rect-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render rect-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :triangle [game ^js/p5 renderer content parent-opts]
@@ -414,6 +440,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :x3  -  The x-coordinate of the third point (number)
    :y3  -  The y-coordinate of the third point (number)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:triangle {:x1 10, :y1 10, :x2 50, :y2 25, :x3 10, :y3 35}]]}
   (defonce triangle-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [*state (atom {})]
@@ -425,8 +452,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render triangle-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render triangle-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :image [game ^js/p5 renderer content parent-opts]
@@ -468,6 +497,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :flip-x  -  Whether to flip the image on its x-axis (boolean)
    :flip-y  -  Whether to flip the image on its y-axis (boolean)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:image {:name "player_stand.png" :x 0 :y 0 :width 80 :height 80}]]}
   (defonce image-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [*state (atom {})]
@@ -479,8 +509,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render image-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render image-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :animation [game ^js/p5 renderer content parent-opts]
@@ -497,6 +529,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    
    :duration  -  The number of milliseconds each child should be displayed (number)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:animation {:x 10 :y 10 :duration 200}
                        [:image {:name "player_walk1.png" :width 80 :height 80}]
                        [:image {:name "player_walk2.png" :width 80 :height 80}]
@@ -511,9 +544,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render animation-game focus)
-                          (catch js/Error _))))))))
-  nil)
+                          (let [content focus]
+                            (render animation-game content)
+                            (callback content))
+                          (catch js/Error e (callback e))))))))))
 
 (defmethod draw-sketch! :fill [game ^js/p5 renderer content parent-opts]
   (let [[command opts & children] content
@@ -539,6 +573,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :color  -  The name of the color (string)
    :colors -  The RGB or HSB color values (vector of numbers)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:fill {:color "purple"}
                        [:rect {:x 40 :y 40 :width 150 :height 150}]]]}
   (defonce fill-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
@@ -551,8 +586,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render fill-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render fill-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :stroke [game ^js/p5 renderer content parent-opts]
@@ -579,6 +616,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :color  -  The name of the color (string)
    :colors -  The RGB or HSB color values (vector of numbers)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:stroke {:color "green"}
                        [:rect {:x 50 :y 50 :width 70 :height 70}]]]}
   (defonce stroke-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
@@ -591,8 +629,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render stroke-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render stroke-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :bezier [game ^js/p5 renderer content parent-opts]
@@ -635,6 +675,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :z3  -  The z-coordinate of the second anchor point (number)
    :z4  -  The z-coordinate of the second control point (number)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:stroke {:colors [0 0 0]}
                        [:bezier {:x1 85 :y1 20 :x2 10 :y2 10 :x3 90 :y3 90 :x4 15 :y4 80}]]]}
   (defonce bezier-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
@@ -647,8 +688,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render bezier-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render bezier-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :curve [game ^js/p5 renderer content parent-opts]
@@ -692,6 +735,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :z3  -  The z-coordinate of the second point (number)
    :z4  -  The z-coordinate of the ending control point (number)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:stroke {:colors [255 102 0]}
                        [:curve {:x1 5 :y1 26 :x2 5 :y2 26 :x3 73 :y3 24 :x4 73 :y4 180}]]]}
   (defonce curve-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
@@ -704,8 +748,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render curve-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render curve-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :rgb [game ^js/p5 renderer content parent-opts]
@@ -724,6 +770,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :max-g  -  Range for green (number)
    :max-b  -  Range for blue (number)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:rgb {:max-r 100 :max-g 100 :max-b 100}
                        [:fill {:colors [20 50 70]}
                         [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
@@ -737,8 +784,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render rgb-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render rgb-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :hsb [game ^js/p5 renderer content parent-opts]
@@ -757,6 +806,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :max-s  -  Range for saturation (number)
    :max-b  -  Range for brightness (number)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:hsb {:max-h 100 :max-s 100 :max-b 100}
                        [:fill {:colors [20 50 70]}
                         [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
@@ -770,8 +820,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render hsb-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render hsb-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :tiled-map [game ^js/p5 renderer content parent-opts]
@@ -806,6 +858,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    
    :points  -  The x and y vertexes to draw (vector of numbers)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:shape {:points [30 20 85 20 85 75 30 75]}]]}
   (defonce shape-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
   (let [*state (atom {})]
@@ -817,8 +870,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render shape-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render shape-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :contour [game ^js/p5 renderer content parent-opts]
@@ -841,6 +896,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    
    :points  -  The x and y vertexes to draw (vector of numbers)"
    :with-card card
+   :with-callback callback
    :with-focus [focus [:shape {:points [40 40 80 40 80 80 40 80]}
                        [:contour {:points [20 20 20 40 40 40 40 20]}]]]}
   (defonce contour-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
@@ -853,8 +909,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
                     (on-render [this]
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
-                          (render contour-game focus)
-                          (catch js/Error _))))))))
+                          (let [content focus]
+                            (render contour-game content)
+                            (callback content))
+                          (catch js/Error e (callback e)))))))))
   nil)
 
 (defmethod draw-sketch! :default [game ^js/p5 renderer content parent-opts]
