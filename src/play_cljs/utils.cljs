@@ -1,4 +1,5 @@
-(ns play-cljs.utils)
+(ns play-cljs.utils
+  (:require [clojure.spec.alpha :as s]))
 
 (defn update-opts [opts parent-opts defaults]
   (let [parent-opts (merge defaults parent-opts)]
@@ -6,18 +7,86 @@
         (update :x + (:x parent-opts))
         (update :y + (:y parent-opts)))))
 
-(def ^:const basic-defaults {:x 0 :y 0 :scale-x 1 :scale-y 1})
-(def ^:const text-defaults (merge basic-defaults {:size 32 :font "Helvetica" :halign :left :valign :baseline :leading 0 :style :normal}))
-(def ^:const img-defaults (merge basic-defaults {:sx 0 :sy 0}))
-(def ^:const rgb-defaults (merge basic-defaults {:max-r 255 :max-g 255 :max-b 255 :max-a 1}))
-(def ^:const hsb-defaults (merge basic-defaults {:max-h 360 :max-s 100 :max-b 100 :max-a 1}))
-
+(s/def ::halign #{:left :center :right})
 (defn halign->constant [^js/p5 renderer halign]
-  (get {:left (.-LEFT renderer) :center (.-CENTER renderer) :right (.-RIGHT renderer)} halign))
+  (get {:left (.-LEFT renderer)
+        :center (.-CENTER renderer)
+        :right (.-RIGHT renderer)}
+    halign))
 
+(s/def ::valign #{:top :center :bottom :baseline})
 (defn valign->constant [^js/p5 renderer valign]
-  (get {:top (.-TOP renderer) :center (.-CENTER renderer) :bottom (.-BOTTOM renderer) :baseline (.-BASELINE renderer)} valign))
+  (get {:top (.-TOP renderer)
+        :center (.-CENTER renderer)
+        :bottom (.-BOTTOM renderer)
+        :baseline (.-BASELINE renderer)}
+    valign))
 
+(s/def ::style #{:normal :italic :bold})
 (defn style->constant [^js/p5 renderer style]
-  (get {:normal (.-NORMAL renderer) :italic (.-ITALIC renderer) :bold (.-BOLD renderer)} style))
+  (get {:normal (.-NORMAL renderer)
+        :italic (.-ITALIC renderer)
+        :bold (.-BOLD renderer)}
+    style))
+
+(s/def ::x number?)
+(s/def ::y number?)
+
+(s/def ::basic-opts (s/keys :opt-un [::x ::y]))
+(def ^:const basic-defaults {:x 0 :y 0})
+
+(s/def ::size number?)
+(s/def ::font string?)
+(s/def ::leading number?)
+
+(s/def ::text-opts (s/keys :opt-un [::size ::font ::halign ::valign ::leading ::style]))
+(def ^:const text-defaults (merge basic-defaults
+                             {:size 32
+                              :font "Helvetica"
+                              :halign :left
+                              :valign :baseline
+                              :leading 0
+                              :style :normal}))
+
+(s/def ::scale-x number?)
+(s/def ::scale-y number?)
+(s/def ::sx number?)
+(s/def ::sy number?)
+
+(s/def ::img-opts (s/keys :opt-un [::scale-x ::scale-y ::sx ::sy]))
+(def ^:const img-defaults (merge basic-defaults {:scale-x 1 :scale-y 1 :sx 0 :sy 0}))
+
+(s/def ::max-red #(<= 0 % 255))
+(s/def ::max-green #(<= 0 % 255))
+(s/def ::max-blue #(<= 0 % 255))
+
+(s/def ::max-hue #(<= 0 % 360))
+(s/def ::max-saturation #(<= 0 % 100))
+(s/def ::max-brightness #(<= 0 % 100))
+
+(s/def ::max-alpha #(<= 0 % 255))
+
+(s/def ::rgb-opts (s/keys :opt-un [::max-red ::max-green ::max-blue ::max-alpha]))
+(def ^:const rgb-defaults (merge basic-defaults {:max-red 255 :max-green 255 :max-blue 255 :max-alpha 1}))
+
+(s/def ::hsb-opts (s/keys :opt-un [::max-hue ::max-saturation ::max-brightness ::max-alpha]))
+(def ^:const hsb-defaults (merge basic-defaults {:max-hue 360 :max-saturation 100 :max-brightness 100 :max-alpha 1}))
+
+(s/def ::opts (s/? (s/merge
+                     ::basic-opts
+                     ::text-opts
+                     ::img-opts
+                     ::rgb-opts
+                     ::hsb-opts)))
+(s/def ::command (s/cat
+                   :name keyword?
+                   :opts ::opts
+                   :children (s/* ::content)))
+(s/def ::content (s/or
+                   :single (s/nilable ::command)
+                   :multiple (s/* ::content)))
+
+(defn check [content]
+  (when (= :cljs.spec.alpha/invalid (s/conform ::content content))
+    (throw (js/Error. (s/explain-str ::content content)))))
 

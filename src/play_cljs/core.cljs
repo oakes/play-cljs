@@ -71,8 +71,6 @@ A tiled map with the provided name must already be loaded
   (get-asset [game name]
     "Gets the asset with the given name."))
 
-(set! (.-disableFriendlyErrors ^js/p5 js/p5) true)
-
 (defn ^:private start-example-game [game card *state]
   (doto game
     (start)
@@ -90,8 +88,18 @@ A tiled map with the provided name must already be loaded
 (defmulti draw-sketch!
   "Internal multimethod for drawing entities. Extending this will allow you
 to define new entity types."
-  (fn [game ^js/p5 renderer content parent-opts]
-    (first content)))
+  (fn [game renderer content parent-opts]
+    (let [k (first content)]
+      (cond
+        (keyword? k) k
+        (sequential? k) ::multiple))))
+
+(defmethod draw-sketch! ::multiple [game ^js/p5 renderer content parent-opts]
+  (run! #(draw-sketch! game renderer % parent-opts) content))
+
+(defmethod draw-sketch! :default [game ^js/p5 renderer content parent-opts]
+  (when-let [name (first content)]
+    (throw (js/Error. (str "Command not found: " name)))))
 
 (defexample draw-sketch!
   {:doc "Creates a new entity type called :smiley that draws a smiley face.
@@ -99,7 +107,7 @@ After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
    :with-card card
    :with-callback callback
    :with-focus [focus (defmethod play-cljs.core/draw-sketch! :smiley [game ^js/p5 renderer content parent-opts]
-                        (let [[command opts & children] content
+                        (let [[_ opts & children] content
                               opts (play-cljs.utils/update-opts opts parent-opts play-cljs.utils/basic-defaults)]
                           (play-cljs.core/draw-sketch!
                             game
@@ -114,7 +122,7 @@ After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
                                 [:arc {:width 60 :height 60 :start 0 :stop 3.14}]]]]]
                             opts)
                           (play-cljs.core/draw-sketch! game renderer children opts)))]}
-  (defonce smiley-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce smiley-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})
         var-obj focus]
     (doto smiley-game
@@ -131,7 +139,7 @@ After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
   nil)
 
 (defmethod draw-sketch! :div [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)]
     (draw-sketch! game renderer children opts)))
 
@@ -145,7 +153,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-focus [focus [:div {:x x :y y}
                        [:fill {:color "lightblue"}
                         [:rect {:x 0 :y 0 :width 100 :height 100}]]]]}
-  (defonce div-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce div-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto div-game
       (start-example-game card *state)
@@ -162,7 +170,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :text [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         {:keys [value x y size font halign valign leading style] :as opts}
         (utils/update-opts opts parent-opts utils/text-defaults)]
     (doto renderer
@@ -186,7 +194,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-focus [focus [:text {:value "Hello, world!"
                               :x 0 :y 50 :size 16
                               :font "Georgia" :style :italic}]]}
-  (defonce text-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce text-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto text-game
       (start-example-game card *state)
@@ -203,7 +211,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :arc [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         {:keys [x y width height start stop] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)]
     (.arc renderer x y width height start stop)
@@ -219,7 +227,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-callback callback
    :with-focus [focus [:arc {:x 200 :y 0 :width 200 :height 200 :start 0 :stop 3.14}]]}
-  (defonce arc-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce arc-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto arc-game
       (start-example-game card *state)
@@ -236,7 +244,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :ellipse [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         {:keys [x y width height] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)]
     (.ellipse renderer x y width height)
@@ -250,7 +258,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-callback callback
    :with-focus [focus [:ellipse {:x 100 :y 100 :width 50 :height 70}]]}
-  (defonce ellipse-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce ellipse-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto ellipse-game
       (start-example-game card *state)
@@ -267,7 +275,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :line [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2] :as opts}
         (-> opts
@@ -288,7 +296,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-callback callback
    :with-focus [focus [:line {:x1 0 :y1 0 :x2 50 :y2 50}]]}
-  (defonce line-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce line-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto line-game
       (start-example-game card *state)
@@ -305,7 +313,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :point [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         {:keys [x y] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)]
     (.point renderer x y)
@@ -322,7 +330,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
                        [:point {:x 25 :y 5}]
                        [:point {:x 30 :y 5}]
                        [:point {:x 35 :y 5}]]]}
-  (defonce point-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce point-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto point-game
       (start-example-game card *state)
@@ -339,7 +347,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :quad [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4] :as opts}
         (-> opts
@@ -368,7 +376,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-callback callback
    :with-focus [focus [:quad {:x1 50 :y1 55 :x2 70 :y2 15 :x3 10 :y3 15 :x4 20 :y4 55}]]}
-  (defonce quad-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce quad-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto quad-game
       (start-example-game card *state)
@@ -385,7 +393,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :rect [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         {:keys [x y width height] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)]
     (.rect renderer x y width height)
@@ -400,7 +408,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-callback callback
    :with-focus [focus [:rect {:x 10 :y 15 :width 20 :height 30}]]}
-  (defonce rect-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce rect-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto rect-game
       (start-example-game card *state)
@@ -417,7 +425,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :triangle [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3] :as opts}
         (-> opts
@@ -442,7 +450,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-callback callback
    :with-focus [focus [:triangle {:x1 10, :y1 10, :x2 50, :y2 25, :x3 10, :y3 35}]]}
-  (defonce triangle-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce triangle-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto triangle-game
       (start-example-game card *state)
@@ -459,7 +467,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :image [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         {:keys [value name x y width height sx sy swidth sheight scale-x scale-y flip-x flip-y]
          :as opts} (utils/update-opts opts parent-opts utils/img-defaults)
         ^js/p5.Image value (or value
@@ -499,7 +507,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-callback callback
    :with-focus [focus [:image {:name "player_stand.png" :x 0 :y 0 :width 80 :height 80}]]}
-  (defonce image-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce image-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto image-game
       (start-example-game card *state)
@@ -516,7 +524,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :animation [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         {:keys [duration] :as opts} (utils/update-opts opts parent-opts utils/basic-defaults)
         images (vec children)
         cycle-time (mod (get-total-time game) (* duration (count images)))
@@ -534,7 +542,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
                        [:image {:name "player_walk1.png" :width 80 :height 80}]
                        [:image {:name "player_walk2.png" :width 80 :height 80}]
                        [:image {:name "player_walk3.png" :width 80 :height 80}]]]}
-  (defonce animation-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce animation-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto animation-game
       (start-example-game card *state)
@@ -550,7 +558,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (catch js/Error e (callback e))))))))))
 
 (defmethod draw-sketch! :fill [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         {:keys [grayscale color colors] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)]
     (.push renderer)
@@ -560,8 +568,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
       color
       (.fill renderer color)
       colors
-      (let [[n1 n2 n3] colors]
-        (.fill renderer n1 n2 n3))
+      (let [[n1 n2 n3 a] colors]
+        (.fill renderer n1 n2 n3 a))
       :else
       (.noFill renderer))
     (draw-sketch! game renderer children opts)
@@ -576,7 +584,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-callback callback
    :with-focus [focus [:fill {:color "purple"}
                        [:rect {:x 40 :y 40 :width 150 :height 150}]]]}
-  (defonce fill-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce fill-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto fill-game
       (start-example-game card *state)
@@ -593,7 +601,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :stroke [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         {:keys [grayscale color colors] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)]
     (.push renderer)
@@ -619,7 +627,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-callback callback
    :with-focus [focus [:stroke {:color "green"}
                        [:rect {:x 50 :y 50 :width 70 :height 70}]]]}
-  (defonce stroke-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce stroke-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto stroke-game
       (start-example-game card *state)
@@ -636,7 +644,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :bezier [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4
                 z1 z2 z3 z4] :as opts}
@@ -678,7 +686,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-callback callback
    :with-focus [focus [:stroke {:colors [0 0 0]}
                        [:bezier {:x1 85 :y1 20 :x2 10 :y2 10 :x3 90 :y3 90 :x4 15 :y4 80}]]]}
-  (defonce bezier-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce bezier-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto bezier-game
       (start-example-game card *state)
@@ -695,7 +703,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :curve [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4
                 z1 z2 z3 z4] :as opts}
@@ -738,7 +746,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-callback callback
    :with-focus [focus [:stroke {:colors [255 102 0]}
                        [:curve {:x1 5 :y1 26 :x2 5 :y2 26 :x3 73 :y3 24 :x4 73 :y4 180}]]]}
-  (defonce curve-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce curve-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto curve-game
       (start-example-game card *state)
@@ -755,26 +763,33 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :rgb [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
-        {:keys [max-r max-g max-b max-a] :as opts}
+  (let [[_ opts & children] content
+        {:keys [max-r max-g max-b max-a]} opts
+        {:keys [max-red max-green max-blue max-alpha] :as opts}
         (utils/update-opts opts parent-opts utils/rgb-defaults)]
     (.push renderer)
-    (.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a)
+    (.colorMode renderer
+      (.-RGB renderer)
+      (or max-r max-red)
+      (or max-g max-green)
+      (or max-b max-blue)
+      (or max-a max-alpha))
     (draw-sketch! game renderer children opts)
     (.pop renderer)))
 
 (defexample :rgb
   {:doc "Causes the color values in all children to be interpreted as RGB colors.
    
-   :max-r  -  Range for red (number)
-   :max-g  -  Range for green (number)
-   :max-b  -  Range for blue (number)"
+   :max-red    -  Range for red (number between 0 and 255)
+   :max-green  -  Range for green (number between 0 and 255)
+   :max-blue   -  Range for blue (number between 0 and 255)
+   :max-alpha  -  Range for alpha (number between 0 and 255)"
    :with-card card
    :with-callback callback
-   :with-focus [focus [:rgb {:max-r 100 :max-g 100 :max-b 100}
+   :with-focus [focus [:rgb {:max-red 100 :max-green 100 :max-blue 100}
                        [:fill {:colors [20 50 70]}
                         [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
-  (defonce rgb-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce rgb-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto rgb-game
       (start-example-game card *state)
@@ -791,26 +806,33 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :hsb [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
-        {:keys [max-h max-s max-b max-a] :as opts}
+  (let [[_ opts & children] content
+        {:keys [max-h max-s max-b max-a]} opts
+        {:keys [max-hue max-saturation max-brightness max-alpha] :as opts}
         (utils/update-opts opts parent-opts utils/hsb-defaults)]
     (.push renderer)
-    (.colorMode renderer (.-HSB renderer) max-h max-s max-b max-a)
+    (.colorMode renderer
+      (.-HSB renderer)
+      (or max-h max-hue)
+      (or max-s max-saturation)
+      (or max-b max-brightness)
+      (or max-a max-alpha))
     (draw-sketch! game renderer children opts)
     (.pop renderer)))
 
 (defexample :hsb
   {:doc "Causes the color values in all children to be interpreted as HSB colors.
    
-   :max-h  -  Range for hue (number)
-   :max-s  -  Range for saturation (number)
-   :max-b  -  Range for brightness (number)"
+   :max-hue         -  Range for hue (number between 0 and 360)
+   :max-saturation  -  Range for saturation (number between 0 and 100)
+   :max-brightness  -  Range for brightness (number between 0 and 100)
+   :max-alpha       -  Range for alpha (number between 0 and 255)"
    :with-card card
    :with-callback callback
-   :with-focus [focus [:hsb {:max-h 100 :max-s 100 :max-b 100}
+   :with-focus [focus [:hsb {:max-hue 100 :max-saturation 100 :max-brightness 100}
                        [:fill {:colors [20 50 70]}
                         [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
-  (defonce hsb-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce hsb-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto hsb-game
       (start-example-game card *state)
@@ -827,7 +849,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :tiled-map [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         {:keys [value name x y] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)
         ^js/p5.TiledMap value (or value
@@ -839,19 +861,20 @@ hard-coded at (0,0) but the :div is passing its own position down."
 ; TODO: tiled-map examaple
 
 (defmethod draw-sketch! :shape [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         points (:points opts)]
-    (cond (odd? (count points))
-          (throw ":shape requires :points to contain a seq'able with an even number of values (x and y pairs)")
-          :else
-          (do (.beginShape renderer)
-              (loop [[x y & rest] points]
-                (.vertex renderer x y)
-                (when rest
-                  (recur rest)))
-              (draw-sketch! game renderer children opts)
-              (.endShape renderer (.-CLOSE renderer))))))
+    (cond
+      (odd? (count points))
+      (throw ":shape requires :points to contain a seq'able with an even number of values (x and y pairs)")
+      :else
+      (do (.beginShape renderer)
+          (loop [[x y & rest] points]
+            (.vertex renderer x y)
+            (when rest
+              (recur rest)))
+          (draw-sketch! game renderer children opts)
+          (.endShape renderer (.-CLOSE renderer))))))
 
 (defexample :shape
   {:doc "Draws a complex shape.
@@ -860,7 +883,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-card card
    :with-callback callback
    :with-focus [focus [:shape {:points [30 20 85 20 85 75 30 75]}]]}
-  (defonce shape-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce shape-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto shape-game
       (start-example-game card *state)
@@ -877,19 +900,20 @@ hard-coded at (0,0) but the :div is passing its own position down."
   nil)
 
 (defmethod draw-sketch! :contour [game ^js/p5 renderer content parent-opts]
-  (let [[command opts & children] content
+  (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         points (:points opts)]
-    (cond (odd? (count points))
-          (throw ":contour requires :points to contain a seq'able with an even number of values (x and y pairs)")
-          :else
-          (do (.beginContour renderer)
-              (loop [[x y & rest] points]
-                (.vertex renderer x y)
-                (when rest
-                  (recur rest)))
-              (draw-sketch! game renderer children opts)
-              (.endContour renderer (.-CLOSE renderer))))))
+    (cond
+      (odd? (count points))
+      (throw ":contour requires :points to contain a seq'able with an even number of values (x and y pairs)")
+      :else
+      (do (.beginContour renderer)
+        (loop [[x y & rest] points]
+          (.vertex renderer x y)
+          (when rest
+            (recur rest)))
+        (draw-sketch! game renderer children opts)
+        (.endContour renderer (.-CLOSE renderer))))))
 
 (defexample :contour
   {:doc "Draws a negative shape.
@@ -899,7 +923,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :with-callback callback
    :with-focus [focus [:shape {:points [40 40 80 40 80 80 40 80]}
                        [:contour {:points [20 20 20 40 40 40 40 20]}]]]}
-  (defonce contour-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card}))
+  (defonce contour-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto contour-game
       (start-example-game card *state)
@@ -915,20 +939,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (catch js/Error e (callback e)))))))))
   nil)
 
-(defmethod draw-sketch! :default [game ^js/p5 renderer content parent-opts]
-  (cond
-    (sequential? (first content))
-    (run! #(draw-sketch! game renderer % parent-opts) content)
-    (nil? (first content))
-    nil
-    :else
-    (throw (js/Error. (str "Invalid sketch command: " (pr-str content))))))
-
 (defn create-game
   "Returns a game object."
   ([width height]
    (create-game width height {}))
-  ([width height {:keys [parent]}]
+  ([width height {:keys [parent debug?]
+                  :or {debug? (not js/COMPILED)}}]
+   (if debug?
+     (js/console.log
+       (str "Debugging is enabled. If things are slow, try passing "
+         "`:debug? false` to the options map of `create-game`."))
+     (set! (.-disableFriendlyErrors ^js/p5 js/p5) true))
    (let [*hidden-state (atom {:screen nil
                               :renderer nil
                               :canvas nil
@@ -950,7 +971,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
                (fn []
                  ;; create the canvas
                  (let [^js/p5 canvas-wrapper (cond-> (.createCanvas renderer width height)
-                                               parent (.parent parent))
+                                                     parent (.parent parent))
                        canvas (.-canvas canvas-wrapper)]
                    (.removeAttribute canvas "style")
                    (swap! *hidden-state assoc :renderer renderer :canvas canvas))
@@ -968,8 +989,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
                  (.clear renderer)
                  (some-> this get-screen on-render)))))
          (listen this "keydown"
-            (fn [^js/KeyboardEvent e]
-              (swap! *hidden-state update :pressed-keys conj (.-keyCode e))))
+           (fn [^js/KeyboardEvent e]
+             (swap! *hidden-state update :pressed-keys conj (.-keyCode e))))
          (listen this "keyup"
            (fn [^js/KeyboardEvent e]
              (if (contains? #{91 93} (.-keyCode e))
@@ -979,11 +1000,15 @@ hard-coded at (0,0) but the :div is passing its own position down."
            #(swap! *hidden-state assoc :pressed-keys #{})))
        (listen [this listen-type listener]
          (swap! *hidden-state update :listeners conj
-                (events/listen js/window listen-type listener)))
+           (events/listen js/window listen-type listener)))
        (render [this content]
+         (when debug?
+           (utils/check content))
          (when-let [^js/p5 renderer (get-renderer this)]
            (draw-sketch! this renderer content {})))
        (pre-render [this image-name width height content]
+         (when debug?
+           (utils/check content))
          (when-let [^js/p5 renderer (get-renderer this)]
            (let [object (.createGraphics renderer width height)]
              (draw-sketch! this object content {})
