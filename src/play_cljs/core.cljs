@@ -70,9 +70,7 @@ A tiled map with the provided name must already be loaded
   (set-size [game width height]
     "Sets the virtual width and height of the game.")
   (get-asset [game name]
-    "Gets the asset with the given name.")
-  (debug? [game]
-    "Returns true if debugging is enabled."))
+    "Gets the asset with the given name."))
 
 (defn ^:private start-example-game [game card *state]
   (doto game
@@ -142,7 +140,7 @@ to define new entity types."
 (defmethod draw-sketch! :div [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (debug? game) (options/check-opts ::options/basic-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/basic-opts opts))
     (draw-sketch! game renderer children opts)))
 
 (defexample :div
@@ -180,7 +178,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [value x y size font halign valign leading style] :as opts}
         (options/update-opts opts parent-opts options/text-defaults)]
-    (when (debug? game) (options/check-opts ::text-opts opts))
+    (when (:debug? opts) (options/check-opts ::text-opts opts))
     (doto renderer
       (.textSize size)
       (.textFont font)
@@ -227,7 +225,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [x y width height start stop] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (debug? game) (options/check-opts ::arc-opts opts))
+    (when (:debug? opts) (options/check-opts ::arc-opts opts))
     (.arc renderer x y width height start stop)
     (draw-sketch! game renderer children opts)))
 
@@ -266,7 +264,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [x y width height] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (debug? game) (options/check-opts ::ellipse-opts opts))
+    (when (:debug? opts) (options/check-opts ::ellipse-opts opts))
     (.ellipse renderer x y width height)
     (draw-sketch! game renderer children opts)))
 
@@ -308,7 +306,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y1 + (:y opts))
             (update :x2 + (:x opts))
             (update :y2 + (:y opts)))]
-    (when (debug? game) (options/check-opts ::line-opts opts))
+    (when (:debug? opts) (options/check-opts ::line-opts opts))
     (.line renderer x1 y1 x2 y2)
     (draw-sketch! game renderer children opts)))
 
@@ -343,7 +341,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [x y] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (debug? game) (options/check-opts ::options/point-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/point-opts opts))
     (.point renderer x y)
     (draw-sketch! game renderer children opts)))
 
@@ -392,7 +390,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y3 + (:y opts))
             (update :x4 + (:x opts))
             (update :y4 + (:y opts)))]
-    (when (debug? game) (options/check-opts ::quad-opts opts))
+    (when (:debug? opts) (options/check-opts ::quad-opts opts))
     (.quad renderer x1 y1 x2 y2 x3 y3 x4 y4)
     (draw-sketch! game renderer children opts)))
 
@@ -435,7 +433,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [x y width height] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (debug? game) (options/check-opts ::rect-opts opts))
+    (when (:debug? opts) (options/check-opts ::rect-opts opts))
     (.rect renderer x y width height)
     (draw-sketch! game renderer children opts)))
 
@@ -480,7 +478,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y2 + (:y opts))
             (update :x3 + (:x opts))
             (update :y3 + (:y opts)))]
-    (when (debug? game) (options/check-opts ::triangle-opts opts))
+    (when (:debug? opts) (options/check-opts ::triangle-opts opts))
     (.triangle renderer x1 y1 x2 y2 x3 y3)
     (draw-sketch! game renderer children opts)))
 
@@ -521,7 +519,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [value name x y width height sx sy swidth sheight scale-x scale-y flip-x flip-y]
          :as opts} (options/update-opts opts parent-opts options/image-defaults)
-        _ (when (debug? game) (options/check-opts ::image-opts opts))
+        _ (when (:debug? opts) (options/check-opts ::image-opts opts))
         ^js/p5.Image value (or value
                                (get-asset game name)
                                (load-image game name))
@@ -583,7 +581,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defmethod draw-sketch! :animation [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [duration] :as opts} (options/update-opts opts parent-opts options/basic-defaults)
-        _ (when (debug? game) (options/check-opts ::animation-opts opts))
+        _ (when (:debug? opts) (options/check-opts ::animation-opts opts))
         images (vec children)
         cycle-time (mod (get-total-time game) (* duration (count images)))
         index (int (/ cycle-time duration))
@@ -625,7 +623,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [grayscale color colors] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (debug? game) (options/check-opts ::fill-opts opts))
+    (when (:debug? opts) (options/check-opts ::fill-opts opts))
     (.push renderer)
     (cond
       grayscale
@@ -674,7 +672,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [grayscale color colors] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (debug? game) (options/check-opts ::stroke-opts opts))
+    (when (:debug? opts) (options/check-opts ::stroke-opts opts))
     (.push renderer)
     (cond
       grayscale
@@ -733,7 +731,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y3 + (:y opts))
             (update :x4 + (:x opts))
             (update :y4 + (:y opts)))]
-    (when (debug? game) (options/check-opts ::bezier-opts opts))
+    (when (:debug? opts) (options/check-opts ::bezier-opts opts))
     (if (and z1 z2 z3 z4)
       (.bezier renderer x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4)
       (.bezier renderer x1 y1 x2 y2 x3 y3 x4 y4))
@@ -794,7 +792,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y3 + (:y opts))
             (update :x4 + (:x opts))
             (update :y4 + (:y opts)))]
-    (when (debug? game) (options/check-opts ::curve-opts opts))
+    (when (:debug? opts) (options/check-opts ::curve-opts opts))
     (if (and z1 z2 z3 z4)
       (.curve renderer x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4)
       (.curve renderer x1 y1 x2 y2 x3 y3 x4 y4))
@@ -846,7 +844,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [max-r max-g max-b max-a] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (debug? game) (options/check-opts ::rgb-opts opts))
+    (when (:debug? opts) (options/check-opts ::rgb-opts opts))
     (.push renderer)
     (.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a)
     (draw-sketch! game renderer children opts)
@@ -889,7 +887,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [max-h max-s max-b max-a] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (debug? game) (options/check-opts ::hsb-opts opts))
+    (when (:debug? opts) (options/check-opts ::hsb-opts opts))
     (.push renderer)
     (.colorMode renderer (.-HSB renderer) max-h max-s max-b max-a)
     (draw-sketch! game renderer children opts)
@@ -932,7 +930,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [max-h max-s max-l max-a] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (debug? game) (options/check-opts ::hsl-opts opts))
+    (when (:debug? opts) (options/check-opts ::hsl-opts opts))
     (.push renderer)
     (.colorMode renderer (.-HSL renderer) max-h max-s max-l max-a)
     (draw-sketch! game renderer children opts)
@@ -975,7 +973,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [value name x y] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)
-        _ (when (debug? game) (options/check-opts ::tiled-map-opts opts))
+        _ (when (:debug? opts) (options/check-opts ::tiled-map-opts opts))
         ^js/p5.TiledMap value (or value
                                   (get-asset game name)
                                   (load-tiled-map game name))]
@@ -991,7 +989,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defmethod draw-sketch! :shape [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (debug? game) (options/check-opts ::shape-opts opts))
+    (when (:debug? opts) (options/check-opts ::shape-opts opts))
     (.beginShape renderer)
     (loop [[x y & rest] (:points opts)]
       (.vertex renderer x y)
@@ -1031,7 +1029,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defmethod draw-sketch! :contour [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (debug? game) (options/check-opts ::contour-opts opts))
+    (when (:debug? opts) (options/check-opts ::contour-opts opts))
     (.beginContour renderer)
     (loop [[x y & rest] (:points opts)]
       (.vertex renderer x y)
@@ -1093,7 +1091,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
                               :delta-time 0
                               :pressed-keys #{}
                               :assets {}})
-         setup-finished? (promise-chan)]
+         setup-finished? (promise-chan)
+         parent-opts (if debug? {:debug? true} {})]
      (reify Game
        (start [this]
          (when-let [^js/p5 renderer (get-renderer this)]
@@ -1138,11 +1137,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
            (events/listen js/window listen-type listener)))
        (render [this content]
          (when-let [^js/p5 renderer (get-renderer this)]
-           (draw-sketch! this renderer content {})))
+           (draw-sketch! this renderer content parent-opts)))
        (pre-render [this image-name width height content]
          (when-let [^js/p5 renderer (get-renderer this)]
            (let [object (.createGraphics renderer width height)]
-             (draw-sketch! this object content {})
+             (draw-sketch! this object content parent-opts)
              (swap! *hidden-state update :assets assoc image-name object)
              object)))
        (load-image [this path]
@@ -1185,6 +1184,5 @@ hard-coded at (0,0) but the :div is passing its own position down."
          (when-let [^js/p5 renderer (get-renderer this)]
            (.resizeCanvas renderer width height)))
        (get-asset [game name]
-         (get-in @*hidden-state [:assets name]))
-       (debug? [game] debug?)))))
+         (get-in @*hidden-state [:assets name]))))))
 
