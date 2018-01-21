@@ -141,9 +141,7 @@ After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
 (defmethod draw-sketch! :div [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::options/basic-opts opts)))
-      (throw (js/Error. (s/explain-str ::options/basic-opts opts))))
+    (when (debug? game) (options/check-opts ::options/basic-opts opts))
     (draw-sketch! game renderer children opts)))
 
 (defexample :div
@@ -181,9 +179,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [value x y size font halign valign leading style] :as opts}
         (options/update-opts opts parent-opts options/text-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::text-opts opts)))
-      (throw (js/Error. (s/explain-str ::text-opts opts))))
+    (when (debug? game) (options/check-opts ::text-opts opts))
     (doto renderer
       (.textSize size)
       (.textFont font)
@@ -230,9 +226,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [x y width height start stop] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::arc-opts opts)))
-      (throw (js/Error. (s/explain-str ::arc-opts opts))))
+    (when (debug? game) (options/check-opts ::arc-opts opts))
     (.arc renderer x y width height start stop)
     (draw-sketch! game renderer children opts)))
 
@@ -271,9 +265,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [x y width height] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::ellipse-opts opts)))
-      (throw (js/Error. (s/explain-str ::ellipse-opts opts))))
+    (when (debug? game) (options/check-opts ::ellipse-opts opts))
     (.ellipse renderer x y width height)
     (draw-sketch! game renderer children opts)))
 
@@ -315,9 +307,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y1 + (:y opts))
             (update :x2 + (:x opts))
             (update :y2 + (:y opts)))]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::line-opts opts)))
-      (throw (js/Error. (s/explain-str ::line-opts opts))))
+    (when (debug? game) (options/check-opts ::line-opts opts))
     (.line renderer x1 y1 x2 y2)
     (draw-sketch! game renderer children opts)))
 
@@ -352,9 +342,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [x y] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::options/point-opts opts)))
-      (throw (js/Error. (s/explain-str ::options/point-opts opts))))
+    (when (debug? game) (options/check-opts ::options/point-opts opts))
     (.point renderer x y)
     (draw-sketch! game renderer children opts)))
 
@@ -403,9 +391,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y3 + (:y opts))
             (update :x4 + (:x opts))
             (update :y4 + (:y opts)))]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::quad-opts opts)))
-      (throw (js/Error. (s/explain-str ::quad-opts opts))))
+    (when (debug? game) (options/check-opts ::quad-opts opts))
     (.quad renderer x1 y1 x2 y2 x3 y3 x4 y4)
     (draw-sketch! game renderer children opts)))
 
@@ -448,9 +434,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [x y width height] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::rect-opts opts)))
-      (throw (js/Error. (s/explain-str ::rect-opts opts))))
+    (when (debug? game) (options/check-opts ::rect-opts opts))
     (.rect renderer x y width height)
     (draw-sketch! game renderer children opts)))
 
@@ -495,9 +479,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y2 + (:y opts))
             (update :x3 + (:x opts))
             (update :y3 + (:y opts)))]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::triangle-opts opts)))
-      (throw (js/Error. (s/explain-str ::triangle-opts opts))))
+    (when (debug? game) (options/check-opts ::triangle-opts opts))
     (.triangle renderer x1 y1 x2 y2 x3 y3)
     (draw-sketch! game renderer children opts)))
 
@@ -538,14 +520,12 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [value name x y width height sx sy swidth sheight scale-x scale-y flip-x flip-y]
          :as opts} (options/update-opts opts parent-opts options/image-defaults)
+        _ (when (debug? game) (options/check-opts ::image-opts opts))
         ^js/p5.Image value (or value
                                (get-asset game name)
                                (load-image game name))
         swidth (or swidth (.-width value))
         sheight (or sheight (.-height value))]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::image-opts opts)))
-      (throw (js/Error. (s/explain-str ::image-opts opts))))
     (.push renderer)
     (.translate renderer x y)
     (.scale renderer scale-x scale-y)
@@ -602,13 +582,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defmethod draw-sketch! :animation [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [duration] :as opts} (options/update-opts opts parent-opts options/basic-defaults)
+        _ (when (debug? game) (options/check-opts ::animation-opts opts))
         images (vec children)
         cycle-time (mod (get-total-time game) (* duration (count images)))
         index (int (/ cycle-time duration))
         image (get images index)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::animation-opts opts)))
-      (throw (js/Error. (s/explain-str ::animation-opts opts))))
     (draw-sketch! game renderer image opts)))
 
 (defexample :animation
@@ -646,9 +624,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [grayscale color colors] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::fill-opts opts)))
-      (throw (js/Error. (s/explain-str ::fill-opts opts))))
+    (when (debug? game) (options/check-opts ::fill-opts opts))
     (.push renderer)
     (cond
       grayscale
@@ -697,9 +673,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [grayscale color colors] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::stroke-opts opts)))
-      (throw (js/Error. (s/explain-str ::stroke-opts opts))))
+    (when (debug? game) (options/check-opts ::stroke-opts opts))
     (.push renderer)
     (cond
       grayscale
@@ -758,9 +732,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y3 + (:y opts))
             (update :x4 + (:x opts))
             (update :y4 + (:y opts)))]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::bezier-opts opts)))
-      (throw (js/Error. (s/explain-str ::bezier-opts opts))))
+    (when (debug? game) (options/check-opts ::bezier-opts opts))
     (if (and z1 z2 z3 z4)
       (.bezier renderer x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4)
       (.bezier renderer x1 y1 x2 y2 x3 y3 x4 y4))
@@ -821,9 +793,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y3 + (:y opts))
             (update :x4 + (:x opts))
             (update :y4 + (:y opts)))]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::curve-opts opts)))
-      (throw (js/Error. (s/explain-str ::curve-opts opts))))
+    (when (debug? game) (options/check-opts ::curve-opts opts))
     (if (and z1 z2 z3 z4)
       (.curve renderer x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4)
       (.curve renderer x1 y1 x2 y2 x3 y3 x4 y4))
@@ -875,9 +845,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [max-r max-g max-b max-a] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::rgb-opts opts)))
-      (throw (js/Error. (s/explain-str ::rgb-opts opts))))
+    (when (debug? game) (options/check-opts ::rgb-opts opts))
     (.push renderer)
     (.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a)
     (draw-sketch! game renderer children opts)
@@ -920,9 +888,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [max-h max-s max-b max-a] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::hsb-opts opts)))
-      (throw (js/Error. (s/explain-str ::hsb-opts opts))))
+    (when (debug? game) (options/check-opts ::hsb-opts opts))
     (.push renderer)
     (.colorMode renderer (.-HSB renderer) max-h max-s max-b max-a)
     (draw-sketch! game renderer children opts)
@@ -965,9 +931,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [max-h max-s max-l max-a] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::hsl-opts opts)))
-      (throw (js/Error. (s/explain-str ::hsl-opts opts))))
+    (when (debug? game) (options/check-opts ::hsl-opts opts))
     (.push renderer)
     (.colorMode renderer (.-HSL renderer) max-h max-s max-l max-a)
     (draw-sketch! game renderer children opts)
@@ -1010,12 +974,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         {:keys [value name x y] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)
+        _ (when (debug? game) (options/check-opts ::tiled-map-opts opts))
         ^js/p5.TiledMap value (or value
                                   (get-asset game name)
                                   (load-tiled-map game name))]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::tiled-map-opts opts)))
-      (throw (js/Error. (s/explain-str ::tiled-map-opts opts))))
     (.draw value x y)
     (draw-sketch! game renderer children opts)))
 
@@ -1028,9 +990,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defmethod draw-sketch! :shape [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::shape-opts opts)))
-      (throw (js/Error. (s/explain-str ::shape-opts opts))))
+    (when (debug? game) (options/check-opts ::shape-opts opts))
     (.beginShape renderer)
     (loop [[x y & rest] (:points opts)]
       (.vertex renderer x y)
@@ -1070,9 +1030,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defmethod draw-sketch! :contour [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (and (debug? game)
-               (= :cljs.spec.alpha/invalid (s/conform ::contour-opts opts)))
-      (throw (js/Error. (s/explain-str ::contour-opts opts))))
+    (when (debug? game) (options/check-opts ::contour-opts opts))
     (.beginContour renderer)
     (loop [[x y & rest] (:points opts)]
       (.vertex renderer x y)
