@@ -300,13 +300,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defmethod draw-sketch! :line [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)
+        _ (when (:debug? opts) (options/check-opts ::line-opts opts))
         {:keys [x1 y1 x2 y2] :as opts}
         (-> opts
             (update :x1 + (:x opts))
             (update :y1 + (:y opts))
             (update :x2 + (:x opts))
             (update :y2 + (:y opts)))]
-    (when (:debug? opts) (options/check-opts ::line-opts opts))
     (.line renderer x1 y1 x2 y2)
     (draw-sketch! game renderer children opts)))
 
@@ -380,6 +380,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defmethod draw-sketch! :quad [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)
+        _ (when (:debug? opts) (options/check-opts ::quad-opts opts))
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4] :as opts}
         (-> opts
             (update :x1 + (:x opts))
@@ -390,7 +391,6 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y3 + (:y opts))
             (update :x4 + (:x opts))
             (update :y4 + (:y opts)))]
-    (when (:debug? opts) (options/check-opts ::quad-opts opts))
     (.quad renderer x1 y1 x2 y2 x3 y3 x4 y4)
     (draw-sketch! game renderer children opts)))
 
@@ -470,6 +470,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defmethod draw-sketch! :triangle [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)
+        _ (when (:debug? opts) (options/check-opts ::triangle-opts opts))
         {:keys [x1 y1 x2 y2 x3 y3] :as opts}
         (-> opts
             (update :x1 + (:x opts))
@@ -478,7 +479,6 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y2 + (:y opts))
             (update :x3 + (:x opts))
             (update :y3 + (:y opts)))]
-    (when (:debug? opts) (options/check-opts ::triangle-opts opts))
     (.triangle renderer x1 y1 x2 y2 x3 y3)
     (draw-sketch! game renderer children opts)))
 
@@ -720,6 +720,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defmethod draw-sketch! :bezier [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)
+        _ (when (:debug? opts) (options/check-opts ::bezier-opts opts))
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4
                 z1 z2 z3 z4] :as opts}
         (-> opts
@@ -731,7 +732,6 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y3 + (:y opts))
             (update :x4 + (:x opts))
             (update :y4 + (:y opts)))]
-    (when (:debug? opts) (options/check-opts ::bezier-opts opts))
     (if (and z1 z2 z3 z4)
       (.bezier renderer x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4)
       (.bezier renderer x1 y1 x2 y2 x3 y3 x4 y4))
@@ -781,6 +781,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
 (defmethod draw-sketch! :curve [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)
+        _ (when (:debug? opts) (options/check-opts ::curve-opts opts))
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4
                 z1 z2 z3 z4] :as opts}
         (-> opts
@@ -792,7 +793,6 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y3 + (:y opts))
             (update :x4 + (:x opts))
             (update :y4 + (:y opts)))]
-    (when (:debug? opts) (options/check-opts ::curve-opts opts))
     (if (and z1 z2 z3 z4)
       (.curve renderer x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4)
       (.curve renderer x1 y1 x2 y2 x3 y3 x4 y4))
