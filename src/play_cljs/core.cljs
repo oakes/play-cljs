@@ -929,7 +929,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (throw (js/Error. (s/explain-str ::rgb content))))
   (let [[_ opts & children] content
         {:keys [max-r max-g max-b max-a] :as opts}
-        (options/update-opts opts parent-opts options/rgb-defaults)]
+        (options/update-opts opts parent-opts options/basic-defaults)]
     (.push renderer)
     (.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a)
     (draw-sketch! game renderer children opts)
@@ -977,7 +977,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (throw (js/Error. (s/explain-str ::hsb content))))
   (let [[_ opts & children] content
         {:keys [max-h max-s max-b max-a] :as opts}
-        (options/update-opts opts parent-opts options/hsb-defaults)]
+        (options/update-opts opts parent-opts options/basic-defaults)]
     (.push renderer)
     (.colorMode renderer (.-HSB renderer) max-h max-s max-b max-a)
     (draw-sketch! game renderer children opts)
@@ -1007,6 +1007,54 @@ hard-coded at (0,0) but the :div is passing its own position down."
                         (try
                           (let [content focus]
                             (render hsb-game content)
+                            (callback content))
+                          (catch js/Error e (callback e))))))))))
+
+;; hsl
+
+(s/def ::hsl (s/cat
+               :name #{:hsl}
+               :opts (s/merge
+                       ::options/basic-opts
+                       ::options/hsl-opts)
+               :children (s/* ::content)))
+
+(defmethod draw-sketch! :hsl [game ^js/p5 renderer content parent-opts]
+  (when (and (debug? game)
+             (= :cljs.spec.alpha/invalid (s/conform ::hsl content)))
+    (throw (js/Error. (s/explain-str ::hsl content))))
+  (let [[_ opts & children] content
+        {:keys [max-h max-s max-l max-a] :as opts}
+        (options/update-opts opts parent-opts options/basic-defaults)]
+    (.push renderer)
+    (.colorMode renderer (.-HSL renderer) max-h max-s max-l max-a)
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
+
+(defexample :hsl
+  {:doc "Causes the color values in all children to be interpreted as HSL colors.
+   
+   :max-h  -  Range for hue (number between 0 and 360)
+   :max-s  -  Range for saturation (number between 0 and 100)
+   :max-l  -  Range for lightness (number between 0 and 100)
+   :max-a  -  Range for alpha (number between 0 and 255)"
+   :with-card card
+   :with-callback callback
+   :with-focus [focus [:hsl {:max-h 50 :max-s 50 :max-l 100}
+                       [:fill {:colors [20 50 70]}
+                        [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
+  (defonce hsl-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
+  (let [*state (atom {})]
+    (doto hsl-game
+      (start-example-game card *state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
+                        (try
+                          (let [content focus]
+                            (render hsl-game content)
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 

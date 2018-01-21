@@ -75,7 +75,7 @@
 
 (s/def ::quad-opts (s/keys :req-un [::x1 ::y1 ::x2 ::y2 ::x3 ::y3 ::x4 ::y4]))
 
-(s/def ::rect-opts (s/keys :req-un [::x ::y ::width ::height]))
+(s/def ::rect-opts (s/keys :req-un [::width ::height]))
 
 (s/def ::triangle-opts (s/keys :req-un [::x1 ::y1 ::x2 ::y2 ::x3 ::y3]))
 
@@ -130,7 +130,6 @@
                              :play-cljs.options.rgb/max-g
                              :play-cljs.options.rgb/max-b]
                     :opt-un [:play-cljs.options.rgb/max-a]))
-(def ^:const rgb-defaults (merge basic-defaults {:max-r 255 :max-g 255 :max-b 255 :max-a 1}))
 
 (s/def :play-cljs.options.hsb/max-h #(<= 0 % 360))
 (s/def :play-cljs.options.hsb/max-s #(<= 0 % 100))
@@ -142,7 +141,17 @@
                              :play-cljs.options.hsb/max-s
                              :play-cljs.options.hsb/max-b]
                     :opt-un [:play-cljs.options.hsb/max-a]))
-(def ^:const hsb-defaults (merge basic-defaults {:max-h 360 :max-s 100 :max-b 100 :max-a 1}))
+
+(s/def :play-cljs.options.hsl/max-h #(<= 0 % 360))
+(s/def :play-cljs.options.hsl/max-s #(<= 0 % 100))
+(s/def :play-cljs.options.hsl/max-l #(<= 0 % 100))
+(s/def :play-cljs.options.hsl/max-a #(<= 0 % 255))
+
+(s/def ::hsl-opts (s/keys
+                    :req-un [:play-cljs.options.hsl/max-h
+                             :play-cljs.options.hsl/max-s
+                             :play-cljs.options.hsl/max-l]
+                    :opt-un [:play-cljs.options.hsl/max-a]))
 
 (s/def :play-cljs.options.tiled-map/value #(instance? js/p5.TiledMap %))
 
