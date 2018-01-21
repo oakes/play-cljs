@@ -50,16 +50,71 @@
                               :leading 0
                               :style :normal}))
 
+(s/def ::start number?)
+(s/def ::stop number?)
+
+(s/def ::arc-opts (s/keys :req-un [::width ::height ::start ::stop]))
+
+(s/def ::ellipse-opts (s/keys :req-un [::width ::height]))
+
+(s/def ::x1 number?)
+(s/def ::y1 number?)
+(s/def ::x2 number?)
+(s/def ::y2 number?)
+(s/def ::x3 number?)
+(s/def ::y3 number?)
+(s/def ::x4 number?)
+(s/def ::y4 number?)
+
+(s/def ::line-opts (s/keys :req-un [::x1 ::y1 ::x2 ::y2]))
+
+(s/def ::point-opts (s/keys :req-un [::x ::y]))
+
+(s/def ::quad-opts (s/keys :req-un [::x1 ::y1 ::x2 ::y2 ::x3 ::y3 ::x4 ::y4]))
+
+(s/def ::rect-opts (s/keys :req-un [::width ::height]))
+
+(s/def ::triangle-opts (s/keys :req-un [::x1 ::y1 ::x2 ::y2 ::x3 ::y3]))
+
 (s/def ::name string?)
 (s/def ::scale-x number?)
 (s/def ::scale-y number?)
 (s/def ::sx number?)
 (s/def ::sy number?)
+(s/def ::swidth number?)
+(s/def ::sheight number?)
+(s/def ::flip-x boolean?)
+(s/def ::flip-y boolean?)
 
 (s/def ::image-opts (s/keys
                       :req-un [::name]
-                      :opt-un [::scale-x ::scale-y ::sx ::sy]))
-(def ^:const img-defaults (merge basic-defaults {:scale-x 1 :scale-y 1 :sx 0 :sy 0}))
+                      :opt-un [::scale-x ::scale-y ::sx ::sy ::swidth ::sheight ::flip-x ::flip-y]))
+(def ^:const image-defaults (merge basic-defaults {:scale-x 1 :scale-y 1 :sx 0 :sy 0}))
+
+(s/def ::duration number?)
+
+(s/def ::animation-opts (s/keys :req-un [::duration]))
+
+(s/def ::grayscale #(<= 0 % 255))
+(s/def ::color string?)
+(s/def ::colors (s/coll-of number?))
+
+(s/def ::fill-opts (s/keys :opt-un [::grayscale ::color ::colors]))
+
+(s/def ::stroke-opts (s/keys :opt-un [::grayscale ::color ::colors]))
+
+(s/def ::z1 number?)
+(s/def ::z2 number?)
+(s/def ::z3 number?)
+(s/def ::z4 number?)
+
+(s/def ::bezier-opts (s/keys
+                       :req-un [::x1 ::y1 ::x2 ::y2 ::x3 ::y3 ::x4 ::y4]
+                       :opt-un [::z1 ::z2 ::z3 ::z4]))
+
+(s/def ::curve-opts (s/keys
+                      :req-un [::x1 ::y1 ::x2 ::y2 ::x3 ::y3 ::x4 ::y4]
+                      :opt-un [::z1 ::z2 ::z3 ::z4]))
 
 (s/def ::max-red #(<= 0 % 255))
 (s/def ::max-green #(<= 0 % 255))
@@ -76,4 +131,12 @@
 
 (s/def ::hsb-opts (s/keys :opt-un [::max-hue ::max-saturation ::max-brightness ::max-alpha]))
 (def ^:const hsb-defaults (merge basic-defaults {:max-hue 360 :max-saturation 100 :max-brightness 100 :max-alpha 1}))
+
+(s/def ::tiled-map-opts (s/keys :req-un [::name]))
+
+(s/def ::points (s/coll-of number?))
+
+(s/def ::shape-opts (s/keys :req-un [::points]))
+
+(s/def ::contour-opts (s/keys :req-un [::points]))
 

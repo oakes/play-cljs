@@ -136,6 +136,8 @@ After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
                           (callback var-obj)
                           (catch js/Error e (callback e))))))))))
 
+;; div
+
 (s/def ::div (s/cat
                :name #{:div}
                :opts ::utils/basic-opts
@@ -173,6 +175,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (render div-game content)
                             (callback content))
                           (catch js/Error e (callback e))))))))))
+
+;; text
 
 (s/def ::text (s/cat
                 :name #{:text}
@@ -224,9 +228,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; arc
+
 (s/def ::arc (s/cat
                :name #{:arc}
-               :opts ::utils/basic-opts
+               :opts (s/merge
+                       ::utils/basic-opts
+                       ::utils/arc-opts)
                :children (s/* ::content)))
 
 (defmethod draw-sketch! :arc [game ^js/p5 renderer content parent-opts]
@@ -264,9 +272,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; ellipse
+
 (s/def ::ellipse (s/cat
                    :name #{:ellipse}
-                   :opts ::utils/basic-opts
+                   :opts (s/merge
+                           ::utils/basic-opts
+                           ::utils/ellipse-opts)
                    :children (s/* ::content)))
 
 (defmethod draw-sketch! :ellipse [game ^js/p5 renderer content parent-opts]
@@ -302,9 +314,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; line
+
 (s/def ::line (s/cat
                 :name #{:line}
-                :opts ::utils/basic-opts
+                :opts (s/merge
+                        ::utils/basic-opts
+                        ::utils/line-opts)
                 :children (s/* ::content)))
 
 (defmethod draw-sketch! :line [game ^js/p5 renderer content parent-opts]
@@ -347,9 +363,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; point
+
 (s/def ::point (s/cat
                  :name #{:point}
-                 :opts ::utils/basic-opts
+                 :opts ::utils/point-opts
                  :children (s/* ::content)))
 
 (defmethod draw-sketch! :point [game ^js/p5 renderer content parent-opts]
@@ -388,9 +406,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; quad
+
 (s/def ::quad (s/cat
                 :name #{:quad}
-                :opts ::utils/basic-opts
+                :opts (s/merge
+                        ::utils/basic-opts
+                        ::utils/quad-opts)
                 :children (s/* ::content)))
 
 (defmethod draw-sketch! :quad [game ^js/p5 renderer content parent-opts]
@@ -441,9 +463,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; rect
+
 (s/def ::rect (s/cat
                 :name #{:rect}
-                :opts ::utils/basic-opts
+                :opts (s/merge
+                        ::utils/basic-opts
+                        ::utils/rect-opts)
                 :children (s/* ::content)))
 
 (defmethod draw-sketch! :rect [game ^js/p5 renderer content parent-opts]
@@ -480,9 +506,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; triangle
+
 (s/def ::triangle (s/cat
                     :name #{:triangle}
-                    :opts ::utils/basic-opts
+                    :opts (s/merge
+                            ::utils/basic-opts
+                            ::utils/triangle-opts)
                     :children (s/* ::content)))
 
 (defmethod draw-sketch! :triangle [game ^js/p5 renderer content parent-opts]
@@ -529,6 +559,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; image
+
 (s/def ::image (s/cat
                  :name #{:image}
                  :opts (s/merge
@@ -542,7 +574,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
     (throw (js/Error. (s/explain-str ::image content))))
   (let [[_ opts & children] content
         {:keys [value name x y width height sx sy swidth sheight scale-x scale-y flip-x flip-y]
-         :as opts} (utils/update-opts opts parent-opts utils/img-defaults)
+         :as opts} (utils/update-opts opts parent-opts utils/image-defaults)
         ^js/p5.Image value (or value
                                (get-asset game name)
                                (load-image game name))
@@ -595,9 +627,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; animation
+
 (s/def ::animation (s/cat
                      :name #{:animation}
-                     :opts ::utils/basic-opts
+                     :opts (s/merge
+                             ::utils/basic-opts
+                             ::utils/animation-opts)
                      :children (s/* ::content)))
 
 (defmethod draw-sketch! :animation [game ^js/p5 renderer content parent-opts]
@@ -637,9 +673,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; fill
+
 (s/def ::fill (s/cat
                 :name #{:fill}
-                :opts ::utils/basic-opts
+                :opts (s/merge
+                        ::utils/basic-opts
+                        ::utils/fill-opts)
                 :children (s/* ::content)))
 
 (defmethod draw-sketch! :fill [game ^js/p5 renderer content parent-opts]
@@ -687,9 +727,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; stroke
+
 (s/def ::stroke (s/cat
                   :name #{:stroke}
-                  :opts ::utils/basic-opts
+                  :opts (s/merge
+                          ::utils/basic-opts
+                          ::utils/stroke-opts)
                   :children (s/* ::content)))
 
 (defmethod draw-sketch! :stroke [game ^js/p5 renderer content parent-opts]
@@ -737,9 +781,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; bezier
+
 (s/def ::bezier (s/cat
                   :name #{:bezier}
-                  :opts ::utils/basic-opts
+                  :opts (s/merge
+                          ::utils/basic-opts
+                          ::utils/bezier-opts)
                   :children (s/* ::content)))
 
 (defmethod draw-sketch! :bezier [game ^js/p5 renderer content parent-opts]
@@ -759,13 +807,9 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y3 + (:y opts))
             (update :x4 + (:x opts))
             (update :y4 + (:y opts)))]
-    (cond
-      (and x1 y1 x2 y2 x3 y3 x4 y4)
-      (.bezier renderer x1 y1 x2 y2 x3 y3 x4 y4)
-      (and z1 z2 z3 z4)
-      (.bezier renderer z1 z2 z3 z4)
-      :else
-      (throw "Invalid args for bezier"))
+    (if (and z1 z2 z3 z4)
+      (.bezier renderer x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4)
+      (.bezier renderer x1 y1 x2 y2 x3 y3 x4 y4))
     (draw-sketch! game renderer children opts)))
 
 (defexample :bezier
@@ -803,9 +847,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; curve
+
 (s/def ::curve (s/cat
                  :name #{:curve}
-                 :opts ::utils/basic-opts
+                 :opts (s/merge
+                          ::utils/basic-opts
+                          ::utils/curve-opts)
                  :children (s/* ::content)))
 
 (defmethod draw-sketch! :curve [game ^js/p5 renderer content parent-opts]
@@ -825,13 +873,9 @@ hard-coded at (0,0) but the :div is passing its own position down."
             (update :y3 + (:y opts))
             (update :x4 + (:x opts))
             (update :y4 + (:y opts)))]
-    (cond
-      (and x1 y1 x2 y2 x3 y3 x4 y4)
-      (.curve renderer x1 y1 x2 y2 x3 y3 x4 y4)
-      (and z1 z2 z3 z4)
-      (.curve renderer z1 z2 z3 z4)
-      :else
-      (throw "Invalid args for curve"))
+    (if (and z1 z2 z3 z4)
+      (.curve renderer x1 y1 z1 x2 y2 z2 x3 y3 z3 x4 y4 z4)
+      (.curve renderer x1 y1 x2 y2 x3 y3 x4 y4))
     (draw-sketch! game renderer children opts)))
 
 (defexample :curve
@@ -869,6 +913,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (render curve-game content)
                             (callback content))
                           (catch js/Error e (callback e))))))))))
+
+;; rgb
 
 (s/def ::rgb (s/cat
                :name #{:rgb}
@@ -922,6 +968,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; hsb
+
 (s/def ::hsb (s/cat
                :name #{:hsb}
                :opts (s/merge
@@ -974,9 +1022,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; tiled-map
+
 (s/def ::tiled-map (s/cat
                      :name #{:tiled-map}
-                     :opts ::utils/basic-opts
+                     :opts (s/merge
+                             ::utils/basic-opts
+                             ::utils/tiled-map-opts)
                      :children (s/* ::content)))
 
 (defmethod draw-sketch! :tiled-map [game ^js/p5 renderer content parent-opts]
@@ -996,7 +1048,9 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 (s/def ::shape (s/cat
                  :name #{:shape}
-                 :opts ::utils/basic-opts
+                 :opts (s/merge
+                         ::utils/basic-opts
+                         ::utils/shape-opts)
                  :children (s/* ::content)))
 
 (defmethod draw-sketch! :shape [game ^js/p5 renderer content parent-opts]
@@ -1006,17 +1060,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         points (:points opts)]
-    (cond
-      (odd? (count points))
-      (throw ":shape requires :points to contain a seq'able with an even number of values (x and y pairs)")
-      :else
-      (do (.beginShape renderer)
-          (loop [[x y & rest] points]
-            (.vertex renderer x y)
-            (when rest
-              (recur rest)))
-          (draw-sketch! game renderer children opts)
-          (.endShape renderer (.-CLOSE renderer))))))
+    (.beginShape renderer)
+    (loop [[x y & rest] points]
+      (.vertex renderer x y)
+      (when rest
+        (recur rest)))
+    (draw-sketch! game renderer children opts)
+    (.endShape renderer (.-CLOSE renderer))))
 
 (defexample :shape
   {:doc "Draws a complex shape.
@@ -1040,9 +1090,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+;; contour
+
 (s/def ::contour (s/cat
                    :name #{:contour}
-                   :opts ::utils/basic-opts
+                   :opts (s/merge
+                           ::utils/basic-opts
+                           ::utils/contour-opts)
                    :children (s/* ::content)))
 
 (defmethod draw-sketch! :contour [game ^js/p5 renderer content parent-opts]
@@ -1052,17 +1106,13 @@ hard-coded at (0,0) but the :div is passing its own position down."
   (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         points (:points opts)]
-    (cond
-      (odd? (count points))
-      (throw ":contour requires :points to contain a seq'able with an even number of values (x and y pairs)")
-      :else
-      (do (.beginContour renderer)
-        (loop [[x y & rest] points]
-          (.vertex renderer x y)
-          (when rest
-            (recur rest)))
-        (draw-sketch! game renderer children opts)
-        (.endContour renderer (.-CLOSE renderer))))))
+    (.beginContour renderer)
+    (loop [[x y & rest] points]
+      (.vertex renderer x y)
+      (when rest
+        (recur rest)))
+    (draw-sketch! game renderer children opts)
+    (.endContour renderer (.-CLOSE renderer))))
 
 (defexample :contour
   {:doc "Draws a negative shape.
@@ -1086,6 +1136,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (render contour-game content)
                             (callback content))
                           (catch js/Error e (callback e))))))))))
+
+;; default
 
 (defmethod draw-sketch! :default [game ^js/p5 renderer content parent-opts]
   (when-let [name (first content)]
