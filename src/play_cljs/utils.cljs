@@ -31,8 +31,10 @@
 
 (s/def ::x number?)
 (s/def ::y number?)
+(s/def ::width number?)
+(s/def ::height number?)
 
-(s/def ::basic-opts (s/keys :opt-un [::x ::y]))
+(s/def ::basic-opts (s/keys :opt-un [::x ::y ::width ::height]))
 (def ^:const basic-defaults {:x 0 :y 0})
 
 (s/def ::size number?)
@@ -48,12 +50,15 @@
                               :leading 0
                               :style :normal}))
 
+(s/def ::name string?)
 (s/def ::scale-x number?)
 (s/def ::scale-y number?)
 (s/def ::sx number?)
 (s/def ::sy number?)
 
-(s/def ::img-opts (s/keys :opt-un [::scale-x ::scale-y ::sx ::sy]))
+(s/def ::image-opts (s/keys
+                      :req-un [::name]
+                      :opt-un [::scale-x ::scale-y ::sx ::sy]))
 (def ^:const img-defaults (merge basic-defaults {:scale-x 1 :scale-y 1 :sx 0 :sy 0}))
 
 (s/def ::max-red #(<= 0 % 255))
@@ -71,22 +76,4 @@
 
 (s/def ::hsb-opts (s/keys :opt-un [::max-hue ::max-saturation ::max-brightness ::max-alpha]))
 (def ^:const hsb-defaults (merge basic-defaults {:max-hue 360 :max-saturation 100 :max-brightness 100 :max-alpha 1}))
-
-(s/def ::opts (s/? (s/merge
-                     ::basic-opts
-                     ::text-opts
-                     ::img-opts
-                     ::rgb-opts
-                     ::hsb-opts)))
-(s/def ::command (s/cat
-                   :name keyword?
-                   :opts ::opts
-                   :children (s/* ::content)))
-(s/def ::content (s/or
-                   :single (s/nilable ::command)
-                   :multiple (s/* ::content)))
-
-(defn check [content]
-  (when (= :cljs.spec.alpha/invalid (s/conform ::content content))
-    (throw (js/Error. (s/explain-str ::content content)))))
 

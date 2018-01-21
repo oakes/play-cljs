@@ -3,7 +3,8 @@
             [p5.core]
             [p5.tiled-map]
             [cljs.core.async :refer [promise-chan put! <!]]
-            [play-cljs.utils :as utils])
+            [play-cljs.utils :as utils]
+            [clojure.spec.alpha :as s])
   (:require-macros [cljs.core.async.macros :refer [go]]
                    [dynadoc.example :refer [defexample]]))
 
@@ -69,7 +70,9 @@ A tiled map with the provided name must already be loaded
   (set-size [game width height]
     "Sets the virtual width and height of the game.")
   (get-asset [game name]
-    "Gets the asset with the given name."))
+    "Gets the asset with the given name.")
+  (get-option [game k]
+    "Gets the option associated with k."))
 
 (defn ^:private start-example-game [game card *state]
   (doto game
@@ -96,10 +99,6 @@ to define new entity types."
 
 (defmethod draw-sketch! ::multiple [game ^js/p5 renderer content parent-opts]
   (run! #(draw-sketch! game renderer % parent-opts) content))
-
-(defmethod draw-sketch! :default [game ^js/p5 renderer content parent-opts]
-  (when-let [name (first content)]
-    (throw (js/Error. (str "Command not found: " name)))))
 
 (defexample draw-sketch!
   {:doc "Creates a new entity type called :smiley that draws a smiley face.
@@ -135,10 +134,17 @@ After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
                         (try
                           (render smiley-game [:smiley {:x 0 :y 0}])
                           (callback var-obj)
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::div (s/cat
+               :name #{:div}
+               :opts ::utils/basic-opts
+               :children (s/* ::content)))
 
 (defmethod draw-sketch! :div [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::div content)))
+    (throw (js/Error. (s/explain-str ::div content))))
   (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)]
     (draw-sketch! game renderer children opts)))
@@ -166,10 +172,19 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render div-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::text (s/cat
+                :name #{:text}
+                :opts (s/merge
+                        ::utils/basic-opts
+                        ::utils/text-opts)
+                :children (s/* ::content)))
 
 (defmethod draw-sketch! :text [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::text content)))
+    (throw (js/Error. (s/explain-str ::text content))))
   (let [[_ opts & children] content
         {:keys [value x y size font halign valign leading style] :as opts}
         (utils/update-opts opts parent-opts utils/text-defaults)]
@@ -207,10 +222,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render text-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::arc (s/cat
+               :name #{:arc}
+               :opts ::utils/basic-opts
+               :children (s/* ::content)))
 
 (defmethod draw-sketch! :arc [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::arc content)))
+    (throw (js/Error. (s/explain-str ::arc content))))
   (let [[_ opts & children] content
         {:keys [x y width height start stop] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)]
@@ -240,10 +262,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render arc-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::ellipse (s/cat
+                   :name #{:ellipse}
+                   :opts ::utils/basic-opts
+                   :children (s/* ::content)))
 
 (defmethod draw-sketch! :ellipse [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::ellipse content)))
+    (throw (js/Error. (s/explain-str ::ellipse content))))
   (let [[_ opts & children] content
         {:keys [x y width height] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)]
@@ -271,10 +300,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render ellipse-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::line (s/cat
+                :name #{:line}
+                :opts ::utils/basic-opts
+                :children (s/* ::content)))
 
 (defmethod draw-sketch! :line [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::line content)))
+    (throw (js/Error. (s/explain-str ::line content))))
   (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2] :as opts}
@@ -309,10 +345,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render line-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::point (s/cat
+                 :name #{:point}
+                 :opts ::utils/basic-opts
+                 :children (s/* ::content)))
 
 (defmethod draw-sketch! :point [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::point content)))
+    (throw (js/Error. (s/explain-str ::point content))))
   (let [[_ opts & children] content
         {:keys [x y] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)]
@@ -343,10 +386,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render point-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::quad (s/cat
+                :name #{:quad}
+                :opts ::utils/basic-opts
+                :children (s/* ::content)))
 
 (defmethod draw-sketch! :quad [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::quad content)))
+    (throw (js/Error. (s/explain-str ::quad content))))
   (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4] :as opts}
@@ -389,10 +439,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render quad-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::rect (s/cat
+                :name #{:rect}
+                :opts ::utils/basic-opts
+                :children (s/* ::content)))
 
 (defmethod draw-sketch! :rect [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::rect content)))
+    (throw (js/Error. (s/explain-str ::rect content))))
   (let [[_ opts & children] content
         {:keys [x y width height] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)]
@@ -421,10 +478,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render rect-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::triangle (s/cat
+                    :name #{:triangle}
+                    :opts ::utils/basic-opts
+                    :children (s/* ::content)))
 
 (defmethod draw-sketch! :triangle [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::triangle content)))
+    (throw (js/Error. (s/explain-str ::triangle content))))
   (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3] :as opts}
@@ -463,10 +527,19 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render triangle-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::image (s/cat
+                 :name #{:image}
+                 :opts (s/merge
+                         ::utils/basic-opts
+                         ::utils/image-opts)
+                 :children (s/* ::content)))
 
 (defmethod draw-sketch! :image [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::image content)))
+    (throw (js/Error. (s/explain-str ::image content))))
   (let [[_ opts & children] content
         {:keys [value name x y width height sx sy swidth sheight scale-x scale-y flip-x flip-y]
          :as opts} (utils/update-opts opts parent-opts utils/img-defaults)
@@ -520,10 +593,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render image-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::animation (s/cat
+                     :name #{:animation}
+                     :opts ::utils/basic-opts
+                     :children (s/* ::content)))
 
 (defmethod draw-sketch! :animation [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::animation content)))
+    (throw (js/Error. (s/explain-str ::animation content))))
   (let [[_ opts & children] content
         {:keys [duration] :as opts} (utils/update-opts opts parent-opts utils/basic-defaults)
         images (vec children)
@@ -557,7 +637,15 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+(s/def ::fill (s/cat
+                :name #{:fill}
+                :opts ::utils/basic-opts
+                :children (s/* ::content)))
+
 (defmethod draw-sketch! :fill [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::fill content)))
+    (throw (js/Error. (s/explain-str ::fill content))))
   (let [[_ opts & children] content
         {:keys [grayscale color colors] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)]
@@ -597,10 +685,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render fill-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::stroke (s/cat
+                  :name #{:stroke}
+                  :opts ::utils/basic-opts
+                  :children (s/* ::content)))
 
 (defmethod draw-sketch! :stroke [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::stroke content)))
+    (throw (js/Error. (s/explain-str ::stroke content))))
   (let [[_ opts & children] content
         {:keys [grayscale color colors] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)]
@@ -640,10 +735,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render stroke-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::bezier (s/cat
+                  :name #{:bezier}
+                  :opts ::utils/basic-opts
+                  :children (s/* ::content)))
 
 (defmethod draw-sketch! :bezier [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::bezier content)))
+    (throw (js/Error. (s/explain-str ::bezier content))))
   (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4
@@ -699,10 +801,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render bezier-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::curve (s/cat
+                 :name #{:curve}
+                 :opts ::utils/basic-opts
+                 :children (s/* ::content)))
 
 (defmethod draw-sketch! :curve [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::curve content)))
+    (throw (js/Error. (s/explain-str ::curve content))))
   (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4
@@ -759,10 +868,19 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render curve-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::rgb (s/cat
+               :name #{:rgb}
+               :opts (s/merge
+                       ::utils/basic-opts
+                       ::utils/rgb-opts)
+               :children (s/* ::content)))
 
 (defmethod draw-sketch! :rgb [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::rgb content)))
+    (throw (js/Error. (s/explain-str ::rgb content))))
   (let [[_ opts & children] content
         {:keys [max-r max-g max-b max-a]} opts
         {:keys [max-red max-green max-blue max-alpha] :as opts}
@@ -802,10 +920,19 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render rgb-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::hsb (s/cat
+               :name #{:hsb}
+               :opts (s/merge
+                       ::utils/basic-opts
+                       ::utils/hsb-opts)
+               :children (s/* ::content)))
 
 (defmethod draw-sketch! :hsb [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::hsb content)))
+    (throw (js/Error. (s/explain-str ::hsb content))))
   (let [[_ opts & children] content
         {:keys [max-h max-s max-b max-a]} opts
         {:keys [max-hue max-saturation max-brightness max-alpha] :as opts}
@@ -845,10 +972,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render hsb-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::tiled-map (s/cat
+                     :name #{:tiled-map}
+                     :opts ::utils/basic-opts
+                     :children (s/* ::content)))
 
 (defmethod draw-sketch! :tiled-map [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::tiled-map content)))
+    (throw (js/Error. (s/explain-str ::tiled-map content))))
   (let [[_ opts & children] content
         {:keys [value name x y] :as opts}
         (utils/update-opts opts parent-opts utils/basic-defaults)
@@ -860,7 +994,15 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ; TODO: tiled-map examaple
 
+(s/def ::shape (s/cat
+                 :name #{:shape}
+                 :opts ::utils/basic-opts
+                 :children (s/* ::content)))
+
 (defmethod draw-sketch! :shape [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::shape content)))
+    (throw (js/Error. (s/explain-str ::shape content))))
   (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         points (:points opts)]
@@ -896,10 +1038,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render shape-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(s/def ::contour (s/cat
+                   :name #{:contour}
+                   :opts ::utils/basic-opts
+                   :children (s/* ::content)))
 
 (defmethod draw-sketch! :contour [game ^js/p5 renderer content parent-opts]
+  (when (and (get-option game :debug?)
+             (= :cljs.spec.alpha/invalid (s/conform ::contour content)))
+    (throw (js/Error. (s/explain-str ::contour content))))
   (let [[_ opts & children] content
         opts (utils/update-opts opts parent-opts utils/basic-defaults)
         points (:points opts)]
@@ -936,8 +1085,20 @@ hard-coded at (0,0) but the :div is passing its own position down."
                           (let [content focus]
                             (render contour-game content)
                             (callback content))
-                          (catch js/Error e (callback e)))))))))
-  nil)
+                          (catch js/Error e (callback e))))))))))
+
+(defmethod draw-sketch! :default [game ^js/p5 renderer content parent-opts]
+  (when-let [name (first content)]
+    (throw (js/Error. (str "Command not found: " name)))))
+
+(s/def ::command (s/cat
+                   :name keyword?
+                   :opts ::utils/basic-opts
+                   :children (s/* ::content)))
+
+(s/def ::content (s/or
+                   :single (s/nilable ::command)
+                   :multiple (s/* ::content)))
 
 (defn create-game
   "Returns a game object."
@@ -1002,13 +1163,9 @@ hard-coded at (0,0) but the :div is passing its own position down."
          (swap! *hidden-state update :listeners conj
            (events/listen js/window listen-type listener)))
        (render [this content]
-         (when debug?
-           (utils/check content))
          (when-let [^js/p5 renderer (get-renderer this)]
            (draw-sketch! this renderer content {})))
        (pre-render [this image-name width height content]
-         (when debug?
-           (utils/check content))
          (when-let [^js/p5 renderer (get-renderer this)]
            (let [object (.createGraphics renderer width height)]
              (draw-sketch! this object content {})
@@ -1054,4 +1211,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
          (when-let [^js/p5 renderer (get-renderer this)]
            (.resizeCanvas renderer width height)))
        (get-asset [game name]
-         (get-in @*hidden-state [:assets name]))))))
+         (get-in @*hidden-state [:assets name]))
+       (get-option [game k]
+         (get {:parent parent
+               :debug? debug?}
+           k))))))
