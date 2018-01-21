@@ -1,4 +1,4 @@
-(ns play-cljs.utils
+(ns play-cljs.options
   (:require [clojure.spec.alpha :as s]))
 
 (defn update-opts [opts parent-opts defaults]
@@ -37,11 +37,14 @@
 (s/def ::basic-opts (s/keys :opt-un [::x ::y ::width ::height]))
 (def ^:const basic-defaults {:x 0 :y 0})
 
+(s/def :play-cljs.options.text/value string?)
 (s/def ::size number?)
 (s/def ::font string?)
 (s/def ::leading number?)
 
-(s/def ::text-opts (s/keys :opt-un [::size ::font ::halign ::valign ::leading ::style]))
+(s/def ::text-opts (s/keys
+                     :req-un [:play-cljs.options.text/value]
+                     :opt-un [::size ::font ::halign ::valign ::leading ::style]))
 (def ^:const text-defaults (merge basic-defaults
                              {:size 32
                               :font "Helvetica"
@@ -72,10 +75,11 @@
 
 (s/def ::quad-opts (s/keys :req-un [::x1 ::y1 ::x2 ::y2 ::x3 ::y3 ::x4 ::y4]))
 
-(s/def ::rect-opts (s/keys :req-un [::width ::height]))
+(s/def ::rect-opts (s/keys :req-un [::x ::y ::width ::height]))
 
 (s/def ::triangle-opts (s/keys :req-un [::x1 ::y1 ::x2 ::y2 ::x3 ::y3]))
 
+(s/def :play-cljs.options.image/value #(instance? js/p5.Image %))
 (s/def ::name string?)
 (s/def ::scale-x number?)
 (s/def ::scale-y number?)
@@ -87,7 +91,7 @@
 (s/def ::flip-y boolean?)
 
 (s/def ::image-opts (s/keys
-                      :req-un [::name]
+                      :req-un [(or ::name :play-cljs.options.image/value)]
                       :opt-un [::scale-x ::scale-y ::sx ::sy ::swidth ::sheight ::flip-x ::flip-y]))
 (def ^:const image-defaults (merge basic-defaults {:scale-x 1 :scale-y 1 :sx 0 :sy 0}))
 
@@ -116,25 +120,35 @@
                       :req-un [::x1 ::y1 ::x2 ::y2 ::x3 ::y3 ::x4 ::y4]
                       :opt-un [::z1 ::z2 ::z3 ::z4]))
 
-(s/def ::max-red #(<= 0 % 255))
-(s/def ::max-green #(<= 0 % 255))
-(s/def ::max-blue #(<= 0 % 255))
+(s/def :play-cljs.options.rgb/max-r #(<= 0 % 255))
+(s/def :play-cljs.options.rgb/max-g #(<= 0 % 255))
+(s/def :play-cljs.options.rgb/max-b #(<= 0 % 255))
+(s/def :play-cljs.options.rgb/max-a #(<= 0 % 255))
 
-(s/def ::max-hue #(<= 0 % 360))
-(s/def ::max-saturation #(<= 0 % 100))
-(s/def ::max-brightness #(<= 0 % 100))
+(s/def ::rgb-opts (s/keys
+                    :req-un [:play-cljs.options.rgb/max-r
+                             :play-cljs.options.rgb/max-g
+                             :play-cljs.options.rgb/max-b]
+                    :opt-un [:play-cljs.options.rgb/max-a]))
+(def ^:const rgb-defaults (merge basic-defaults {:max-r 255 :max-g 255 :max-b 255 :max-a 1}))
 
-(s/def ::max-alpha #(<= 0 % 255))
+(s/def :play-cljs.options.hsb/max-h #(<= 0 % 360))
+(s/def :play-cljs.options.hsb/max-s #(<= 0 % 100))
+(s/def :play-cljs.options.hsb/max-b #(<= 0 % 100))
+(s/def :play-cljs.options.hsb/max-a #(<= 0 % 255))
 
-(s/def ::rgb-opts (s/keys :opt-un [::max-red ::max-green ::max-blue ::max-alpha]))
-(def ^:const rgb-defaults (merge basic-defaults {:max-red 255 :max-green 255 :max-blue 255 :max-alpha 1}))
+(s/def ::hsb-opts (s/keys
+                    :req-un [:play-cljs.options.hsb/max-h
+                             :play-cljs.options.hsb/max-s
+                             :play-cljs.options.hsb/max-b]
+                    :opt-un [:play-cljs.options.hsb/max-a]))
+(def ^:const hsb-defaults (merge basic-defaults {:max-h 360 :max-s 100 :max-b 100 :max-a 1}))
 
-(s/def ::hsb-opts (s/keys :opt-un [::max-hue ::max-saturation ::max-brightness ::max-alpha]))
-(def ^:const hsb-defaults (merge basic-defaults {:max-hue 360 :max-saturation 100 :max-brightness 100 :max-alpha 1}))
+(s/def :play-cljs.options.tiled-map/value #(instance? js/p5.TiledMap %))
 
-(s/def ::tiled-map-opts (s/keys :req-un [::name]))
+(s/def ::tiled-map-opts (s/keys :req-un [(or ::name :play-cljs.options.tiled-map/value)]))
 
-(s/def ::points (s/coll-of number?))
+(s/def ::points (s/and (s/coll-of number?) #(even? (count %))))
 
 (s/def ::shape-opts (s/keys :req-un [::points]))
 
