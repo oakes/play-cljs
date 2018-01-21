@@ -101,8 +101,9 @@ to define new entity types."
   (run! #(draw-sketch! game renderer % parent-opts) content))
 
 (defexample draw-sketch!
-  {:doc "Creates a new entity type called :smiley that draws a smiley face.
-After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
+  {:doc "Extending this multimethod allows you to create new entity types.
+   In this example, we create a new entity type called :smiley that draws a smiley face.
+   After defining the method, it can be rendered like this: [:smiley {:x 0 :y 0}]"
    :with-card card
    :with-callback callback
    :with-focus [focus (defmethod play-cljs.core/draw-sketch! :smiley [game ^js/p5 renderer content parent-opts]
