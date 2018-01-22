@@ -46,9 +46,11 @@
 (s/def ::font string?)
 (s/def ::leading number?)
 
-(s/def ::text-opts (s/keys
-                     :req-un [:play-cljs.options.text/value]
-                     :opt-un [::size ::font ::halign ::valign ::leading ::style]))
+(s/def ::text-opts (s/merge
+                     ::basic-opts
+                     (s/keys
+                       :req-un [:play-cljs.options.text/value]
+                       :opt-un [::size ::font ::halign ::valign ::leading ::style])))
 (def ^:const text-defaults (merge basic-defaults
                              {:size 32
                               :font "Helvetica"
@@ -60,9 +62,13 @@
 (s/def ::start number?)
 (s/def ::stop number?)
 
-(s/def ::arc-opts (s/keys :req-un [::width ::height ::start ::stop]))
+(s/def ::arc-opts (s/merge
+                     ::basic-opts
+                     (s/keys :req-un [::width ::height ::start ::stop])))
 
-(s/def ::ellipse-opts (s/keys :req-un [::width ::height]))
+(s/def ::ellipse-opts (s/merge
+                        ::basic-opts
+                        (s/keys :req-un [::width ::height])))
 
 (s/def ::x1 number?)
 (s/def ::y1 number?)
@@ -79,7 +85,9 @@
 
 (s/def ::quad-opts (s/keys :req-un [::x1 ::y1 ::x2 ::y2 ::x3 ::y3 ::x4 ::y4]))
 
-(s/def ::rect-opts (s/keys :req-un [::width ::height]))
+(s/def ::rect-opts (s/merge
+                     ::basic-opts
+                     (s/keys :req-un [::width ::height])))
 
 (s/def ::triangle-opts (s/keys :req-un [::x1 ::y1 ::x2 ::y2 ::x3 ::y3]))
 
@@ -94,14 +102,18 @@
 (s/def ::flip-x boolean?)
 (s/def ::flip-y boolean?)
 
-(s/def ::image-opts (s/keys
-                      :req-un [(or ::name :play-cljs.options.image/value)]
-                      :opt-un [::scale-x ::scale-y ::sx ::sy ::swidth ::sheight ::flip-x ::flip-y]))
+(s/def ::image-opts (s/merge
+                      ::basic-opts
+                      (s/keys
+                        :req-un [(or ::name :play-cljs.options.image/value)]
+                        :opt-un [::scale-x ::scale-y ::sx ::sy ::swidth ::sheight ::flip-x ::flip-y])))
 (def ^:const image-defaults (merge basic-defaults {:scale-x 1 :scale-y 1 :sx 0 :sy 0}))
 
 (s/def ::duration number?)
 
-(s/def ::animation-opts (s/keys :req-un [::duration]))
+(s/def ::animation-opts (s/merge
+                          ::basic-opts
+                          (s/keys :req-un [::duration])))
 
 (s/def ::grayscale #(<= 0 % 255))
 (s/def ::color string?)
@@ -159,7 +171,9 @@
 
 (s/def :play-cljs.options.tiled-map/value #(instance? js/p5.TiledMap %))
 
-(s/def ::tiled-map-opts (s/keys :req-un [(or ::name :play-cljs.options.tiled-map/value)]))
+(s/def ::tiled-map-opts (s/merge
+                          ::basic-opts
+                          (s/keys :req-un [(or ::name :play-cljs.options.tiled-map/value)])))
 
 (s/def ::points (s/and (s/coll-of number?) #(even? (count %))))
 

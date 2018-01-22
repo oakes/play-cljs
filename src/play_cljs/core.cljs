@@ -3,8 +3,7 @@
             [p5.core]
             [p5.tiled-map]
             [cljs.core.async :refer [promise-chan put! <!]]
-            [play-cljs.options :as options]
-            [clojure.spec.alpha :as s])
+            [play-cljs.options :as options])
   (:require-macros [cljs.core.async.macros :refer [go]]
                    [dynadoc.example :refer [defexample]]))
 
@@ -98,6 +97,10 @@ to define new entity types."
 (defmethod draw-sketch! ::multiple [game ^js/p5 renderer content parent-opts]
   (run! #(draw-sketch! game renderer % parent-opts) content))
 
+(defmethod draw-sketch! :default [game ^js/p5 renderer content parent-opts]
+  (when-let [name (first content)]
+    (throw (js/Error. (str "Command not found: " name)))))
+
 (defexample draw-sketch!
   {:doc "Extending this multimethod allows you to create new entity types.
    In this example, we create a new entity type called :smiley that draws a smiley face.
@@ -170,15 +173,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; text
 
-(s/def ::text-opts (s/merge
-                     ::options/basic-opts
-                     ::options/text-opts))
-
 (defmethod draw-sketch! :text [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [value x y size font halign valign leading style] :as opts}
         (options/update-opts opts parent-opts options/text-defaults)]
-    (when (:debug? opts) (options/check-opts ::text-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/text-opts opts))
     (doto renderer
       (.textSize size)
       (.textFont font)
@@ -217,15 +216,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; arc
 
-(s/def ::arc-opts (s/merge
-                    ::options/basic-opts
-                    ::options/arc-opts))
-
 (defmethod draw-sketch! :arc [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [x y width height start stop] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (:debug? opts) (options/check-opts ::arc-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/arc-opts opts))
     (.arc renderer x y width height start stop)
     (draw-sketch! game renderer children opts)))
 
@@ -256,15 +251,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; ellipse
 
-(s/def ::ellipse-opts (s/merge
-                        ::options/basic-opts
-                        ::options/ellipse-opts))
-
 (defmethod draw-sketch! :ellipse [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [x y width height] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (:debug? opts) (options/check-opts ::ellipse-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/ellipse-opts opts))
     (.ellipse renderer x y width height)
     (draw-sketch! game renderer children opts)))
 
@@ -293,14 +284,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; line
 
-(s/def ::line-opts (s/merge
-                     ::options/basic-opts
-                     ::options/line-opts))
-
 (defmethod draw-sketch! :line [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)
-        _ (when (:debug? opts) (options/check-opts ::line-opts opts))
+        _ (when (:debug? opts) (options/check-opts ::options/line-opts opts))
         {:keys [x1 y1 x2 y2] :as opts}
         (-> opts
             (update :x1 + (:x opts))
@@ -373,14 +360,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; quad
 
-(s/def ::quad-opts (s/merge
-                     ::options/basic-opts
-                     ::options/quad-opts))
-
 (defmethod draw-sketch! :quad [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)
-        _ (when (:debug? opts) (options/check-opts ::quad-opts opts))
+        _ (when (:debug? opts) (options/check-opts ::options/quad-opts opts))
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4] :as opts}
         (-> opts
             (update :x1 + (:x opts))
@@ -425,15 +408,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; rect
 
-(s/def ::rect-opts (s/merge
-                     ::options/basic-opts
-                     ::options/rect-opts))
-
 (defmethod draw-sketch! :rect [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [x y width height] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (:debug? opts) (options/check-opts ::rect-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/rect-opts opts))
     (.rect renderer x y width height)
     (draw-sketch! game renderer children opts)))
 
@@ -463,14 +442,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; triangle
 
-(s/def ::triangle-opts (s/merge
-                         ::options/basic-opts
-                         ::options/triangle-opts))
-
 (defmethod draw-sketch! :triangle [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)
-        _ (when (:debug? opts) (options/check-opts ::triangle-opts opts))
+        _ (when (:debug? opts) (options/check-opts ::options/triangle-opts opts))
         {:keys [x1 y1 x2 y2 x3 y3] :as opts}
         (-> opts
             (update :x1 + (:x opts))
@@ -511,15 +486,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; image
 
-(s/def ::image-opts (s/merge
-                      ::options/basic-opts
-                      ::options/image-opts))
-
 (defmethod draw-sketch! :image [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [value name x y width height sx sy swidth sheight scale-x scale-y flip-x flip-y]
          :as opts} (options/update-opts opts parent-opts options/image-defaults)
-        _ (when (:debug? opts) (options/check-opts ::image-opts opts))
+        _ (when (:debug? opts) (options/check-opts ::options/image-opts opts))
         ^js/p5.Image value (or value
                                (get-asset game name)
                                (load-image game name))
@@ -574,14 +545,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; animation
 
-(s/def ::animation-opts (s/merge
-                          ::options/basic-opts
-                          ::options/animation-opts))
-
 (defmethod draw-sketch! :animation [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [duration] :as opts} (options/update-opts opts parent-opts options/basic-defaults)
-        _ (when (:debug? opts) (options/check-opts ::animation-opts opts))
+        _ (when (:debug? opts) (options/check-opts ::options/animation-opts opts))
         images (vec children)
         cycle-time (mod (get-total-time game) (* duration (count images)))
         index (int (/ cycle-time duration))
@@ -615,15 +582,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; fill
 
-(s/def ::fill-opts (s/merge
-                     ::options/basic-opts
-                     ::options/fill-opts))
-
 (defmethod draw-sketch! :fill [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [grayscale color colors] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (:debug? opts) (options/check-opts ::fill-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/fill-opts opts))
     (.push renderer)
     (cond
       grayscale
@@ -664,15 +627,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; stroke
 
-(s/def ::stroke-opts (s/merge
-                       ::options/basic-opts
-                       ::options/stroke-opts))
-
 (defmethod draw-sketch! :stroke [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [grayscale color colors] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (:debug? opts) (options/check-opts ::stroke-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/stroke-opts opts))
     (.push renderer)
     (cond
       grayscale
@@ -713,14 +672,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; bezier
 
-(s/def ::bezier-opts (s/merge
-                       ::options/basic-opts
-                       ::options/bezier-opts))
-
 (defmethod draw-sketch! :bezier [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)
-        _ (when (:debug? opts) (options/check-opts ::bezier-opts opts))
+        _ (when (:debug? opts) (options/check-opts ::options/bezier-opts opts))
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4
                 z1 z2 z3 z4] :as opts}
         (-> opts
@@ -774,14 +729,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; curve
 
-(s/def ::curve-opts (s/merge
-                      ::options/basic-opts
-                      ::options/curve-opts))
-
 (defmethod draw-sketch! :curve [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)
-        _ (when (:debug? opts) (options/check-opts ::curve-opts opts))
+        _ (when (:debug? opts) (options/check-opts ::options/curve-opts opts))
         {:keys [x1 y1 x2 y2 x3 y3 x4 y4
                 z1 z2 z3 z4] :as opts}
         (-> opts
@@ -836,15 +787,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; rgb
 
-(s/def ::rgb-opts (s/merge
-                    ::options/basic-opts
-                    ::options/rgb-opts))
-
 (defmethod draw-sketch! :rgb [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [max-r max-g max-b max-a] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (:debug? opts) (options/check-opts ::rgb-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/rgb-opts opts))
     (.push renderer)
     (.colorMode renderer (.-RGB renderer) max-r max-g max-b max-a)
     (draw-sketch! game renderer children opts)
@@ -879,15 +826,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; hsb
 
-(s/def ::hsb-opts (s/merge
-                    ::options/basic-opts
-                    ::options/hsb-opts))
-
 (defmethod draw-sketch! :hsb [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [max-h max-s max-b max-a] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (:debug? opts) (options/check-opts ::hsb-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/hsb-opts opts))
     (.push renderer)
     (.colorMode renderer (.-HSB renderer) max-h max-s max-b max-a)
     (draw-sketch! game renderer children opts)
@@ -922,15 +865,11 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; hsl
 
-(s/def ::hsl-opts (s/merge
-                    ::options/basic-opts
-                    ::options/hsl-opts))
-
 (defmethod draw-sketch! :hsl [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [max-h max-s max-l max-a] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (:debug? opts) (options/check-opts ::hsl-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/hsl-opts opts))
     (.push renderer)
     (.colorMode renderer (.-HSL renderer) max-h max-s max-l max-a)
     (draw-sketch! game renderer children opts)
@@ -965,31 +904,23 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; tiled-map
 
-(s/def ::tiled-map-opts (s/merge
-                          ::options/basic-opts
-                          ::options/tiled-map-opts))
-
 (defmethod draw-sketch! :tiled-map [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         {:keys [value name x y] :as opts}
         (options/update-opts opts parent-opts options/basic-defaults)
-        _ (when (:debug? opts) (options/check-opts ::tiled-map-opts opts))
+        _ (when (:debug? opts) (options/check-opts ::options/tiled-map-opts opts))
         ^js/p5.TiledMap value (or value
                                   (get-asset game name)
                                   (load-tiled-map game name))]
     (.draw value x y)
     (draw-sketch! game renderer children opts)))
 
-; TODO: tiled-map examaple
-
-(s/def ::shape-opts (s/merge
-                      ::options/basic-opts
-                      ::options/shape-opts))
+;; shape
 
 (defmethod draw-sketch! :shape [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (:debug? opts) (options/check-opts ::shape-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/shape-opts opts))
     (.beginShape renderer)
     (loop [[x y & rest] (:points opts)]
       (.vertex renderer x y)
@@ -1022,14 +953,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
 
 ;; contour
 
-(s/def ::contour-opts (s/merge
-                        ::options/basic-opts
-                        ::options/contour-opts))
-
 (defmethod draw-sketch! :contour [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/basic-defaults)]
-    (when (:debug? opts) (options/check-opts ::contour-opts opts))
+    (when (:debug? opts) (options/check-opts ::options/contour-opts opts))
     (.beginContour renderer)
     (loop [[x y & rest] (:points opts)]
       (.vertex renderer x y)
@@ -1060,12 +987,6 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (render contour-game content)
                             (callback content))
                           (catch js/Error e (callback e))))))))))
-
-;; default
-
-(defmethod draw-sketch! :default [game ^js/p5 renderer content parent-opts]
-  (when-let [name (first content)]
-    (throw (js/Error. (str "Command not found: " name)))))
 
 (defn create-game
   "Returns a game object. You can pass an options map with the following:
