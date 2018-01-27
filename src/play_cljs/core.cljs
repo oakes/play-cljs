@@ -806,7 +806,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :max-a  -  Range for alpha (number between 0 and 255)"
    :with-card card
    :with-callback callback
-   :with-focus [focus [:rgb {:max-r 100 :max-g 100 :max-b 100}
+   :with-focus [focus [:rgb {:max-r 64 :max-g 64 :max-b 64}
                        [:fill {:colors [20 50 70]}
                         [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
   (defonce rgb-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
@@ -845,7 +845,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :max-a  -  Range for alpha (number between 0 and 255)"
    :with-card card
    :with-callback callback
-   :with-focus [focus [:hsb {:max-h 100 :max-s 100 :max-b 100}
+   :with-focus [focus [:hsb {:max-h 90 :max-s 50 :max-b 100}
                        [:fill {:colors [20 50 70]}
                         [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
   (defonce hsb-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
@@ -884,7 +884,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :max-a  -  Range for alpha (number between 0 and 255)"
    :with-card card
    :with-callback callback
-   :with-focus [focus [:hsl {:max-h 50 :max-s 50 :max-l 100}
+   :with-focus [focus [:hsl {:max-h 90 :max-s 50 :max-l 100}
                        [:fill {:colors [20 50 70]}
                         [:rect {:x 10 :y 10 :width 70 :height 70}]]]]}
   (defonce hsl-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
