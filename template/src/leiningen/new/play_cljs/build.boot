@@ -7,7 +7,7 @@
                   [pandeiro/boot-http "0.8.3" :scope "test"]
                   [javax.xml.bind/jaxb-api "2.3.0" :scope "test"] ; necessary for Java 9 compatibility
                   ; project deps
-                  [org.clojure/clojurescript "1.9.946"]
+                  [org.clojure/clojurescript "1.10.238"]
                   [play-cljs "1.1.0"]])
 
 (require
@@ -20,7 +20,9 @@
     (serve :dir "target/public")
     (watch)
     (reload)
-    (cljs :source-map true :optimizations :none)
+    (cljs
+      :optimizations :none
+      :compiler-options {:asset-path "main.out"})
     (target)))
 
 (deftask build []
