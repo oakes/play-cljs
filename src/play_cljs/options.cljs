@@ -1,5 +1,6 @@
 (ns play-cljs.options
-  (:require [clojure.spec.alpha :as s]))
+  (:require [clojure.spec.alpha :as s]
+            [expound.alpha :as expound]))
 
 (defn update-opts [opts parent-opts defaults]
   (let [parent-opts (merge defaults parent-opts)]
@@ -9,7 +10,7 @@
 
 (defn check-opts [spec opts]
   (when (= :cljs.spec.alpha/invalid (s/conform spec opts))
-    (throw (js/Error. (s/explain-str spec opts)))))
+    (throw (js/Error. (expound/expound-str spec opts)))))
 
 (s/def ::halign #{:left :center :right})
 (defn halign->constant [^js/p5 renderer halign]
