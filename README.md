@@ -1,6 +1,10 @@
 ## Introduction
 
-A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) underneath. There are several ways to create a project:
+A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) underneath.
+
+### [Try the interactive docs!](https://oakes.github.io/play-cljs/)
+
+There are several ways to create a project:
 
 * [Boot](http://boot-clj.com/): `boot -d boot/new new -t play-cljs -n hello-world`
 * [Nightcode](https://sekao.net/nightcode/): Choose "Game Project" from its start menu
@@ -10,7 +14,7 @@ A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) unde
 ## Documentation
 
 * Check out [the example games](https://github.com/oakes/play-cljs-examples)
-* Read [the dynadocs (interactive docs in your browser!)](https://oakes.github.io/play-cljs/)
+* Read [the dynadocs](https://oakes.github.io/play-cljs/)
 * Join the discussion on [r/playcljs](https://www.reddit.com/r/playcljs/)
 * Look at this commented example:
 
