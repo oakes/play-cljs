@@ -13,7 +13,7 @@
         (str/join "-" $)))
 
 (defn play-cljs
-  [name]
+  [name & _]
   (let [render (t/renderer "play-cljs")
         sanitized-name (sanitize-name name)
         _ (when-not (seq sanitized-name)
