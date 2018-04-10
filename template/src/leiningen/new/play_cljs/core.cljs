@@ -30,7 +30,7 @@
   (p/start)
   (p/set-screen main-screen))
 
-; uncomment to generate a song and play it in a loop!
+; uncomment to generate a song and play it!
 
 ;(defonce audio (js/document.createElement "audio"))
 ;(set! (.-src audio) (build-for-cljs))
