@@ -1,6 +1,7 @@
-(ns {{namespace}}
+(ns {{name}}.core
   (:require [play-cljs.core :as p]
-            [goog.events :as events]))
+            [goog.events :as events])
+  (:require-macros [{{name}}.music :refer [build-for-cljs]]))
 
 (defonce game (p/create-game (.-innerWidth js/window) (.-innerHeight js/window)))
 (defonce state (atom {}))
@@ -28,4 +29,10 @@
 (doto game
   (p/start)
   (p/set-screen main-screen))
+
+; uncomment to generate a song and play it in a loop!
+
+;(defonce audio (js/document.createElement "audio"))
+;(set! (.-src audio) (build-for-cljs))
+;(.play audio)
 

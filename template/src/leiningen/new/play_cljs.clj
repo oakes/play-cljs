@@ -1,24 +1,33 @@
 (ns leiningen.new.play-cljs
-  (:require [leiningen.new.templates :as t]))
+  (:require [leiningen.new.templates :as t]
+            [clojure.string :as str]))
+
+(defn sanitize-name [s]
+  (as-> s $
+        (str/trim $)
+        (str/lower-case $)
+        (str/replace $ "'" "")
+        (str/replace $ #"[^a-z0-9]" " ")
+        (str/split $ #" ")
+        (remove empty? $)
+        (str/join "-" $)))
 
 (defn play-cljs
-  [name & [package-name]]
+  [name]
   (let [render (t/renderer "play-cljs")
-        package-name (t/sanitize (t/multi-segment (or package-name name)))
-        package-prefix (->> (.lastIndexOf package-name ".")
-                            (subs package-name 0))
-        main-ns (t/sanitize-ns package-name)
-        data {:app-name name
-              :name (t/project-name name)
-              :package package-name
-              :namespace main-ns
-              :path (t/name-to-path main-ns)}]
+        sanitized-name (sanitize-name name)
+        _ (when-not (seq sanitized-name)
+            (throw (Exception. "Invalid name: " name)))
+        data {:name sanitized-name
+              :dir (str/replace sanitized-name "-" "_")}]
     (t/->files data
       ["README.md" (render "README.md" data)]
       [".gitignore" (render "gitignore" data)]
       ["build.boot" (render "build.boot" data)]
       ["boot.properties" (render "boot.properties" data)]
-      ["src/{{path}}.cljs" (render "core.cljs" data)]
+      ["src/{{dir}}/core.cljs" (render "core.cljs" data)]
+      ["src/{{dir}}/music.clj" (render "music.clj" data)]
       ["resources/public/index.html" (render "index.html" data)]
-      ["resources/public/main.cljs.edn" (render "main.cljs.edn" data)])))
+      ["dev-resources/public/main.cljs.edn" (render "main.cljs.edn.dev" data)]
+      ["prod-resources/public/main.cljs.edn" (render "main.cljs.edn.prod" data)])))
 
