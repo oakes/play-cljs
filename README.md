@@ -1,8 +1,10 @@
 ## Introduction
 
-A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) underneath.
+A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) underneath. And then the terrifying, irrational monstrosity of the web underneath that.
 
 ### [Try the interactive docs!](https://oakes.github.io/play-cljs/)
+
+## Getting Started
 
 There are several ways to create a project:
 
