@@ -17,7 +17,7 @@
   (let [render (t/renderer "play-cljs")
         sanitized-name (sanitize-name name)
         _ (when-not (seq sanitized-name)
-            (throw (Exception. "Invalid name: " name)))
+            (throw (Exception. (str "Invalid name: " name))))
         data {:name sanitized-name
               :dir (str/replace sanitized-name "-" "_")}]
     (t/->files data
