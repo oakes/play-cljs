@@ -8,6 +8,9 @@
    1/2 :e 1/8 :e :e 1/2 :+c 1/8 :a :a# :+c
    1/2 :+d 1/8 :f :g 1/4 :a 3/8 :f 1/8 :e :f :g :d])
 
+(def edna->data-uri
+  (memoize edna/edna->data-uri))
+
 (defmacro build-for-cljs []
-  (edna/edna->data-uri music))
+  (edna->data-uri music))
 
