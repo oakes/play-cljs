@@ -2,5 +2,5 @@
  :deps {org.clojure/clojure {:mvn/version "1.9.0" :scope "provided"}
         org.clojure/core.async {:mvn/version "0.3.443"}
         defexample {:mvn/version "1.7.0"}
-        expound {:mvn/version "0.5.0"}}
+        expound {:mvn/version "0.7.0"}}
  :aliases {:cljs {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.238"}}}}}
