@@ -7,10 +7,10 @@
                   [pandeiro/boot-http "0.8.3" :scope "test"]
                   [javax.xml.bind/jaxb-api "2.3.0" :scope "test"] ; necessary for Java 9 compatibility
                   ; project deps
-                  [org.clojure/clojurescript "1.10.238"]
+                  [org.clojure/clojurescript "1.10.238" :scope "test"]
                   [nightlight "RELEASE"]
                   [play-cljs "1.2.0"]
-                  [edna "1.1.0"]])
+                  [edna "1.2.0"]])
 
 (require
   '[nightlight.boot :refer [nightlight]]
