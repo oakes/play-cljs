@@ -10,7 +10,7 @@
                   [org.clojure/clojurescript "1.10.312" :scope "test"]
                   [nightlight "RELEASE"]
                   [play-cljs "1.2.0"]
-                  [edna "1.5.0"]])
+                  [edna "1.5.3"]])
 
 (require
   '[nightlight.boot :refer [nightlight]]
