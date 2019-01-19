@@ -1,6 +1,6 @@
 (set-env!
   :resource-paths #{"src"}
-  :dependencies '[[org.clojure/clojure "1.9.0" :scope "provided"]]
+  :dependencies '[[org.clojure/clojure "1.10.0" :scope "provided"]]
   :repositories (conj (get-env :repositories)
                   ["clojars" {:url "https://clojars.org/repo/"
                               :username (System/getenv "CLOJARS_USER")
@@ -8,7 +8,7 @@
 
 (task-options!
   pom {:project 'play-cljs/lein-template
-       :version "1.2.0.10"
+       :version "1.2.0.11"
        :description "A template for making play-cljs projects"
        :url "https://github.com/oakes/play-cljs"
        :license {"Public Domain" "http://unlicense.org/UNLICENSE"}}
