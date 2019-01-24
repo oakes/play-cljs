@@ -63,7 +63,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
-(defexample :play-cljs.core/transform
+(defexample :play-cljs.core/translate
   {:doc "Specifies an amount to displace objects within the display window.
    
    :x  -  The left/right translation (number)
@@ -75,9 +75,9 @@ hard-coded at (0,0) but the :div is passing its own position down."
                        [:rect {:x 0 :y 0 :width 50 :height 50}]
                        [:translate {:x 20 :y 20}
                         [:rect {:x 0 :y 0 :width 50 :height 50}]]]]}
-  (defonce transform-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
+  (defonce translate-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
-    (doto transform-game
+    (doto translate-game
       (start-example-game card *state)
       (set-screen (reify Screen
                     (on-show [this])
@@ -86,7 +86,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
                       (let [{:keys [x y] :or {x 0 y 0}} @*state]
                         (try
                           (let [content focus]
-                            (render transform-game content)
+                            (render translate-game content)
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
@@ -94,7 +94,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
   {:doc "Rotates a shape the amount specified by the angle parameter.
    
    :angle  -  The angle of rotation, in radians (number)
-   :axis   -  The axis to rotate on (:x, :y, or :z) (:webgl only)"
+   :axis   -  The axis to rotate on (:x, :y, or :z) (:webgl mode only)"
    :with-card card
    :with-callback callback
    :with-focus [focus [:translate {:x 100 :y 100}
