@@ -109,6 +109,8 @@ to define new entity types."
 
 (defmethod draw-sketch! :rotate [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
+        parent-opts (dissoc parent-opts :x :y :z)
+        opts (options/update-opts opts parent-opts options/basic-defaults)
         {:keys [angle axis]} opts]
     (when (:debug? opts) (options/check-opts ::options/rotate-opts opts))
     (.push renderer)
