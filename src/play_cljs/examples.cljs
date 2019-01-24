@@ -806,4 +806,33 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+(defexample :play-cljs.core/model
+  {:doc "[3D] Draws a model.
+   
+   NOTE: You must pass {:mode :webgl} to the third argument of create-game.
+   
+   :name    -  The file name of the model (string)
+   :scale-x -  Percent to scale the model in the x-axis (number)
+   :scale-y -  Percent to scale the model in the y-axis (number)
+   :scale-z -  Percent to scale the model in the z-axis (number)"
+   :with-card card
+   :with-callback callback
+   :with-focus [focus [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :x}
+                       [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :y}
+                        [:model {:name "chr_old.obj" :scale-x 10 :scale-y 10 :scale-z 10}]]]]}
+  (defonce model-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true :mode :webgl}))
+  (let [*state (atom {})]
+    (doto model-game
+      (start-example-game card *state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
+                        (try
+                          (let [content focus]
+                            (render model-game content)
+                            (callback content))
+                          (catch js/Error e (callback e))))))))))
+
 

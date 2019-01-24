@@ -49,6 +49,10 @@
 (s/def ::axis #{:x :y :z})
 (s/def ::rotate-opts (s/keys :req-un [::angle] :opt-un [::axis]))
 
+(s/def ::scale-x number?)
+(s/def ::scale-y number?)
+(s/def ::scale-z number?)
+
 ;; 2d
 
 (s/def :play-cljs.options.text/value string?)
@@ -103,8 +107,6 @@
 
 (s/def :play-cljs.options.image/value #(instance? js/p5.Image %))
 (s/def ::name string?)
-(s/def ::scale-x number?)
-(s/def ::scale-y number?)
 (s/def ::sx number?)
 (s/def ::sy number?)
 (s/def ::swidth number?)
@@ -243,5 +245,14 @@
                       :opt-un [::detail-x ::detail-y]))
 (def ^:const torus-defaults (merge basic-defaults
                               {:detail-x 24 :detail-y 16}))
+
+(s/def :play-cljs.options.model/value #(instance? js/p5.Geometry %))
+
+(s/def ::model-opts (s/merge
+                      ::basic-opts
+                      (s/keys
+                        :req-un [(or ::name :play-cljs.options.model/value)]
+                        :opt-un [::scale-x ::scale-y ::scale-z])))
+(def ^:const model-defaults (merge basic-defaults {:scale-x 1 :scale-y 1 :scale-z 1}))
 
 
