@@ -1,1 +1,1 @@
-{:require  [play-cljs.core play-cljs.examples dynadoc.core]}
+{:require  [play-cljs.core dynadoc.core]}

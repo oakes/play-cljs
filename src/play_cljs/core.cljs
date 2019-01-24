@@ -3,8 +3,11 @@
             [cljsjs.p5]
             [p5.tiled-map]
             [cljs.core.async :refer [promise-chan put! <!]]
+            [play-cljs.examples]
             [play-cljs.options :as options])
   (:require-macros [cljs.core.async.macros :refer [go]]))
+
+;; protocols and multimethods
 
 (defprotocol Screen
   "A screen object provides the basic lifecycle for a game.
@@ -70,20 +73,6 @@ A tiled map with the provided name must already be loaded
   (get-asset [game name]
     "Gets the asset with the given name."))
 
-(defn ^:private start-example-game [game card *state]
-  (doto game
-    (start)
-    (set-size (.-clientWidth card) (.-clientHeight card))
-    (listen "mousemove"
-      (fn [event]
-        (let [bounds (.getBoundingClientRect card)
-              x (- (.-clientX event) (.-left bounds))
-              y (- (.-clientY event) (.-top bounds))]
-          (swap! *state assoc :x x :y y))))
-    (listen "resize"
-      (fn [event]
-        (set-size game (.-clientWidth card) (.-clientHeight card))))))
-
 (defmulti draw-sketch!
   "Internal multimethod for drawing entities. Extending this will allow you
 to define new entity types."
@@ -105,6 +94,33 @@ to define new entity types."
         opts (options/update-opts opts parent-opts options/basic-defaults)]
     (when (:debug? opts) (options/check-opts ::options/basic-opts opts))
     (draw-sketch! game renderer children opts)))
+
+(defmethod draw-sketch! :translate [game ^js/p5 renderer content parent-opts]
+  (let [[_ opts & children] content
+        opts (options/update-opts opts parent-opts options/basic-defaults)
+        {:keys [x y z]} opts]
+    (when (:debug? opts) (options/check-opts ::options/translate-opts opts))
+    (.push renderer)
+    (if z
+      (.translate renderer x y z)
+      (.translate renderer x y))
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
+
+(defmethod draw-sketch! :rotate [game ^js/p5 renderer content parent-opts]
+  (let [[_ opts & children] content
+        {:keys [angle axis]} opts]
+    (when (:debug? opts) (options/check-opts ::options/rotate-opts opts))
+    (.push renderer)
+    (case axis
+      :x (.rotateX renderer angle)
+      :y (.rotateY renderer angle)
+      :z (.rotateZ renderer angle)
+      (.rotate renderer angle))
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
+
+;; 2d
 
 (defmethod draw-sketch! :text [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
@@ -199,7 +215,7 @@ to define new entity types."
 
 (defmethod draw-sketch! :image [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
-        {:keys [value name x y width height sx sy swidth sheight scale-x scale-y flip-x flip-y]
+        {:keys [value name x y width height sx sy swidth sheight scale-x scale-y flip-x flip-y flip-x? flip-y?]
          :as opts} (options/update-opts opts parent-opts options/image-defaults)
         _ (when (:debug? opts) (options/check-opts ::options/image-opts opts))
         ^js/p5.Image value (or value
@@ -210,10 +226,10 @@ to define new entity types."
     (.push renderer)
     (.translate renderer x y)
     (.scale renderer scale-x scale-y)
-    (when flip-x
+    (when (or flip-x? flip-x)
       (.scale renderer -1 1)
       (.translate renderer (- swidth) 0))
-    (when flip-y
+    (when (or flip-y? flip-y)
       (.scale renderer 1 -1)
       (.translate renderer 0 (- sheight)))
     (.image renderer value
@@ -375,16 +391,92 @@ to define new entity types."
     (draw-sketch! game renderer children opts)
     (.endContour renderer (.-CLOSE renderer))))
 
+;; 3d
+
+(defmethod draw-sketch! :plane [game ^js/p5 renderer content parent-opts]
+  (let [[_ opts & children] content
+        opts (options/update-opts opts parent-opts options/plane-defaults)
+        {:keys [width height detail-x detail-y]} opts]
+    (when (:debug? opts) (options/check-opts ::options/plane-opts opts))
+    (.plane renderer width height detail-x detail-y)
+    (draw-sketch! game renderer children opts)))
+
+(defmethod draw-sketch! :box [game ^js/p5 renderer content parent-opts]
+  (let [[_ opts & children] content
+        opts (options/update-opts opts parent-opts options/box-defaults)
+        {:keys [width height depth detail-x detail-y]} opts]
+    (when (:debug? opts) (options/check-opts ::options/box-opts opts))
+    (.box renderer width height depth detail-x detail-y)
+    (draw-sketch! game renderer children opts)))
+
+(defmethod draw-sketch! :sphere [game ^js/p5 renderer content parent-opts]
+  (let [[_ opts & children] content
+        opts (options/update-opts opts parent-opts options/sphere-defaults)
+        {:keys [radius detail-x detail-y]} opts]
+    (when (:debug? opts) (options/check-opts ::options/sphere-opts opts))
+    (.sphere renderer radius detail-x detail-y)
+    (draw-sketch! game renderer children opts)))
+
+(defmethod draw-sketch! :cylinder [game ^js/p5 renderer content parent-opts]
+  (let [[_ opts & children] content
+        opts (options/update-opts opts parent-opts options/cylinder-defaults)
+        {:keys [radius height detail-x detail-y bottom-cap? top-cap?]} opts]
+    (when (:debug? opts) (options/check-opts ::options/cylinder-opts opts))
+    (.cylinder renderer radius height detail-x detail-y bottom-cap? top-cap?)
+    (draw-sketch! game renderer children opts)))
+
+(defmethod draw-sketch! :cone [game ^js/p5 renderer content parent-opts]
+  (let [[_ opts & children] content
+        opts (options/update-opts opts parent-opts options/cone-defaults)
+        {:keys [radius height detail-x detail-y cap?]} opts]
+    (when (:debug? opts) (options/check-opts ::options/cone-opts opts))
+    (.cone renderer radius height detail-x detail-y cap?)
+    (draw-sketch! game renderer children opts)))
+
+(defmethod draw-sketch! :ellipsoid [game ^js/p5 renderer content parent-opts]
+  (let [[_ opts & children] content
+        opts (options/update-opts opts parent-opts options/ellipsoid-defaults)
+        {:keys [radius-x radius-y radius-z detail-x detail-y]} opts]
+    (when (:debug? opts) (options/check-opts ::options/ellipsoid-opts opts))
+    (.ellipsoid renderer radius-x radius-y radius-z detail-x detail-y)
+    (draw-sketch! game renderer children opts)))
+
+(defmethod draw-sketch! :torus [game ^js/p5 renderer content parent-opts]
+  (let [[_ opts & children] content
+        opts (options/update-opts opts parent-opts options/torus-defaults)
+        {:keys [radius tube-radius detail-x detail-y]} opts]
+    (when (:debug? opts) (options/check-opts ::options/torus-opts opts))
+    (.torus renderer radius tube-radius detail-x detail-y)
+    (draw-sketch! game renderer children opts)))
+
+;; creating a game
+
+(defn ^:private start-example-game [game card *state]
+  (doto game
+    (start)
+    (set-size (.-clientWidth card) (.-clientHeight card))
+    (listen "mousemove"
+      (fn [event]
+        (let [bounds (.getBoundingClientRect card)
+              x (- (.-clientX event) (.-left bounds))
+              y (- (.-clientY event) (.-top bounds))]
+          (swap! *state assoc :x x :y y))))
+    (listen "resize"
+      (fn [event]
+        (set-size game (.-clientWidth card) (.-clientHeight card))))))
+
 (defn create-game
   "Returns a game object. You can pass an options map with the following:
   
   :parent  -  A DOM element in which to place the canvas
   :debug?  -  Whether or not to enable debug mode
-              (defaults to true if :optimizations are set to :none)"
+              (defaults to true if :optimizations are set to :none)
+  :mode    -  Either :2d or :webgl (defaults to :2d)"
   ([width height]
    (create-game width height {}))
-  ([width height {:keys [parent debug?]
-                  :or {debug? (not js/COMPILED)}
+  ([width height {:keys [parent debug? mode]
+                  :or {debug? (not js/COMPILED)
+                       mode :2d}
                   :as opts}]
    (if debug?
      (js/console.log
@@ -412,7 +504,10 @@ to define new entity types."
              (set! (.-setup renderer)
                (fn []
                  ;; create the canvas
-                 (let [^js/p5 canvas-wrapper (cond-> (.createCanvas renderer width height)
+                 (let [^js/p5 canvas-wrapper (cond-> (.createCanvas renderer width height
+                                                       (case mode
+                                                         :2d (.-P2D renderer)
+                                                         :webgl (.-WEBGL renderer)))
                                                      parent (.parent parent))
                        canvas (.-canvas canvas-wrapper)]
                    (.removeAttribute canvas "style")

@@ -63,6 +63,60 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
+(defexample :play-cljs.core/transform
+  {:doc "Specifies an amount to displace objects within the display window.
+   
+   :x  -  The left/right translation (number)
+   :y  -  The up/down translation (number)
+   :z  -  The forward/backward translation (number) (:webgl mode only)"
+   :with-card card
+   :with-callback callback
+   :with-focus [focus [:translate {:x 20 :y 20}
+                       [:rect {:x 0 :y 0 :width 50 :height 50}]
+                       [:translate {:x 20 :y 20}
+                        [:rect {:x 0 :y 0 :width 50 :height 50}]]]]}
+  (defonce transform-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
+  (let [*state (atom {})]
+    (doto transform-game
+      (start-example-game card *state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
+                        (try
+                          (let [content focus]
+                            (render transform-game content)
+                            (callback content))
+                          (catch js/Error e (callback e))))))))))
+
+(defexample :play-cljs.core/rotate
+  {:doc "Rotates a shape the amount specified by the angle parameter.
+   
+   :angle  -  The angle of rotation, in radians (number)
+   :axis   -  The axis to rotate on (:x, :y, or :z) (:webgl only)"
+   :with-card card
+   :with-callback callback
+   :with-focus [focus [:translate {:x 100 :y 100}
+                       [:rotate {:angle (/ (js/window.performance.now) 1000)}
+                        [:rect {:x 0 :y 0 :width 50 :height 50}]]]]}
+  (defonce rotate-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
+  (let [*state (atom {})]
+    (doto rotate-game
+      (start-example-game card *state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
+                        (try
+                          (let [content focus]
+                            (render rotate-game content)
+                            (callback content))
+                          (catch js/Error e (callback e))))))))))
+
+;; 2d
+
 (defexample :play-cljs.core/text
   {:doc "Draws text to the screen.
    
@@ -281,8 +335,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :sheight -  The height of the subsection of the source image to draw into the destination rectangle (number)
    :scale-x -  Percent to scale the image in the x-axis (number)
    :scale-y -  Percent to scale the image in the y-axis (number)
-   :flip-x  -  Whether to flip the image on its x-axis (boolean)
-   :flip-y  -  Whether to flip the image on its y-axis (boolean)"
+   :flip-x? -  Whether to flip the image on its x-axis (boolean)
+   :flip-y? -  Whether to flip the image on its y-axis (boolean)"
    :with-card card
    :with-callback callback
    :with-focus [focus [:image {:name "player_stand.png" :x 0 :y 0 :width 80 :height 80}]]}
@@ -568,6 +622,215 @@ hard-coded at (0,0) but the :div is passing its own position down."
                         (try
                           (let [content focus]
                             (render contour-game content)
+                            (callback content))
+                          (catch js/Error e (callback e))))))))))
+
+;; 3d
+
+(defexample :play-cljs.core/plane
+  {:doc "[3D] Draws a plane.
+   
+   NOTE: You must pass {:mode :webgl} to the third argument of create-game.
+   
+   :width     -  The width of the plane (number)
+   :height    -  The height of the plane (number)
+   :detail-x  -  Triangle subdivisions in the x-dimension (number)
+   :detail-y  -  Triangle subdivisions in the y-dimension (number)"
+   :with-card card
+   :with-callback callback
+   :with-focus [focus [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :x}
+                       [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :y}
+                        [:plane {:width 50 :height 50}]]]]}
+  (defonce plane-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true :mode :webgl}))
+  (let [*state (atom {})]
+    (doto plane-game
+      (start-example-game card *state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
+                        (try
+                          (let [content focus]
+                            (render plane-game content)
+                            (callback content))
+                          (catch js/Error e (callback e))))))))))
+
+(defexample :play-cljs.core/box
+  {:doc "[3D] Draws a box.
+   
+   NOTE: You must pass {:mode :webgl} to the third argument of create-game.
+   
+   :width     -  The width of the box (number)
+   :height    -  The height of the box (number)
+   :depth     -  The depth of the box (number)
+   :detail-x  -  Triangle subdivisions in the x-dimension (number)
+   :detail-y  -  Triangle subdivisions in the y-dimension (number)"
+   :with-card card
+   :with-callback callback
+   :with-focus [focus [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :x}
+                       [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :y}
+                        [:box {:width 50 :height 50 :depth 50}]]]]}
+  (defonce box-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true :mode :webgl}))
+  (let [*state (atom {})]
+    (doto box-game
+      (start-example-game card *state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
+                        (try
+                          (let [content focus]
+                            (render box-game content)
+                            (callback content))
+                          (catch js/Error e (callback e))))))))))
+
+(defexample :play-cljs.core/sphere
+  {:doc "[3D] Draws a sphere.
+   
+   NOTE: You must pass {:mode :webgl} to the third argument of create-game.
+   
+   :radius    -  The radius of the circle (number)
+   :detail-x  -  Number of segments in the x-dimension (number)
+   :detail-y  -  Number of segments in the y-dimension (number)"
+   :with-card card
+   :with-callback callback
+   :with-focus [focus [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :x}
+                       [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :y}
+                        [:sphere {:radius 50}]]]]}
+  (defonce sphere-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true :mode :webgl}))
+  (let [*state (atom {})]
+    (doto sphere-game
+      (start-example-game card *state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
+                        (try
+                          (let [content focus]
+                            (render sphere-game content)
+                            (callback content))
+                          (catch js/Error e (callback e))))))))))
+
+(defexample :play-cljs.core/cylinder
+  {:doc "[3D] Draws a cylinder.
+   
+   NOTE: You must pass {:mode :webgl} to the third argument of create-game.
+   
+   :radius       -  The radius of the cylinder (number)
+   :height       -  The height of the cylinder (number)
+   :detail-x     -  Number of segments in the x-dimension (number)
+   :detail-y     -  Number of segments in the y-dimension (number)
+   :bottom-cap?  -  Whether to draw the bottom of the cylinder (boolean)
+   :top-cap?     -  Whether to draw the top of the cylinder (boolean)"
+   :with-card card
+   :with-callback callback
+   :with-focus [focus [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :x}
+                       [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :y}
+                        [:cylinder {:radius 50 :height 100}]]]]}
+  (defonce cylinder-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true :mode :webgl}))
+  (let [*state (atom {})]
+    (doto cylinder-game
+      (start-example-game card *state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
+                        (try
+                          (let [content focus]
+                            (render cylinder-game content)
+                            (callback content))
+                          (catch js/Error e (callback e))))))))))
+
+(defexample :play-cljs.core/cone
+  {:doc "[3D] Draws a cone.
+   
+   NOTE: You must pass {:mode :webgl} to the third argument of create-game.
+   
+   :radius    -  The radius of the cone (number)
+   :height    -  The height of the cone (number)
+   :detail-x  -  Number of segments in the x-dimension (number)
+   :detail-y  -  Number of segments in the y-dimension (number)
+   :cap?      -  Whether to draw the base of the cone (boolean)"
+   :with-card card
+   :with-callback callback
+   :with-focus [focus [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :x}
+                       [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :y}
+                        [:cone {:radius 50 :height 100}]]]]}
+  (defonce cone-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true :mode :webgl}))
+  (let [*state (atom {})]
+    (doto cone-game
+      (start-example-game card *state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
+                        (try
+                          (let [content focus]
+                            (render cone-game content)
+                            (callback content))
+                          (catch js/Error e (callback e))))))))))
+
+(defexample :play-cljs.core/ellipsoid
+  {:doc "[3D] Draws an ellipsoid.
+   
+   NOTE: You must pass {:mode :webgl} to the third argument of create-game.
+   
+   :radius    -  The radius of the cone (number)
+   :height    -  The height of the cone (number)
+   :detail-x  -  Number of segments in the x-dimension (number)
+   :detail-y  -  Number of segments in the y-dimension (number)
+   :cap?      -  Whether to draw the base of the cone (boolean)"
+   :with-card card
+   :with-callback callback
+   :with-focus [focus [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :x}
+                       [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :y}
+                        [:ellipsoid {:radius-x 20 :radius-y 30 :radius-z 40}]]]]}
+  (defonce ellipsoid-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true :mode :webgl}))
+  (let [*state (atom {})]
+    (doto ellipsoid-game
+      (start-example-game card *state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
+                        (try
+                          (let [content focus]
+                            (render ellipsoid-game content)
+                            (callback content))
+                          (catch js/Error e (callback e))))))))))
+
+(defexample :play-cljs.core/torus
+  {:doc "[3D] Draws a torus.
+   
+   NOTE: You must pass {:mode :webgl} to the third argument of create-game.
+   
+   :radius       -  The radius of the whole ring (number)
+   :tube-radius  -  The height of the tube (number)
+   :detail-x  -  Number of segments in the x-dimension (number)
+   :detail-y  -  Number of segments in the y-dimension (number)"
+   :with-card card
+   :with-callback callback
+   :with-focus [focus [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :x}
+                       [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :y}
+                        [:torus {:radius 50 :tube-radius 15}]]]]}
+  (defonce torus-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true :mode :webgl}))
+  (let [*state (atom {})]
+    (doto torus-game
+      (start-example-game card *state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
+                        (try
+                          (let [content focus]
+                            (render torus-game content)
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 

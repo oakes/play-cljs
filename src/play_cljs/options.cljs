@@ -36,11 +36,20 @@
 
 (s/def ::x number?)
 (s/def ::y number?)
+(s/def ::z number?)
 (s/def ::width number?)
 (s/def ::height number?)
 
 (s/def ::basic-opts (s/keys :opt-un [::x ::y ::width ::height]))
-(def ^:const basic-defaults {:x 0 :y 0})
+(def ^:const basic-defaults {:x 0 :y 0 :z 0})
+
+(s/def ::translate-opts (s/keys :req-un [::x ::y] :opt-un [::z]))
+
+(s/def ::angle number?)
+(s/def ::axis #{:x :y :z})
+(s/def ::rotate-opts (s/keys :req-un [::angle] :opt-un [::axis]))
+
+;; 2d
 
 (s/def :play-cljs.options.text/value string?)
 (s/def ::size number?)
@@ -100,14 +109,14 @@
 (s/def ::sy number?)
 (s/def ::swidth number?)
 (s/def ::sheight number?)
-(s/def ::flip-x boolean?)
-(s/def ::flip-y boolean?)
+(s/def ::flip-x? boolean?)
+(s/def ::flip-y? boolean?)
 
 (s/def ::image-opts (s/merge
                       ::basic-opts
                       (s/keys
                         :req-un [(or ::name :play-cljs.options.image/value)]
-                        :opt-un [::scale-x ::scale-y ::sx ::sy ::swidth ::sheight ::flip-x ::flip-y])))
+                        :opt-un [::scale-x ::scale-y ::sx ::sy ::swidth ::sheight ::flip-x? ::flip-y?])))
 (def ^:const image-defaults (merge basic-defaults {:scale-x 1 :scale-y 1 :sx 0 :sy 0}))
 
 (s/def ::duration number?)
@@ -181,4 +190,58 @@
 (s/def ::shape-opts (s/keys :req-un [::points]))
 
 (s/def ::contour-opts (s/keys :req-un [::points]))
+
+;; 3d
+
+(s/def ::detail-x nat-int?)
+(s/def ::detail-y nat-int?)
+
+(s/def ::plane-opts (s/keys :req-un [::width ::height]
+                      :opt-un [::detail-x ::detail-y]))
+(def ^:const plane-defaults (merge basic-defaults {:detail-x 1 :detail-y 1}))
+
+(s/def ::depth number?)
+
+(s/def ::box-opts (s/keys :req-un [::width ::height ::depth]
+                    :opt-un [::detail-x ::detail-y]))
+(def ^:const box-defaults (merge basic-defaults {:detail-x 1 :detail-y 1}))
+
+(s/def ::radius number?)
+
+(s/def ::sphere-opts (s/keys :req-un [::radius]
+                       :opt-un [::detail-x ::detail-y]))
+(def ^:const sphere-defaults (merge basic-defaults {:detail-x 24 :detail-y 16}))
+
+(s/def ::bottom-cap? boolean?)
+(s/def ::top-cap? boolean?)
+
+(s/def ::cylinder-opts (s/keys :req-un [::radius ::height]
+                         :opt-un [::detail-x ::detail-y ::bottom-cap? ::top-cap?]))
+(def ^:const cylinder-defaults (merge basic-defaults
+                                 {:detail-x 24 :detail-y 1
+                                  :bottom-cap? true :top-cap? true}))
+
+(s/def ::cap? boolean?)
+
+(s/def ::cone-opts (s/keys :req-un [::radius ::height]
+                     :opt-un [::detail-x ::detail-y ::cap?]))
+(def ^:const cone-defaults (merge basic-defaults
+                             {:detail-x 24 :detail-y 1 :cap? true}))
+
+(s/def ::radius-x number?)
+(s/def ::radius-y number?)
+(s/def ::radius-z number?)
+
+(s/def ::ellipsoid-opts (s/keys :req-un [::radius-x ::radius-y ::radius-z]
+                          :opt-un [::detail-x ::detail-y]))
+(def ^:const ellipsoid-defaults (merge basic-defaults
+                                  {:detail-x 24 :detail-y 16}))
+
+(s/def ::tube-radius number?)
+
+(s/def ::torus-opts (s/keys :req-un [::radius ::tube-radius]
+                      :opt-un [::detail-x ::detail-y]))
+(def ^:const torus-defaults (merge basic-defaults
+                              {:detail-x 24 :detail-y 16}))
+
 
