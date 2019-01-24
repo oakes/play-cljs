@@ -37,7 +37,7 @@
 
 (task-options!
   pom {:project 'play-cljs
-       :version "1.2.1-SNAPSHOT"
+       :version "1.3.0"
        :description "A ClojureScript game library"
        :url "https://github.com/oakes/play-cljs"
        :license {"Public Domain" "http://unlicense.org/UNLICENSE"}}

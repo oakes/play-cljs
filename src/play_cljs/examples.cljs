@@ -812,8 +812,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
    
    :radius       -  The radius of the whole ring (number)
    :tube-radius  -  The height of the tube (number)
-   :detail-x  -  Number of segments in the x-dimension (number)
-   :detail-y  -  Number of segments in the y-dimension (number)"
+   :detail-x     -  Number of segments in the x-dimension (number)
+   :detail-y     -  Number of segments in the y-dimension (number)"
    :with-card card
    :with-callback callback
    :with-focus [focus [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :x}

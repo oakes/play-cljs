@@ -9,7 +9,7 @@
                   ; project deps
                   [org.clojure/clojurescript "1.10.439" :scope "test"]
                   [nightlight "RELEASE"]
-                  [play-cljs "1.2.0"]
+                  [play-cljs "1.3.0"]
                   [edna "1.6.0"]])
 
 (require
