@@ -1,6 +1,6 @@
 (ns play-cljs.core
   (:require [goog.events :as events]
-            [p5.core]
+            [cljsjs.p5]
             [p5.tiled-map]
             [cljs.core.async :refer [promise-chan put! <!]]
             [play-cljs.options :as options])
