@@ -95,31 +95,19 @@ to define new entity types."
     (when (:debug? opts) (options/check-opts ::options/basic-opts opts))
     (draw-sketch! game renderer children opts)))
 
-(defmethod draw-sketch! :translate [game ^js/p5 renderer content parent-opts]
-  (let [[_ opts & children] content
-        opts (options/update-opts opts parent-opts options/basic-defaults)
-        {:keys [x y z]} opts]
-    (when (:debug? opts) (options/check-opts ::options/translate-opts opts))
-    (.push renderer)
-    (if z
-      (.translate renderer x y z)
-      (.translate renderer x y))
-    (draw-sketch! game renderer children opts)
-    (.pop renderer)))
-
 (defmethod draw-sketch! :rotate [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
-        parent-opts (dissoc parent-opts :x :y :z)
         opts (options/update-opts opts parent-opts options/basic-defaults)
-        {:keys [angle axis]} opts]
+        {:keys [angle axis x y z]} opts]
     (when (:debug? opts) (options/check-opts ::options/rotate-opts opts))
     (.push renderer)
+    (.translate renderer x y z)
     (case axis
       :x (.rotateX renderer angle)
       :y (.rotateY renderer angle)
       :z (.rotateZ renderer angle)
       (.rotate renderer angle))
-    (draw-sketch! game renderer children opts)
+    (draw-sketch! game renderer children (dissoc opts :x :y :z))
     (.pop renderer)))
 
 ;; 2d
@@ -398,58 +386,79 @@ to define new entity types."
 (defmethod draw-sketch! :plane [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/plane-defaults)
-        {:keys [width height detail-x detail-y]} opts]
+        {:keys [x y z width height detail-x detail-y]} opts]
     (when (:debug? opts) (options/check-opts ::options/plane-opts opts))
+    (.push renderer)
+    (.translate renderer x y z)
     (.plane renderer width height detail-x detail-y)
-    (draw-sketch! game renderer children opts)))
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
 
 (defmethod draw-sketch! :box [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/box-defaults)
-        {:keys [width height depth detail-x detail-y]} opts]
+        {:keys [x y z width height depth detail-x detail-y]} opts]
     (when (:debug? opts) (options/check-opts ::options/box-opts opts))
+    (.push renderer)
+    (.translate renderer x y z)
     (.box renderer width height depth detail-x detail-y)
-    (draw-sketch! game renderer children opts)))
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
 
 (defmethod draw-sketch! :sphere [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/sphere-defaults)
-        {:keys [radius detail-x detail-y]} opts]
+        {:keys [x y z radius detail-x detail-y]} opts]
     (when (:debug? opts) (options/check-opts ::options/sphere-opts opts))
+    (.push renderer)
+    (.translate renderer x y z)
     (.sphere renderer radius detail-x detail-y)
-    (draw-sketch! game renderer children opts)))
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
 
 (defmethod draw-sketch! :cylinder [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/cylinder-defaults)
-        {:keys [radius height detail-x detail-y bottom-cap? top-cap?]} opts]
+        {:keys [x y z radius height detail-x detail-y bottom-cap? top-cap?]} opts]
     (when (:debug? opts) (options/check-opts ::options/cylinder-opts opts))
+    (.push renderer)
+    (.translate renderer x y z)
     (.cylinder renderer radius height detail-x detail-y bottom-cap? top-cap?)
-    (draw-sketch! game renderer children opts)))
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
 
 (defmethod draw-sketch! :cone [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/cone-defaults)
-        {:keys [radius height detail-x detail-y cap?]} opts]
+        {:keys [x y z radius height detail-x detail-y cap?]} opts]
     (when (:debug? opts) (options/check-opts ::options/cone-opts opts))
+    (.push renderer)
+    (.translate renderer x y z)
     (.cone renderer radius height detail-x detail-y cap?)
-    (draw-sketch! game renderer children opts)))
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
 
 (defmethod draw-sketch! :ellipsoid [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/ellipsoid-defaults)
-        {:keys [radius-x radius-y radius-z detail-x detail-y]} opts]
+        {:keys [x y z radius-x radius-y radius-z detail-x detail-y]} opts]
     (when (:debug? opts) (options/check-opts ::options/ellipsoid-opts opts))
+    (.push renderer)
+    (.translate renderer x y z)
     (.ellipsoid renderer radius-x radius-y radius-z detail-x detail-y)
-    (draw-sketch! game renderer children opts)))
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
 
 (defmethod draw-sketch! :torus [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
         opts (options/update-opts opts parent-opts options/torus-defaults)
-        {:keys [radius tube-radius detail-x detail-y]} opts]
+        {:keys [x y z radius tube-radius detail-x detail-y]} opts]
     (when (:debug? opts) (options/check-opts ::options/torus-opts opts))
+    (.push renderer)
+    (.translate renderer x y z)
     (.torus renderer radius tube-radius detail-x detail-y)
-    (draw-sketch! game renderer children opts)))
+    (draw-sketch! game renderer children opts)
+    (.pop renderer)))
 
 ;; creating a game
 

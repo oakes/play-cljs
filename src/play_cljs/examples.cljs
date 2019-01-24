@@ -63,33 +63,6 @@ hard-coded at (0,0) but the :div is passing its own position down."
                             (callback content))
                           (catch js/Error e (callback e))))))))))
 
-(defexample :play-cljs.core/translate
-  {:doc "Specifies an amount to displace objects within the display window.
-   
-   :x  -  The left/right translation (number)
-   :y  -  The up/down translation (number)
-   :z  -  The forward/backward translation (number) (:webgl mode only)"
-   :with-card card
-   :with-callback callback
-   :with-focus [focus [:translate {:x 20 :y 20}
-                       [:rect {:x 0 :y 0 :width 50 :height 50}]
-                       [:translate {:x 20 :y 20}
-                        [:rect {:x 0 :y 0 :width 50 :height 50}]]]]}
-  (defonce translate-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
-  (let [*state (atom {})]
-    (doto translate-game
-      (start-example-game card *state)
-      (set-screen (reify Screen
-                    (on-show [this])
-                    (on-hide [this])
-                    (on-render [this]
-                      (let [{:keys [x y] :or {x 0 y 0}} @*state]
-                        (try
-                          (let [content focus]
-                            (render translate-game content)
-                            (callback content))
-                          (catch js/Error e (callback e))))))))))
-
 (defexample :play-cljs.core/rotate
   {:doc "Rotates a shape the amount specified by the angle parameter.
    
@@ -97,9 +70,8 @@ hard-coded at (0,0) but the :div is passing its own position down."
    :axis   -  The axis to rotate on (:x, :y, or :z) (:webgl mode only)"
    :with-card card
    :with-callback callback
-   :with-focus [focus [:translate {:x 100 :y 100}
-                       [:rotate {:angle (/ (js/window.performance.now) 1000)}
-                        [:rect {:x 0 :y 0 :width 50 :height 50}]]]]}
+   :with-focus [focus [:rotate {:x 100 :y 100 :angle (/ (js/window.performance.now) 1000)}
+                       [:rect {:x 0 :y 0 :width 50 :height 50}]]]}
   (defonce rotate-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true}))
   (let [*state (atom {})]
     (doto rotate-game
