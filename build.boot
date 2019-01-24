@@ -37,7 +37,7 @@
 
 (task-options!
   pom {:project 'play-cljs
-       :version "1.3.1-SNAPSHOT"
+       :version "1.3.1"
        :description "A ClojureScript game library"
        :url "https://github.com/oakes/play-cljs"
        :license {"Public Domain" "http://unlicense.org/UNLICENSE"}}
@@ -51,7 +51,7 @@
     (watch)
     (reload :asset-path "dynadoc-extend")
     (cljs
-      :optimizations :none
+      :optimizations :simple
       :compiler-options {:asset-path "/main.out"})
     (dynadoc :port 5000)))
 
