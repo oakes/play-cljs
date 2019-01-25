@@ -51,7 +51,7 @@
     (watch)
     (reload :asset-path "dynadoc-extend")
     (cljs
-      :optimizations :simple
+      :optimizations :none
       :compiler-options {:asset-path "/main.out"})
     (dynadoc :port 5000)))
 
