@@ -752,11 +752,10 @@ hard-coded at (0,0) but the :div is passing its own position down."
    
    NOTE: You must pass {:mode :webgl} to the third argument of create-game.
    
-   :radius    -  The radius of the cone (number)
-   :height    -  The height of the cone (number)
+   :radius    -  The radius of the ellipsoid (number)
+   :height    -  The height of the ellipsoid (number)
    :detail-x  -  Number of segments in the x-dimension (number)
-   :detail-y  -  Number of segments in the y-dimension (number)
-   :cap?      -  Whether to draw the base of the cone (boolean)"
+   :detail-y  -  Number of segments in the y-dimension (number)"
    :with-card card
    :with-callback callback
    :with-focus [focus [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :x}
@@ -783,7 +782,7 @@ hard-coded at (0,0) but the :div is passing its own position down."
    NOTE: You must pass {:mode :webgl} to the third argument of create-game.
    
    :radius       -  The radius of the whole ring (number)
-   :tube-radius  -  The height of the tube (number)
+   :tube-radius  -  The radius of the tube (number)
    :detail-x     -  Number of segments in the x-dimension (number)
    :detail-y     -  Number of segments in the y-dimension (number)"
    :with-card card
