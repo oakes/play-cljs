@@ -830,15 +830,17 @@ hard-coded at (0,0) but the :div is passing its own position down."
    
    NOTE: You must pass {:mode :webgl} to the third argument of create-game.
    
-   :name    -  The file name of the model (string)
-   :scale-x -  Percent to scale the model in the x-axis (number)
-   :scale-y -  Percent to scale the model in the y-axis (number)
-   :scale-z -  Percent to scale the model in the z-axis (number)"
+   :name       -  The file name of the model (string)
+   :scale-x    -  Percent to scale the model in the x-axis (number)
+   :scale-y    -  Percent to scale the model in the y-axis (number)
+   :scale-z    -  Percent to scale the model in the z-axis (number)
+   :normalize? -  When first loaded, resize the model to a standardized scale (boolean)
+                  Changing this option has no effect if the model has already loaded"
    :with-card card
    :with-callback callback
    :with-focus [focus [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :x}
                        [:rotate {:angle (/ (js/window.performance.now) 1000) :axis :y}
-                        [:model {:name "chr_old.obj" :scale-x 10 :scale-y 10 :scale-z 10}]]]]}
+                        [:model {:name "chr_old.obj" :normalize? true}]]]]}
   (defonce model-game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true :mode :webgl}))
   (let [*state (atom {})]
     (doto model-game

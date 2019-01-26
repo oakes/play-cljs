@@ -50,7 +50,7 @@ should create just one such object by calling `create-game`."
     "Loads a tiled map. Returns a `TiledMap` object.
 A tiled map with the provided name must already be loaded
 (see the TiledMap docs for details).")
-  (load-model [game path]
+  (load-model [game path] [game path normalize?]
     "Loads a 3D model. Returns a `Geometry` object.")
   (get-screen [game]
     "Returns the `Screen` object currently being displayed.")
@@ -465,12 +465,12 @@ to define new entity types."
 
 (defmethod draw-sketch! :model [game ^js/p5 renderer content parent-opts]
   (let [[_ opts & children] content
-        {:keys [value name x y z scale-x scale-y scale-z]
+        {:keys [value name x y z scale-x scale-y scale-z normalize?]
          :as opts} (options/update-opts opts parent-opts options/model-defaults)
         _ (when (:debug? opts) (options/check-opts ::options/model-opts opts))
         ^js/p5.Geometry value (or value
                                   (get-asset game name)
-                                  (load-model game name))]
+                                  (load-model game name (boolean normalize?)))]
     (.push renderer)
     (.translate renderer x y z)
     (.scale renderer scale-x scale-y scale-z)
@@ -587,8 +587,10 @@ to define new entity types."
              (swap! *hidden-state update :assets assoc map-name object)
              object)))
        (load-model [this path]
+         (load-model this path false))
+       (load-model [this path normalize?]
          (when-let [^js/p5 renderer (get-renderer this)]
-           (let [object (.loadModel renderer path (fn []))]
+           (let [object (.loadModel renderer path normalize?)]
              (swap! *hidden-state update :assets assoc path object)
              object)))
        (get-screen [this]
