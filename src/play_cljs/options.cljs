@@ -247,12 +247,13 @@
                               {:detail-x 24 :detail-y 16}))
 
 (s/def :play-cljs.options.model/value #(instance? js/p5.Geometry %))
+(s/def ::normalize? boolean?)
 
 (s/def ::model-opts (s/merge
                       ::basic-opts
                       (s/keys
                         :req-un [(or ::name :play-cljs.options.model/value)]
-                        :opt-un [::scale-x ::scale-y ::scale-z])))
+                        :opt-un [::scale-x ::scale-y ::scale-z ::normalize?])))
 (def ^:const model-defaults (merge basic-defaults {:scale-x 1 :scale-y 1 :scale-z 1}))
 
 
