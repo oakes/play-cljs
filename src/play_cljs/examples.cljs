@@ -1,6 +1,26 @@
 (ns play-cljs.examples
   (:require-macros [dynadoc.example :refer [defexample]]))
 
+(defexample play-cljs.core/get-renderer
+  {:doc "After retrieving the p5 object, we can call any built-in p5 functions on it."
+   :with-card card
+   :with-callback callback
+   :with-focus [focus (let [p5 (get-renderer game)]
+                        (.directionalLight p5 (.color p5 250 250 250) (.createVector p5 100 0 0)))]}
+  (defonce game (create-game (.-clientWidth card) (.-clientHeight card) {:parent card :debug? true :mode :webgl}))
+  (let [*state (atom {})]
+    (doto game
+      (start-example-game card *state)
+      (set-screen (reify Screen
+                    (on-show [this])
+                    (on-hide [this])
+                    (on-render [this]
+                      (let [{:keys [x y] :or {x 150 y 150}} @*state]
+                        (try
+                          (callback focus)
+                          (render game [:sphere {:radius 50}])
+                          (catch js/Error e (callback e))))))))))
+
 (defexample play-cljs.core/draw-sketch!
   {:doc "Extending this multimethod allows you to create new entity types.
    In this example, we create a new entity type called :smiley that draws a smiley face.

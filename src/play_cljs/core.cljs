@@ -57,7 +57,8 @@ A tiled map with the provided name must already be loaded
   (set-screen [game screen]
     "Sets the `Screen` object to be displayed.")
   (get-renderer [game]
-    "Returns the internal renderer object.")
+    "Returns the internal `p5` object. This is the object you need to use to call
+p5.js functions. We are using p5.js in \"instance mode\" so its functions are not global.")
   (get-canvas [game]
     "Returns the internal canvas object.")
   (get-total-time [game]
