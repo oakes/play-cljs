@@ -1,1 +1,0 @@
-{:require  [play-cljs.core dynadoc.core]}
