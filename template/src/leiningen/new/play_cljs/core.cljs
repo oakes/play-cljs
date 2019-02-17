@@ -26,13 +26,22 @@
   (fn [event]
     (p/set-size game js/window.innerWidth js/window.innerHeight)))
 
+;; start the game
+
 (doto game
   (p/start)
   (p/set-screen main-screen))
 
-; uncomment to generate a song and play it!
+;; build music, put it in the audio tag, and make the button toggle it on and off
 
-;(defonce audio (js/document.createElement "audio"))
-;(set! (.-src audio) (build-for-cljs))
-;(.play audio)
+(defonce play-music? (atom false))
 
+(defonce audio (js/document.querySelector "#audio"))
+(set! (.-src audio) (build-for-cljs))
+
+(defonce button (js/document.querySelector "#audio-button"))
+(set! (.-onclick button)
+      (fn [e]
+        (if (swap! play-music? not)
+          (.play audio)
+          (.pause audio))))

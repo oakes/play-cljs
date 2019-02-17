@@ -1,4 +1,9 @@
-## Introduction
+To build this project, you'll need the Clojure CLI tool:
+https://clojure.org/guides/deps_and_cli
 
-A play-cljs game in which ... well, that part is up to you. Do `boot run` to develop and `boot build` to compile a release version.
+To develop with live code reloading:
+clj dev.clj
+
+To build a release version:
+clj prod.clj
 
