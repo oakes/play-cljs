@@ -1,4 +1,4 @@
-(ns {{name}}.core
+(ns {{name}}.{{core-name}}
   (:require [play-cljs.core :as p]
             [goog.events :as events])
   (:require-macros [{{name}}.music :refer [build-for-cljs]]))

@@ -13,7 +13,7 @@
 
 (println "Building main.js")
 (delete-children-recursively! (io/file out-dir))
-(api/build "src" {:main          '{{name}}.core
+(api/build "src" {:main          '{{name}}.{{core-name}}
                   :optimizations :advanced
                   :output-to     out-file
                   :output-dir    out-dir

@@ -1,3 +1,3 @@
 (ns {{name}}.dev
-  (:require [{{name}}.core]
+  (:require [{{name}}.{{core-name}}]
             [nightlight.repl-server]))
