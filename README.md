@@ -4,7 +4,7 @@ A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) unde
 
 ### [Try the interactive docs!](https://oakes.github.io/play-cljs/)
 
-If you want to make music for your game, [edna](https://github.com/oakes/edna) is a good companion library and the Boot template below is preconfigured with it.
+If you want to make music for your game, [edna](https://github.com/oakes/edna) is a good companion library and the Clojure CLI template below is preconfigured with it.
 
 ## Getting Started
 
