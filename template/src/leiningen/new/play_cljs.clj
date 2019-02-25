@@ -25,6 +25,8 @@
               :core-name core-name
               :project_name (str/replace project-name "-" "_")
               :core_name (str/replace core-name "-" "_")}]
+    (when (= core-name "music")
+      (throw (Exception. "Please choose a different name than 'music'")))
     (t/->files data
       ["README.md" (render "README.md" data)]
       [".gitignore" (render "gitignore" data)]
