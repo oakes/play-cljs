@@ -1,3 +1,5 @@
+## Note: I am focusing my efforts on [play-cljc](https://github.com/oakes/play-cljc), a library for games that run on both the desktop and the web.
+
 ## Introduction
 
 A ClojureScript library for making games. It uses [p5.js](http://p5js.org/) underneath. And then the terrifying, irrational monstrosity of the web underneath that.
