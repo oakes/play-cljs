@@ -6,5 +6,7 @@
  :aliases {:dev {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.520"}
                               dynadoc {:mvn/version "RELEASE"}
                               com.bhauman/figwheel-main {:mvn/version "0.2.0"}}
-                 :extra-paths ["dev-resources"]}
-           :prod {:extra-deps {leiningen {:mvn/version "2.9.0"}}}}}
+                 :extra-paths ["dev-resources"]
+                 :main-opts ["dev.clj"]}
+           :prod {:extra-deps {leiningen {:mvn/version "2.9.0"}}
+                  :main-opts ["prod.clj"]}}}
