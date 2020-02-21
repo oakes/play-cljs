@@ -10,11 +10,9 @@ If you want to make music for your game, [edna](https://github.com/oakes/edna) i
 
 ## Getting Started
 
-There are several ways to create a project:
+You can generate a new project with the [Clojure CLI Tool](https://clojure.org/guides/getting_started#_clojure_installer_and_cli_tools):
 
-* [The Clojure CLI Tool](https://clojure.org/guides/getting_started#_clojure_installer_and_cli_tools): `clj -Sdeps "{:deps {leiningen {:mvn/version \""2.9.0\""}}}" -m leiningen.core.main new play-cljs my-game`
-* [Nightcoders.net](http://nightcoders.net/): Choose "Game" when creating a new project
-* [Lightmod](https://sekao.net/lightmod/): Choose one of the game templates
+`clj -Sdeps "{:deps {leiningen {:mvn/version \""2.9.0\""}}}" -m leiningen.core.main new play-cljs my-game`
 
 ## Documentation
 
